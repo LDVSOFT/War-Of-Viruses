@@ -1,0 +1,99 @@
+\documentclass{beamer}
+
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{nameref}
+\usepackage{ifthen}
+\usepackage{minted}
+
+\usefonttheme{professionalfonts}
+\usetheme{Antibes}
+\useoutertheme{infolines_foot}
+\setbeamercovered{transparent=20}
+
+\usepackage[math-style=ISO,vargreek-shape=unicode]{unicode-math}
+
+\setdefaultlanguage[spelling=modern,babelshorthands=true]{russian}
+\setotherlanguage{english}
+
+\defaultfontfeatures{Ligatures={TeX}}
+\setmainfont{CMU Serif}
+\setsansfont{CMU Sans Serif}
+\setmonofont{CMU Typewriter Text}  
+\setmathfont{Latin Modern Math}
+\AtBeginDocument{\renewcommand{\setminus}{\mathbin{\backslash}}}
+
+\makeatletter
+\newcommand*{\currentname}{\@currentlabelname}
+\makeatother
+\def\t{\texttt}
+
+\newcommand{\cimg}[2]{%
+	\begin{center}%
+		\ifthenelse{\equal{#2}{}}{%
+			\includegraphics[width=0.75\linewidth]{#1}
+		}{%
+			\includegraphics[width=#2\linewidth]{#1}
+		}%
+	\end{center}%
+}
+
+\newmintinline[cinl]{c}{} %\c is defined :(
+\newmintinline[cpp]{cpp}{}
+\newmintinline[python]{python}{}
+\newmintinline[bash]{bash}{}
+\newmintinline[make]{make}{}
+\setminted{obeytabs,tabsize=4,linenos,autogobble}
+\newminted{c}{}
+\newminted{cpp}{}
+\newminted{python}{}
+\newminted{bash}{}
+\newminted{make}{}
+
+\title[Война вирусов]{Война вирусов\\Походовая онлайн-игра на платформе Android}
+\author{Лапшин Дмитрий, Степанов Всеволод}
+\institute{СПб АУ РАН}
+\date{Осень 2015}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\section{Содержание}
+
+\begin{frame}[t]{\currentname}
+	\tableofcontents
+\end{frame}
+
+\section{О проекте}
+
+\subsection{Цель проекта}
+
+\begin{frame}[t]{\currentname}
+	Реализовать онлайн-версию игры
+	\href{https://ru.wikipedia.org/wiki/\%D0\%92\%D0\%BE\%D0\%B9\%D0\%BD\%D0\%B0\_\%D0\%B2\%D0\%B8\%D1\%80\%D1\%83\%D1\%81\%D0\%BE\%D0\%B2}{,,Война Вирусов``}
+	c возмодностью игры с другим игроком из списка знакомых или случайным противником.
+
+	Игра проходит на клеточном поле $10 \times 10$, игроки по очереди ставят свои фигуры, захватывая свободные клетки и уничтожая клетки соперника.
+	\cimg{01.png}{0.2}
+\end{frame}
+
+\subsection{Общий план}
+
+\begin{frame}[t]{\currentname}
+	\begin{enumerate}
+	\item
+		Реализация состоит из клиентской и серверной части.
+		Клиент позволяет пользователю играть, в то время как сервер соединяет клиентов и обрабатывает игры.
+	\pause
+	\item
+		Уже прошедшие игры хранятся в базе данных: сервер хранит все, клиент хранит только свои.
+	\pause
+	\item
+		Сервер и клиенты между собой общаются через систему Google Cloud Messaging, для первого подключения используется \t{https}.
+	\end{enumerate}
+\end{frame}
+
+\end{document}
