@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "net.ldvsoft.warofviruses"
         minSdkVersion 15
-        targetSdkVersion 15
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
     }

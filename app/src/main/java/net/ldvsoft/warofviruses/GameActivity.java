@@ -1,13 +1,12 @@
 package net.ldvsoft.warofviruses;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -20,7 +19,6 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
     }
