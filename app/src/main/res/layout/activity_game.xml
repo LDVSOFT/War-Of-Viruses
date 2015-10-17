@@ -82,10 +82,15 @@
             android:layout_marginBottom="5dp">
 
             <net.ldvsoft.warofviruses.SquareLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/game_board_root"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:layout_margin="0dp">
+
+            </net.ldvsoft.warofviruses.SquareLayout>
+
         </FrameLayout>
 
         <LinearLayout
