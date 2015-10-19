@@ -17,6 +17,7 @@ import android.widget.Toast;
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
+    public static final int BOARD_SIZE = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +26,8 @@ public class GameActivity extends AppCompatActivity {
 
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
-        for (int i = 0; i != 10; i++)
-            for (int j = 0; j != 10; j++) {
+        for (int i = 0; i != BOARD_SIZE; i++)
+            for (int j = 0; j != BOARD_SIZE; j++) {
                 final int x = i;
                 final int y = j;
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
@@ -72,15 +73,31 @@ public class GameActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         float logicalDensity = metrics.density;
         int marginValue = (int) Math.ceil(logicalDensity * 1);
-        BOARD_BUTTON_LAYOUT_PARAMS.setMargins(marginValue, marginValue, marginValue, marginValue);
+        BOARD_BUTTON_LAYOUT_PARAMS.setMargins(marginValue, marginValue, 0, 0);
 
-        boardButtons = new BoardCellButton[10][10];
+        BoardCellButton.loadDrawables(this, 30, 210);
+        boardButtons = new BoardCellButton[BOARD_SIZE][BOARD_SIZE];
         boardRoot.setOrientation(LinearLayout.VERTICAL);
-        for (int row = 0; row != 10; row++) {
+        for (int row = 0; row != BOARD_SIZE; row++) {
             LinearLayout rowLayout = new LinearLayout(this);
             rowLayout.setOrientation(LinearLayout.HORIZONTAL);
-            for (int column = 0; column != 10; column++) {
+            for (int column = 0; column != BOARD_SIZE; column++) {
                 BoardCellButton newButton = new BoardCellButton(this);
+                newButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                switch ((row * BOARD_SIZE + column) % 4) {
+                    case 0:
+                        newButton.setImageDrawable(BoardCellButton.cellOalive);
+                        break;
+                    case 1:
+                        newButton.setImageDrawable(BoardCellButton.cellOdead);
+                        break;
+                    case 2:
+                        newButton.setImageDrawable(BoardCellButton.cellXdead);
+                        break;
+                    case 3:
+                        newButton.setImageDrawable(BoardCellButton.cellXalive);
+                        break;
+                }
                 boardButtons[row][column] = newButton;
                 rowLayout.addView(boardButtons[row][column], BOARD_BUTTON_LAYOUT_PARAMS);
             }
