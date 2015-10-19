@@ -103,10 +103,9 @@ public class BoardCellButton extends ImageView {
         Oalive = decodeActiveColors(Oalive, Xhigh, Xlow, Ohigh, Olow);
         Odead  = decodeActiveColors(Odead , Xhigh, Xlow, Ohigh, Olow);
         empty  = empty.replaceAll(NEUTRAL_BG, colorToString(EMPTY_BG)).replaceAll(NEUTRAL_FG, colorToString(EMPTY_FG));
-        cellEmpty            = SVGParser.getSVGFromString(setBorder(empty , EMPTY_FG)).createPictureDrawable();
+        cellEmpty            = SVGParser.getSVGFromString(setBorder(empty , EMPTY_BG)).createPictureDrawable();
         cellEmpty_borderedX  = SVGParser.getSVGFromString(setBorder(empty , Xhigh   )).createPictureDrawable();
         cellEmpty_borderedO  = SVGParser.getSVGFromString(setBorder(empty , Ohigh   )).createPictureDrawable();
-        cellEmpty            = SVGParser.getSVGFromString(setBorder(empty , WHITE   )).createPictureDrawable();
         cellXalive           = SVGParser.getSVGFromString(setBorder(Xalive, Xlow    )).createPictureDrawable();
         cellXalive_borderedX = SVGParser.getSVGFromString(setBorder(Xalive, Xhigh   )).createPictureDrawable();
         cellXalive_borderedO = SVGParser.getSVGFromString(setBorder(Xalive, Ohigh   )).createPictureDrawable();
