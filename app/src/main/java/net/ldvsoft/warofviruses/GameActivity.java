@@ -78,31 +78,20 @@ public class GameActivity extends AppCompatActivity {
         BoardCellButton.loadDrawables(this, 30, 210);
         boardButtons = new BoardCellButton[BOARD_SIZE][BOARD_SIZE];
         boardRoot.setOrientation(LinearLayout.VERTICAL);
-        for (int row = 0; row != BOARD_SIZE; row++) {
+        for (int row = BOARD_SIZE - 1; row != -1; row--) {
             LinearLayout rowLayout = new LinearLayout(this);
             rowLayout.setOrientation(LinearLayout.HORIZONTAL);
             for (int column = 0; column != BOARD_SIZE; column++) {
                 BoardCellButton newButton = new BoardCellButton(this);
                 newButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                switch ((row * BOARD_SIZE + column) % 4) {
-                    case 0:
-                        newButton.setImageDrawable(BoardCellButton.cellOalive);
-                        break;
-                    case 1:
-                        newButton.setImageDrawable(BoardCellButton.cellOdead);
-                        break;
-                    case 2:
-                        newButton.setImageDrawable(BoardCellButton.cellXdead);
-                        break;
-                    case 3:
-                        newButton.setImageDrawable(BoardCellButton.cellXalive);
-                        break;
-                }
+                newButton.setImageDrawable(BoardCellButton.cellEmpty);
                 boardButtons[row][column] = newButton;
                 rowLayout.addView(boardButtons[row][column], BOARD_BUTTON_LAYOUT_PARAMS);
             }
             boardRoot.addView(rowLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         }
+        boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_borderedX);
+        boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_borderedO);
         boardRoot.invalidate();
     }
 }
