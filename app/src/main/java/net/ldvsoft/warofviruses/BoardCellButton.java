@@ -51,14 +51,17 @@ public class BoardCellButton extends ImageView {
 
     public BoardCellButton(Context context) {
         super(context);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     public BoardCellButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     public BoardCellButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
     private static String colorToString(int color) {

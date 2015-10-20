@@ -38,6 +38,14 @@ public class GameActivity extends AppCompatActivity {
                 redrawGame();
             }
         });
+
+        BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
+        avatar.setImageDrawable(BoardCellButton.cellXalive);
+        avatar.invalidate();
+        avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
+        avatar.setImageDrawable(BoardCellButton.cellOalive);
+        avatar.invalidate();
+
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 final int x = i;
@@ -48,7 +56,6 @@ public class GameActivity extends AppCompatActivity {
                         if (!game.doTurn(x, y)) {
                             return;
                         }
-
                         redrawGame();
                     }
                 });
@@ -58,7 +65,7 @@ public class GameActivity extends AppCompatActivity {
     private void redrawGame() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j));
+                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getCurPlayerFigure());
                 boardButtons[i][j].invalidate();
             }
         }
@@ -103,23 +110,26 @@ public class GameActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setButton(BoardCellButton button, Game.Cell cell) {
-        if (cell.canMakeTurn()) {
+    private void setButton(BoardCellButton button, Game.Cell cell, Game.PlayerFigure current) {
+            if (cell.canMakeTurn()) {
             switch (cell.getCellType()) {
                 case EMPTY:
-                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+                    if (current == Game.PlayerFigure.CROSS) {
+                        button.setImageDrawable(BoardCellButton.cellEmpty_borderedX);
+                    }
+                    else {
+                        button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+                    }
                     break;
                 case CROSS:
                     button.setImageDrawable(BoardCellButton.cellXalive_borderedO);
                     break;
                 case ZERO:
-                    button.setImageDrawable(BoardCellButton.cellOalive_borderedO);
+                    button.setImageDrawable(BoardCellButton.cellOalive_borderedX);
                     break;
                 case DEAD_CROSS:
-                    button.setImageDrawable(BoardCellButton.cellXdead_borderedO);
-                    break;
                 case DEAD_ZERO:
-                    button.setImageDrawable(BoardCellButton.cellOdead_borderedX);
+                    // You cannot make a mode to already dead cell
                     break;
             }
         }
@@ -167,7 +177,6 @@ public class GameActivity extends AppCompatActivity {
             rowLayout.setOrientation(LinearLayout.HORIZONTAL);
             for (int column = 0; column != BOARD_SIZE; column++) {
                 BoardCellButton newButton = new BoardCellButton(this);
-                newButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
                 newButton.setImageDrawable(BoardCellButton.cellEmpty);
                 boardButtons[row][column] = newButton;
                 rowLayout.addView(boardButtons[row][column], BOARD_BUTTON_LAYOUT_PARAMS);
@@ -181,7 +190,7 @@ public class GameActivity extends AppCompatActivity {
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j));
+                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getCurPlayerFigure());
             }
         }
     }

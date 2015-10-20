@@ -6,7 +6,6 @@ package net.ldvsoft.warofviruses;
 public class Game {
     public static final int BOARD_SIZE = 10;
 
-
     public enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY};
 
     public enum PlayerFigure {CROSS, ZERO, NONE};
