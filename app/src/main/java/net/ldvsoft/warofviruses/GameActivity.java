@@ -13,10 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
+import static net.ldvsoft.warofviruses.Game.*;
+
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
-    public static final int BOARD_SIZE = 10;
+    private TextView gameStateText;
+
     public Game game = new Game();
 
     @Override
@@ -24,17 +27,20 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        // Just for now
+        findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
+
+        gameStateText = (TextView) findViewById(R.id.game_text_game_status);
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
-        Button passTurnButton = (Button) findViewById(R.id.game_button_prev);
+        Button passTurnButton = (Button) findViewById(R.id.game_button_passturn);
         passTurnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!game.skipTurn()) {
                     return;
                 }
-
                 redrawGame();
             }
         });
@@ -70,19 +76,18 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        TextView gameStateLabel = (TextView) findViewById(R.id.textView2);
         switch (game.getCurrentGameState()) {
             case RUNNING:
-                gameStateLabel.setText("RUNNING");
+                gameStateText.setText("RUNNING");
                 break;
             case DRAW:
-                gameStateLabel.setText("DRAW");
+                gameStateText.setText("DRAW");
                 break;
             case CROSS_WON:
-                gameStateLabel.setText("CROSS_WON");
+                gameStateText.setText("CROSS_WON");
                 break;
             case ZERO_WON:
-                gameStateLabel.setText("ZERO_WON");
+                gameStateText.setText("ZERO_WON");
                 break;
         }
 
@@ -111,47 +116,47 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setButton(BoardCellButton button, Game.Cell cell, Game.PlayerFigure current) {
-            if (cell.canMakeTurn()) {
-            switch (cell.getCellType()) {
-                case EMPTY:
-                    if (current == Game.PlayerFigure.CROSS) {
-                        button.setImageDrawable(BoardCellButton.cellEmpty_borderedX);
-                    }
-                    else {
-                        button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
-                    }
-                    break;
-                case CROSS:
+        switch (cell.getCellType()) {
+            case CROSS:
+                if (cell.isActive()) {
+                    button.setImageDrawable(BoardCellButton.cellXalive_borderedX);
+                } else if (cell.canMakeTurn()) {
                     button.setImageDrawable(BoardCellButton.cellXalive_borderedO);
-                    break;
-                case ZERO:
-                    button.setImageDrawable(BoardCellButton.cellOalive_borderedX);
-                    break;
-                case DEAD_CROSS:
-                case DEAD_ZERO:
-                    // You cannot make a mode to already dead cell
-                    break;
-            }
-        }
-        else {
-            switch (cell.getCellType()) {
-                case EMPTY:
-                    button.setImageDrawable(BoardCellButton.cellEmpty);
-                    break;
-                case CROSS:
+                } else {
                     button.setImageDrawable(BoardCellButton.cellXalive);
-                    break;
-                case ZERO:
+                }
+                break;
+            case ZERO:
+                if (cell.isActive()) {
+                    button.setImageDrawable(BoardCellButton.cellOalive_borderedO);
+                } else if (cell.canMakeTurn()) {
+                    button.setImageDrawable(BoardCellButton.cellOalive_borderedX);
+                } else {
                     button.setImageDrawable(BoardCellButton.cellOalive);
-                    break;
-                case DEAD_CROSS:
+                }
+                break;
+            case DEAD_CROSS:
+                if (cell.isActive()) {
+                    button.setImageDrawable(BoardCellButton.cellXdead_borderedO);
+                } else {
                     button.setImageDrawable(BoardCellButton.cellXdead);
-                    break;
-                case DEAD_ZERO:
+                }
+                break;
+            case DEAD_ZERO:
+                if (cell.isActive()) {
+                    button.setImageDrawable(BoardCellButton.cellOdead_borderedX);
+                } else {
                     button.setImageDrawable(BoardCellButton.cellOdead);
-                    break;
-            }
-
+                }
+                break;
+            case EMPTY:
+                if (!cell.canMakeTurn()) {
+                    button.setImageDrawable(BoardCellButton.cellEmpty);
+                } else if (current == PlayerFigure.CROSS) {
+                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedX);
+                } else {
+                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+                }
         }
     }
 

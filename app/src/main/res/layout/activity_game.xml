@@ -44,7 +44,8 @@
                     android:id="@+id/game_cross_nick"
                     android:layout_gravity="left|center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp" />
+                    android:layout_marginRight="5dp"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
             </LinearLayout>
 
             <LinearLayout
@@ -61,7 +62,8 @@
                     android:id="@+id/game_zero_nick"
                     android:layout_gravity="center_vertical|right"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp" />
+                    android:layout_marginRight="5dp"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
 
                 <net.ldvsoft.warofviruses.BoardCellButton
                     android:layout_width="32dp"
@@ -95,34 +97,77 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
+            android:id="@+id/game_bar_play">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Give Up"
+                android:id="@+id/game_button_giveup"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UNKNOWN"
+                    android:id="@+id/game_text_game_status"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:password="false"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </FrameLayout>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Skip Turn"
+                android:id="@+id/game_button_passturn"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/game_bar_replay">
 
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="&lt;&lt;"
                 android:id="@+id/game_button_first"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
 
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Skip turn"
+                android:text="&lt;"
                 android:id="@+id/game_button_prev"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
 
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1.5"
-                android:id="@+id/game_text_progress">
+                android:id="@+id/game_text_progress"
+                android:layout_gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="0/0"
-                    android:id="@+id/textView2"
+                    android:id="@+id/game_text_game_position"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_weight="1.5"
@@ -135,14 +180,16 @@
                 android:layout_height="wrap_content"
                 android:text=">"
                 android:id="@+id/game_button_next"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
 
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text=">>"
                 android:id="@+id/game_button_last"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical" />
         </LinearLayout>
 
     </LinearLayout>

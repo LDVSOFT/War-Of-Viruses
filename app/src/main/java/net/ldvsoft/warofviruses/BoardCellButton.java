@@ -64,6 +64,14 @@ public class BoardCellButton extends ImageView {
         setLayerType(LAYER_TYPE_SOFTWARE, null);
     }
 
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        if (drawable == getDrawable())
+            return;
+        super.setImageDrawable(drawable);
+        invalidate();
+    }
+
     private static String colorToString(int color) {
         return String.format("#%06x", 0xFFFFFF & color);
     }
@@ -118,7 +126,7 @@ public class BoardCellButton extends ImageView {
         cellOalive_borderedX = SVGParser.getSVGFromString(setBorder(Oalive, Xhigh   )).createPictureDrawable();
         cellOalive_borderedO = SVGParser.getSVGFromString(setBorder(Oalive, Ohigh   )).createPictureDrawable();
         cellOdead            = SVGParser.getSVGFromString(setBorder(Odead , Xlow    )).createPictureDrawable();
-        cellOdead_borderedX  = SVGParser.getSVGFromString(setBorder(Odead , Ohigh   )).createPictureDrawable();
+        cellOdead_borderedX  = SVGParser.getSVGFromString(setBorder(Odead , Xhigh   )).createPictureDrawable();
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {
