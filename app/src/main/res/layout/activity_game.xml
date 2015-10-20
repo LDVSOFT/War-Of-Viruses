@@ -109,7 +109,7 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="&lt;"
+                android:text="Skip turn"
                 android:id="@+id/game_button_prev"
                 android:layout_weight="1" />
 

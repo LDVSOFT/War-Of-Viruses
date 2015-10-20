@@ -8,11 +8,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
@@ -27,6 +26,18 @@ public class GameActivity extends AppCompatActivity {
 
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
+
+        Button passTurnButton = (Button) findViewById(R.id.game_button_prev);
+        passTurnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!game.skipTurn()) {
+                    return;
+                }
+
+                redrawGame();
+            }
+        });
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 final int x = i;
@@ -34,17 +45,40 @@ public class GameActivity extends AppCompatActivity {
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        game.doTurn(x, y);
-                        for (int i = 0; i < BOARD_SIZE; i++) {
-                            for (int j = 0; j < BOARD_SIZE; j++) {
-                                setButton(boardButtons[i][j], game.getCellAt(i, j));
-                                boardButtons[i][j].invalidate();
-                            }
+                        if (!game.doTurn(x, y)) {
+                            return;
                         }
-                        //Toast.makeText(GameActivity.this, String.format("Pressed %d %d", x, y), Toast.LENGTH_SHORT).show();
+
+                        redrawGame();
                     }
                 });
             }
+    }
+
+    private void redrawGame() {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                setButton(boardButtons[i][j], game.getCellAt(i, j));
+                boardButtons[i][j].invalidate();
+            }
+        }
+
+        TextView gameStateLabel = (TextView) findViewById(R.id.textView2);
+        switch (game.getCurrentGameState()) {
+            case RUNNING:
+                gameStateLabel.setText("RUNNING");
+                break;
+            case DRAW:
+                gameStateLabel.setText("DRAW");
+                break;
+            case CROSS_WON:
+                gameStateLabel.setText("CROSS_WON");
+                break;
+            case ZERO_WON:
+                gameStateLabel.setText("ZERO_WON");
+                break;
+        }
+
     }
 
     @Override
@@ -70,7 +104,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setButton(BoardCellButton button, Game.Cell cell) {
-        if (cell.getCanMove()) {
+        if (cell.canMakeTurn()) {
             switch (cell.getCellType()) {
                 case EMPTY:
                     button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
