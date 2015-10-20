@@ -18,6 +18,7 @@ public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
     public static final int BOARD_SIZE = 10;
+    public Game game = new Game();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +34,14 @@ public class GameActivity extends AppCompatActivity {
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(GameActivity.this, String.format("Pressed %d %d", x, y), Toast.LENGTH_SHORT).show();
+                        game.doTurn(x, y);
+                        for (int i = 0; i < BOARD_SIZE; i++) {
+                            for (int j = 0; j < BOARD_SIZE; j++) {
+                                setButton(boardButtons[i][j], game.getCellAt(i, j));
+                                boardButtons[i][j].invalidate();
+                            }
+                        }
+                        //Toast.makeText(GameActivity.this, String.format("Pressed %d %d", x, y), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -59,6 +67,48 @@ public class GameActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setButton(BoardCellButton button, Game.Cell cell) {
+        if (cell.getCanMove()) {
+            switch (cell.getCellType()) {
+                case EMPTY:
+                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+                    break;
+                case CROSS:
+                    button.setImageDrawable(BoardCellButton.cellXalive_borderedO);
+                    break;
+                case ZERO:
+                    button.setImageDrawable(BoardCellButton.cellOalive_borderedO);
+                    break;
+                case DEAD_CROSS:
+                    button.setImageDrawable(BoardCellButton.cellXdead_borderedO);
+                    break;
+                case DEAD_ZERO:
+                    button.setImageDrawable(BoardCellButton.cellOdead_borderedX);
+                    break;
+            }
+        }
+        else {
+            switch (cell.getCellType()) {
+                case EMPTY:
+                    button.setImageDrawable(BoardCellButton.cellEmpty);
+                    break;
+                case CROSS:
+                    button.setImageDrawable(BoardCellButton.cellXalive);
+                    break;
+                case ZERO:
+                    button.setImageDrawable(BoardCellButton.cellOalive);
+                    break;
+                case DEAD_CROSS:
+                    button.setImageDrawable(BoardCellButton.cellXdead);
+                    break;
+                case DEAD_ZERO:
+                    button.setImageDrawable(BoardCellButton.cellOdead);
+                    break;
+            }
+
+        }
     }
 
     private void buildBoard() {
@@ -92,6 +142,13 @@ public class GameActivity extends AppCompatActivity {
         }
         boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_borderedX);
         boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+        game.newGame();
         boardRoot.invalidate();
+
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                setButton(boardButtons[i][j], game.getCellAt(i, j));
+            }
+        }
     }
 }
