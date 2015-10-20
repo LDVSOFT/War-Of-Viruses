@@ -46,10 +46,10 @@ public class GameActivity extends AppCompatActivity {
         });
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        avatar.setImageDrawable(BoardCellButton.cellXalive);
+        avatar.setImageDrawable(BoardCellButton.cellCross);
         avatar.invalidate();
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        avatar.setImageDrawable(BoardCellButton.cellOalive);
+        avatar.setImageDrawable(BoardCellButton.cellZero);
         avatar.invalidate();
 
         for (int i = 0; i != BOARD_SIZE; i++)
@@ -119,43 +119,43 @@ public class GameActivity extends AppCompatActivity {
         switch (cell.getCellType()) {
             case CROSS:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellXalive_borderedX);
+                    button.setImageDrawable(BoardCellButton.cellCross_forCross);
                 } else if (cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.cellXalive_borderedO);
+                    button.setImageDrawable(BoardCellButton.cellCross_forZero);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellXalive);
+                    button.setImageDrawable(BoardCellButton.cellCross);
                 }
                 break;
             case ZERO:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellOalive_borderedO);
+                    button.setImageDrawable(BoardCellButton.cellZero_forZero);
                 } else if (cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.cellOalive_borderedX);
+                    button.setImageDrawable(BoardCellButton.cellZero_forCross);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellOalive);
+                    button.setImageDrawable(BoardCellButton.cellZero);
                 }
                 break;
             case DEAD_CROSS:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellXdead_borderedO);
+                    button.setImageDrawable(BoardCellButton.cellCrossDead_forZero);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellXdead);
+                    button.setImageDrawable(BoardCellButton.cellCrossDead);
                 }
                 break;
             case DEAD_ZERO:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellOdead_borderedX);
+                    button.setImageDrawable(BoardCellButton.cellZeroDead_forCross);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellOdead);
+                    button.setImageDrawable(BoardCellButton.cellZeroDead);
                 }
                 break;
             case EMPTY:
                 if (!cell.canMakeTurn()) {
                     button.setImageDrawable(BoardCellButton.cellEmpty);
                 } else if (current == PlayerFigure.CROSS) {
-                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedX);
+                    button.setImageDrawable(BoardCellButton.cellEmpty_forCross);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+                    button.setImageDrawable(BoardCellButton.cellEmpty_forZero);
                 }
         }
     }
@@ -188,8 +188,8 @@ public class GameActivity extends AppCompatActivity {
             }
             boardRoot.addView(rowLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         }
-        boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_borderedX);
-        boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_borderedO);
+        boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_forCross);
+        boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_forZero);
         game.newGame();
         boardRoot.invalidate();
 

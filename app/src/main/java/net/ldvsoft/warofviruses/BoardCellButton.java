@@ -1,52 +1,51 @@
 package net.ldvsoft.warofviruses;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 
-import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static android.graphics.Color.*;
+import static android.graphics.Color.BLUE;
+import static android.graphics.Color.GREEN;
+import static android.graphics.Color.HSVToColor;
+import static android.graphics.Color.RED;
+import static android.graphics.Color.WHITE;
+import static android.graphics.Color.rgb;
 
 /**
  * Created by ldvsoft on 17.10.15.
  */
 public class BoardCellButton extends ImageView {
-    final static String X_FG       = colorToString(RED);
-    final static String X_BG       = colorToString(rgb(127, 0, 0));
-    final static String O_FG       = colorToString(BLUE);
-    final static String O_BG       = colorToString(rgb(0, 0, 127));
-    final static String BORDER     = colorToString(GREEN);
-    final static String NEUTRAL_FG = colorToString(WHITE);
-    final static String NEUTRAL_BG = colorToString(rgb(127, 127, 127));
+    protected final static String CROSS_FG   = colorToString(RED);
+    protected final static String CROSS_BG   = colorToString(rgb(127, 0, 0));
+    protected final static String ZERO_FG    = colorToString(BLUE);
+    protected final static String ZERO_BG    = colorToString(rgb(0, 0, 127));
+    protected final static String NEUTRAL_FG = colorToString(WHITE);
+    protected final static String NEUTRAL_BG = colorToString(rgb(127, 127, 127));
+    protected final static String BORDER     = colorToString(GREEN);
 
-    final static int EMPTY_FG = rgb(200, 200, 200);
-    final static int EMPTY_BG = rgb(240, 240, 240);
+    protected final static int EMPTY_FG = rgb(200, 200, 200);
+    protected final static int EMPTY_BG = rgb(240, 240, 240);
 
     protected static Drawable cellEmpty;
-    protected static Drawable cellEmpty_borderedX;
-    protected static Drawable cellEmpty_borderedO;
-    protected static Drawable cellXalive;
-    protected static Drawable cellXalive_borderedX;
-    protected static Drawable cellXalive_borderedO;
-    protected static Drawable cellXdead;
-    protected static Drawable cellXdead_borderedO;
-    protected static Drawable cellOalive;
-    protected static Drawable cellOalive_borderedX;
-    protected static Drawable cellOalive_borderedO;
-    protected static Drawable cellOdead;
-    protected static Drawable cellOdead_borderedX;
+    protected static Drawable cellEmpty_forCross;
+    protected static Drawable cellEmpty_forZero;
+    protected static Drawable cellCross;
+    protected static Drawable cellCross_forCross;
+    protected static Drawable cellCross_forZero;
+    protected static Drawable cellCrossDead;
+    protected static Drawable cellCrossDead_forZero;
+    protected static Drawable cellZero;
+    protected static Drawable cellZero_forCross;
+    protected static Drawable cellZero_forZero;
+    protected static Drawable cellZeroDead;
+    protected static Drawable cellZeroDead_forCross;
 
 
     public BoardCellButton(Context context) {
@@ -72,61 +71,61 @@ public class BoardCellButton extends ImageView {
         invalidate();
     }
 
-    private static String colorToString(int color) {
+    protected static String colorToString(int color) {
         return String.format("#%06x", 0xFFFFFF & color);
     }
 
-    private static int hueToColor(float hue, float saturation, float value) {
+    protected static int hueToColor(float hue, float saturation, float value) {
         return HSVToColor(new float[]{hue, saturation, value});
     }
 
-    private static int getHighColor(float hue) {
+    protected static int getHighColor(float hue) {
         return hueToColor(hue, 1.00f, 1.00f);
     }
 
-    private static int getLowColor(float hue) {
+    protected static int getLowColor(float hue) {
         return hueToColor(hue, 0.43f, 1.00f);
     }
 
-    private static String setBorder(String s, int color) {
+    protected static String setBorder(String s, int color) {
         return s.replaceAll(BORDER, colorToString(color));
     }
 
-    public static void loadDrawables(Context context, int hueX, int hueO) {
-        int Xhigh = getHighColor(hueX);
-        int Xlow  = getLowColor(hueX);
-        int Ohigh = getHighColor(hueO);
-        int Olow  = getLowColor(hueO);
-        String Xalive, Xdead, Oalive, Odead, empty;
+    public static void loadDrawables(Context context, int hueCross, int hueZero) {
+        int crossHigh = getHighColor(hueCross);
+        int crossLow  = getLowColor(hueCross);
+        int zeroHigh  = getHighColor(hueZero);
+        int zeroLow   = getLowColor(hueZero);
+        String cross, crossDead, zero, zeroDead, empty;
         try {
-            empty  = loadSVG(context, R.raw.board_cell_empty  );
-            Xalive = loadSVG(context, R.raw.board_cell_x_alive);
-            Xdead  = loadSVG(context, R.raw.board_cell_x_dead );
-            Oalive = loadSVG(context, R.raw.board_cell_o_alive);
-            Odead  = loadSVG(context, R.raw.board_cell_o_dead );
+            empty      = loadSVG(context, R.raw.board_cell_empty     );
+            cross      = loadSVG(context, R.raw.board_cell_cross     );
+            crossDead  = loadSVG(context, R.raw.board_cell_cross_dead);
+            zero       = loadSVG(context, R.raw.board_cell_zero      );
+            zeroDead   = loadSVG(context, R.raw.board_cell_zero_dead );
         } catch (IOException e) {
             e.printStackTrace();
             Log.wtf("BoardCellButton", "Cannot load SVGs!");
             return;
         }
-        Xalive = decodeActiveColors(Xalive, Xhigh, Xlow, Ohigh, Olow);
-        Xdead  = decodeActiveColors(Xdead , Xhigh, Xlow, Ohigh, Olow);
-        Oalive = decodeActiveColors(Oalive, Xhigh, Xlow, Ohigh, Olow);
-        Odead  = decodeActiveColors(Odead , Xhigh, Xlow, Ohigh, Olow);
-        empty  = empty.replaceAll(NEUTRAL_BG, colorToString(EMPTY_BG)).replaceAll(NEUTRAL_FG, colorToString(EMPTY_FG));
-        cellEmpty            = SVGParser.getSVGFromString(setBorder(empty , EMPTY_BG)).createPictureDrawable();
-        cellEmpty_borderedX  = SVGParser.getSVGFromString(setBorder(empty , Xhigh   )).createPictureDrawable();
-        cellEmpty_borderedO  = SVGParser.getSVGFromString(setBorder(empty , Ohigh   )).createPictureDrawable();
-        cellXalive           = SVGParser.getSVGFromString(setBorder(Xalive, Xlow    )).createPictureDrawable();
-        cellXalive_borderedX = SVGParser.getSVGFromString(setBorder(Xalive, Xhigh   )).createPictureDrawable();
-        cellXalive_borderedO = SVGParser.getSVGFromString(setBorder(Xalive, Ohigh   )).createPictureDrawable();
-        cellXdead            = SVGParser.getSVGFromString(setBorder(Xdead , Olow    )).createPictureDrawable();
-        cellXdead_borderedO  = SVGParser.getSVGFromString(setBorder(Xdead , Ohigh   )).createPictureDrawable();
-        cellOalive           = SVGParser.getSVGFromString(setBorder(Oalive, Olow    )).createPictureDrawable();
-        cellOalive_borderedX = SVGParser.getSVGFromString(setBorder(Oalive, Xhigh   )).createPictureDrawable();
-        cellOalive_borderedO = SVGParser.getSVGFromString(setBorder(Oalive, Ohigh   )).createPictureDrawable();
-        cellOdead            = SVGParser.getSVGFromString(setBorder(Odead , Xlow    )).createPictureDrawable();
-        cellOdead_borderedX  = SVGParser.getSVGFromString(setBorder(Odead , Xhigh   )).createPictureDrawable();
+        cross      = decodeActiveColors(cross,      crossHigh, crossLow, zeroHigh, zeroLow);
+        crossDead  = decodeActiveColors(crossDead , crossHigh, crossLow, zeroHigh, zeroLow);
+        zero       = decodeActiveColors(zero,       crossHigh, crossLow, zeroHigh, zeroLow);
+        zeroDead   = decodeActiveColors(zeroDead ,  crossHigh, crossLow, zeroHigh, zeroLow);
+        empty = empty.replaceAll(NEUTRAL_BG, colorToString(EMPTY_BG)).replaceAll(NEUTRAL_FG, colorToString(EMPTY_FG));
+        cellEmpty             = SVGParser.getSVGFromString(setBorder(empty    , EMPTY_BG    )).createPictureDrawable();
+        cellEmpty_forCross    = SVGParser.getSVGFromString(setBorder(empty    , crossHigh   )).createPictureDrawable();
+        cellEmpty_forZero     = SVGParser.getSVGFromString(setBorder(empty    , zeroHigh    )).createPictureDrawable();
+        cellCross             = SVGParser.getSVGFromString(setBorder(cross    , crossLow    )).createPictureDrawable();
+        cellCross_forCross    = SVGParser.getSVGFromString(setBorder(cross    , crossHigh   )).createPictureDrawable();
+        cellCross_forZero     = SVGParser.getSVGFromString(setBorder(cross    , zeroHigh    )).createPictureDrawable();
+        cellCrossDead         = SVGParser.getSVGFromString(setBorder(crossDead, zeroLow     )).createPictureDrawable();
+        cellCrossDead_forZero = SVGParser.getSVGFromString(setBorder(crossDead, zeroHigh    )).createPictureDrawable();
+        cellZero              = SVGParser.getSVGFromString(setBorder(zero     , zeroLow     )).createPictureDrawable();
+        cellZero_forCross     = SVGParser.getSVGFromString(setBorder(zero     , crossHigh   )).createPictureDrawable();
+        cellZero_forZero      = SVGParser.getSVGFromString(setBorder(zero     , zeroHigh    )).createPictureDrawable();
+        cellZeroDead          = SVGParser.getSVGFromString(setBorder(zeroDead , crossLow    )).createPictureDrawable();
+        cellZeroDead_forCross = SVGParser.getSVGFromString(setBorder(zeroDead , crossHigh   )).createPictureDrawable();
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {
@@ -141,12 +140,12 @@ public class BoardCellButton extends ImageView {
         }
     }
 
-    protected static String decodeActiveColors(String s, int Xhigh, int Xlow, int Ohigh, int Olow) {
+    protected static String decodeActiveColors(String s, int crossHigh, int crossLow, int zeroHigh, int zeroLow) {
         return s
-                .replaceAll(X_FG, colorToString(Xhigh))
-                .replaceAll(X_BG, colorToString(Xlow))
-                .replaceAll(O_FG, colorToString(Ohigh))
-                .replaceAll(O_BG, colorToString(Olow ))
+                .replaceAll(CROSS_FG, colorToString(crossHigh))
+                .replaceAll(CROSS_BG, colorToString(crossLow ))
+                .replaceAll(ZERO_FG , colorToString(zeroHigh ))
+                .replaceAll(ZERO_BG , colorToString(zeroLow  ))
                 ;
     }
 }
