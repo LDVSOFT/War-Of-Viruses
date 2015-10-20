@@ -14,8 +14,7 @@ public class Game {
 
     private Cell board[][] = new Cell[BOARD_SIZE][BOARD_SIZE];
 
-    static final int[][] adjacentDirections = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
-    static final int NUM_OF_DIRECTIONS = 8;
+    static final int[][] ADJACEMENT_DIRECTIONS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
     private GameState currentGameState = GameState.NOT_RUNNING;
     
@@ -105,8 +104,8 @@ public class Game {
 
     private void updateAdjacentCells(int x, int y) {
         board[x][y].isActive = true;
-        for (int dir = 0; dir < NUM_OF_DIRECTIONS; dir++) {
-            int dx = x + adjacentDirections[dir][0], dy = y + adjacentDirections[dir][1];
+        for (int[] adjacementDirection : ADJACEMENT_DIRECTIONS) {
+            int dx = x + adjacementDirection[0], dy = y + adjacementDirection[1];
             if (dx >= 0 && dx < BOARD_SIZE && dy >= 0 && dy < BOARD_SIZE) {
                 if ((board[dx][dy].getOwner() == getOpponent(curPlayerFigure) && !board[dx][dy].isDead()) ||
                         board[dx][dy].cellType == CellType.EMPTY) {
