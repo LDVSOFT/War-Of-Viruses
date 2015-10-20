@@ -8,13 +8,9 @@ import android.util.Log;
 public class Game {
     public static final int BOARD_SIZE = 10;
 
-    public static enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY}
+    public static enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY};
 
-    ;
-
-    public static enum PlayerFigure {CROSS, ZERO, NONE}
-
-    ;
+    public static enum PlayerFigure {CROSS, ZERO, NONE};
 
     private Cell board[][] = new Cell[BOARD_SIZE][BOARD_SIZE];
     static final int[][] adjacentDirections = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
