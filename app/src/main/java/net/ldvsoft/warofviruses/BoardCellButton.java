@@ -25,7 +25,7 @@ import static android.graphics.Color.rgb;
  * Created by ldvsoft on 17.10.15.
  */
 public class BoardCellButton extends ImageView {
-    protected final static int CROSS_FG   = argb(0, 256, 0  , 0  );
+    protected final static int CROSS_FG   = argb(0, 255, 0  , 0  );
     protected final static int CROSS_BG   = argb(0, 127, 0  , 0  );
     protected final static int ZERO_FG    = argb(0, 0  , 0  , 255);
     protected final static int ZERO_BG    = argb(0, 0  , 0  , 127);
