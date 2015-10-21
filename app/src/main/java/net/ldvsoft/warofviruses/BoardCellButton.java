@@ -10,28 +10,31 @@ import com.larvalabs.svgandroid.SVGParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Map;
 
 import static android.graphics.Color.BLUE;
 import static android.graphics.Color.GREEN;
 import static android.graphics.Color.HSVToColor;
 import static android.graphics.Color.RED;
 import static android.graphics.Color.WHITE;
+import static android.graphics.Color.argb;
 import static android.graphics.Color.rgb;
 
 /**
  * Created by ldvsoft on 17.10.15.
  */
 public class BoardCellButton extends ImageView {
-    protected final static String CROSS_FG   = colorToString(RED);
-    protected final static String CROSS_BG   = colorToString(rgb(127, 0, 0));
-    protected final static String ZERO_FG    = colorToString(BLUE);
-    protected final static String ZERO_BG    = colorToString(rgb(0, 0, 127));
-    protected final static String NEUTRAL_FG = colorToString(WHITE);
-    protected final static String NEUTRAL_BG = colorToString(rgb(127, 127, 127));
-    protected final static String BORDER     = colorToString(GREEN);
+    protected final static int CROSS_FG   = argb(0, 256, 0  , 0  );
+    protected final static int CROSS_BG   = argb(0, 127, 0  , 0  );
+    protected final static int ZERO_FG    = argb(0, 0  , 0  , 255);
+    protected final static int ZERO_BG    = argb(0, 0  , 0  , 127);
+    protected final static int NEUTRAL_FG = argb(0, 255, 255, 255);
+    protected final static int NEUTRAL_BG = argb(0, 127, 127, 127);
+    protected final static int BORDER     = argb(0, 0  , 255, 0  );
 
-    protected final static int EMPTY_FG = rgb(200, 200, 200);
-    protected final static int EMPTY_BG = rgb(240, 240, 240);
+    protected final static int EMPTY_FG   = argb(0, 200, 200, 200);
+    protected final static int EMPTY_BG   = argb(0, 240, 240, 240);
 
     protected static Drawable cellEmpty;
     protected static Drawable cellEmpty_forCross;
@@ -71,10 +74,6 @@ public class BoardCellButton extends ImageView {
         invalidate();
     }
 
-    protected static String colorToString(int color) {
-        return String.format("#%06x", 0xFFFFFF & color);
-    }
-
     protected static int hueToColor(float hue, float saturation, float value) {
         return HSVToColor(new float[]{hue, saturation, value});
     }
@@ -85,10 +84,6 @@ public class BoardCellButton extends ImageView {
 
     protected static int getLowColor(float hue) {
         return hueToColor(hue, 0.43f, 1.00f);
-    }
-
-    protected static String setBorder(String s, int color) {
-        return s.replaceAll(BORDER, colorToString(color));
     }
 
     public static void loadDrawables(Context context, int hueCross, int hueZero) {
@@ -108,24 +103,36 @@ public class BoardCellButton extends ImageView {
             Log.wtf("BoardCellButton", "Cannot load SVGs!");
             return;
         }
-        cross      = decodeActiveColors(cross,      crossHigh, crossLow, zeroHigh, zeroLow);
-        crossDead  = decodeActiveColors(crossDead , crossHigh, crossLow, zeroHigh, zeroLow);
-        zero       = decodeActiveColors(zero,       crossHigh, crossLow, zeroHigh, zeroLow);
-        zeroDead   = decodeActiveColors(zeroDead ,  crossHigh, crossLow, zeroHigh, zeroLow);
-        empty = empty.replaceAll(NEUTRAL_BG, colorToString(EMPTY_BG)).replaceAll(NEUTRAL_FG, colorToString(EMPTY_FG));
-        cellEmpty             = SVGParser.getSVGFromString(setBorder(empty    , EMPTY_BG    )).createPictureDrawable();
-        cellEmpty_forCross    = SVGParser.getSVGFromString(setBorder(empty    , crossHigh   )).createPictureDrawable();
-        cellEmpty_forZero     = SVGParser.getSVGFromString(setBorder(empty    , zeroHigh    )).createPictureDrawable();
-        cellCross             = SVGParser.getSVGFromString(setBorder(cross    , crossLow    )).createPictureDrawable();
-        cellCross_forCross    = SVGParser.getSVGFromString(setBorder(cross    , crossHigh   )).createPictureDrawable();
-        cellCross_forZero     = SVGParser.getSVGFromString(setBorder(cross    , zeroHigh    )).createPictureDrawable();
-        cellCrossDead         = SVGParser.getSVGFromString(setBorder(crossDead, zeroLow     )).createPictureDrawable();
-        cellCrossDead_forZero = SVGParser.getSVGFromString(setBorder(crossDead, zeroHigh    )).createPictureDrawable();
-        cellZero              = SVGParser.getSVGFromString(setBorder(zero     , zeroLow     )).createPictureDrawable();
-        cellZero_forCross     = SVGParser.getSVGFromString(setBorder(zero     , crossHigh   )).createPictureDrawable();
-        cellZero_forZero      = SVGParser.getSVGFromString(setBorder(zero     , zeroHigh    )).createPictureDrawable();
-        cellZeroDead          = SVGParser.getSVGFromString(setBorder(zeroDead , crossLow    )).createPictureDrawable();
-        cellZeroDead_forCross = SVGParser.getSVGFromString(setBorder(zeroDead , crossHigh   )).createPictureDrawable();
+        Hashtable<Integer, Integer> colors = new Hashtable<>(10);
+        colors.put(CROSS_FG, crossHigh);
+        colors.put(CROSS_BG, crossLow);
+        colors.put(ZERO_FG, zeroHigh);
+        colors.put(ZERO_BG, zeroLow);
+        colors.put(NEUTRAL_FG, EMPTY_FG);
+        colors.put(NEUTRAL_BG, EMPTY_BG);
+
+        colors.put(BORDER, EMPTY_BG);
+        cellEmpty             = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
+
+        colors.put(BORDER, crossHigh);
+        cellEmpty_forCross    = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
+        cellCross_forCross    = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
+        cellZero_forCross     = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
+        cellZeroDead_forCross = SVGParser.getSVGFromString(zeroDead , colors).createPictureDrawable();
+
+        colors.put(BORDER, crossLow );
+        cellCross             = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
+        cellZeroDead          = SVGParser.getSVGFromString(zeroDead , colors).createPictureDrawable();
+
+        colors.put(BORDER, zeroHigh );
+        cellEmpty_forZero     = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
+        cellCross_forZero     = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
+        cellCrossDead_forZero = SVGParser.getSVGFromString(crossDead, colors).createPictureDrawable();
+        cellZero_forZero      = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
+
+        colors.put(BORDER, zeroLow  );
+        cellZero              = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
+        cellCrossDead         = SVGParser.getSVGFromString(crossDead, colors).createPictureDrawable();
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {
@@ -138,14 +145,5 @@ public class BoardCellButton extends ImageView {
             Log.wtf("BoardCellButton", "What the hell is with svg?!");
             throw e;
         }
-    }
-
-    protected static String decodeActiveColors(String s, int crossHigh, int crossLow, int zeroHigh, int zeroLow) {
-        return s
-                .replaceAll(CROSS_FG, colorToString(crossHigh))
-                .replaceAll(CROSS_BG, colorToString(crossLow ))
-                .replaceAll(ZERO_FG , colorToString(zeroHigh ))
-                .replaceAll(ZERO_BG , colorToString(zeroLow  ))
-                ;
     }
 }
