@@ -82,7 +82,7 @@ public class GameLogic {
         }
     }
 
-    static final int[][] ADJACEMENT_DIRECTIONS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+    static final int[][] ADJACENT_DIRECTIONS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
 
     private Cell board[][] = new Cell[BOARD_SIZE][BOARD_SIZE];
 
@@ -138,8 +138,8 @@ public class GameLogic {
 
     private void updateAdjacentCells(int x, int y) {
         board[x][y].isActive = true;
-        for (int[] adjacementDirection : ADJACEMENT_DIRECTIONS) {
-            int dx = x + adjacementDirection[0], dy = y + adjacementDirection[1];
+        for (int[] adjacentDirection : ADJACENT_DIRECTIONS) {
+            int dx = x + adjacentDirection[0], dy = y + adjacentDirection[1];
             if (dx >= 0 && dx < BOARD_SIZE && dy >= 0 && dy < BOARD_SIZE) {
                 if ((board[dx][dy].getOwner() == getOpponent(curPlayerFigure) && !board[dx][dy].isDead()) ||
                         board[dx][dy].cellType == CellType.EMPTY) {
@@ -199,6 +199,11 @@ public class GameLogic {
             if (!isZeroAlive) {
                 crossWon();
             }
+        }
+
+        //cycle below will work incorrectly in case of curPlayerFigure==NONE
+        if (currentGameState != GameState.RUNNING) {
+            return;
         }
 
         for (int i = 0; i < BOARD_SIZE; i++) {
