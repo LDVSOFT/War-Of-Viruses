@@ -77,21 +77,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        switch (game.getCurrentGameState()) {
-            case RUNNING:
-                gameStateText.setText("RUNNING");
-                break;
-            case DRAW:
-                gameStateText.setText("DRAW");
-                break;
-            case CROSS_WON:
-                gameStateText.setText("CROSS_WON");
-                break;
-            case ZERO_WON:
-                gameStateText.setText("ZERO_WON");
-                break;
-        }
-
+        gameStateText.setText(game.getCurrentGameState().toString());
     }
 
     @Override
