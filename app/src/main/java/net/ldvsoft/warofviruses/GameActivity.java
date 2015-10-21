@@ -13,13 +13,14 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import static net.ldvsoft.warofviruses.Game.*;
+import static net.ldvsoft.warofviruses.GameLogic.*;
 
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
     private TextView gameStateText;
 
+    private HumanPlayer humanPlayer = new HumanPlayer();
     public Game game = new Game();
 
     @Override
@@ -34,14 +35,22 @@ public class GameActivity extends AppCompatActivity {
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
-        Button passTurnButton = (Button) findViewById(R.id.game_button_passturn);
-        passTurnButton.setOnClickListener(new View.OnClickListener() {
+        Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
+        skipTurnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!game.skipTurn()) {
+                if (!game.skipTurn(humanPlayer)) {
                     return;
                 }
                 redrawGame();
+            }
+        });
+
+        Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
+        giveUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.giveUp(humanPlayer);
             }
         });
 
@@ -59,10 +68,7 @@ public class GameActivity extends AppCompatActivity {
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!game.doTurn(x, y)) {
-                            return;
-                        }
-                        redrawGame();
+                        game.doTurn(humanPlayer, x, y);
                     }
                 });
             }
@@ -71,12 +77,12 @@ public class GameActivity extends AppCompatActivity {
     private void redrawGame() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getCurPlayerFigure());
+                setButton(boardButtons[i][j], game.getGameLogic().getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
                 boardButtons[i][j].invalidate();
             }
         }
 
-        switch (game.getCurrentGameState()) {
+        switch (game.getGameLogic().getCurrentGameState()) {
             case RUNNING:
                 gameStateText.setText("RUNNING");
                 break;
@@ -115,7 +121,7 @@ public class GameActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setButton(BoardCellButton button, Game.Cell cell, Game.PlayerFigure current) {
+    private void setButton(BoardCellButton button, GameLogic.Cell cell, GameLogic.PlayerFigure current) {
         switch (cell.getCellType()) {
             case CROSS:
                 if (cell.isActive()) {
@@ -152,7 +158,7 @@ public class GameActivity extends AppCompatActivity {
             case EMPTY:
                 if (!cell.canMakeTurn()) {
                     button.setImageDrawable(BoardCellButton.cellEmpty);
-                } else if (current == PlayerFigure.CROSS) {
+                } else if (current == GameLogic.PlayerFigure.CROSS) {
                     button.setImageDrawable(BoardCellButton.cellEmpty_forCross);
                 } else {
                     button.setImageDrawable(BoardCellButton.cellEmpty_forZero);
@@ -190,12 +196,19 @@ public class GameActivity extends AppCompatActivity {
         }
         boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_forCross);
         boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_forZero);
-        game.newGame();
+        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
+            @Override
+            public void onGameStateChanged() {
+                redrawGame();
+            }
+        });
+        game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
         boardRoot.invalidate();
 
+        GameLogic gameLogic = game.getGameLogic();
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getCurPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurPlayerFigure());
             }
         }
     }
