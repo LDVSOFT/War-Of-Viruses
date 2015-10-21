@@ -28,8 +28,6 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        game.newGame();
-
         // Just for now
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
 
@@ -77,13 +75,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void redrawGame() {
+        GameLogic gameLogic = game.getGameLogic();
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
             }
         }
 
-        gameStateText.setText(game.getCurrentGameState().toString());
+        gameStateText.setText(gameLogic.getCurrentGameState().toString());
     }
 
     @Override

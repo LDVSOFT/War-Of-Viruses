@@ -48,14 +48,13 @@ public class Game {
         if (currentPlayer != null) {
             currentPlayer.makeTurn(this);
         }
-        onGameStateChangedListener.onGameStateChanged();
     }
 
     public boolean giveUp(Player sender) {
         if (sender != getCurrentPlayer()) {
             return false;
         }
-
+        onGameStateChangedListener.onGameStateChanged();
         return gameLogic.giveUp();
     }
 
@@ -70,6 +69,7 @@ public class Game {
         if (oldPlayer != currentPlayer) {
             notifyPlayer();
         }
+        onGameStateChangedListener.onGameStateChanged();
         return result;
     }
 
@@ -84,6 +84,7 @@ public class Game {
         if (oldPlayer != currentPlayer) {
             notifyPlayer();
         }
+        onGameStateChangedListener.onGameStateChanged();
         return result;
     }
 }
