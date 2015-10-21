@@ -28,6 +28,8 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        game.newGame();
+
         // Just for now
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
 
@@ -77,26 +79,11 @@ public class GameActivity extends AppCompatActivity {
     private void redrawGame() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getGameLogic().getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
-                boardButtons[i][j].invalidate();
+                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
             }
         }
 
-        switch (game.getGameLogic().getCurrentGameState()) {
-            case RUNNING:
-                gameStateText.setText("RUNNING");
-                break;
-            case DRAW:
-                gameStateText.setText("DRAW");
-                break;
-            case CROSS_WON:
-                gameStateText.setText("CROSS_WON");
-                break;
-            case ZERO_WON:
-                gameStateText.setText("ZERO_WON");
-                break;
-        }
-
+        gameStateText.setText(game.getCurrentGameState().toString());
     }
 
     @Override
@@ -172,30 +159,26 @@ public class GameActivity extends AppCompatActivity {
             return;
         }
 
-        LayoutParams BOARD_BUTTON_LAYOUT_PARAMS = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-
+        // Init buttons' layout params, they require context to get 1dp in pixels
+        LayoutParams boardButtonLayoutParams = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        float logicalDensity = metrics.density;
-        int marginValue = (int) Math.ceil(logicalDensity * 1);
-        BOARD_BUTTON_LAYOUT_PARAMS.setMargins(marginValue, marginValue, 0, 0);
+        int marginValue = (int) Math.ceil(metrics.density * 1);
+        boardButtonLayoutParams.setMargins(marginValue, marginValue, 0, 0);
 
         BoardCellButton.loadDrawables(this, 30, 210);
         boardButtons = new BoardCellButton[BOARD_SIZE][BOARD_SIZE];
-        boardRoot.setOrientation(LinearLayout.VERTICAL);
+
         for (int row = BOARD_SIZE - 1; row != -1; row--) {
             LinearLayout rowLayout = new LinearLayout(this);
             rowLayout.setOrientation(LinearLayout.HORIZONTAL);
             for (int column = 0; column != BOARD_SIZE; column++) {
-                BoardCellButton newButton = new BoardCellButton(this);
-                newButton.setImageDrawable(BoardCellButton.cellEmpty);
-                boardButtons[row][column] = newButton;
-                rowLayout.addView(boardButtons[row][column], BOARD_BUTTON_LAYOUT_PARAMS);
+                boardButtons[row][column] = new BoardCellButton(this);
+                rowLayout.addView(boardButtons[row][column], boardButtonLayoutParams);
             }
             boardRoot.addView(rowLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         }
-        boardButtons[0][0].setImageDrawable(BoardCellButton.cellEmpty_forCross);
-        boardButtons[BOARD_SIZE - 1][BOARD_SIZE - 1].setImageDrawable(BoardCellButton.cellEmpty_forZero);
+
         game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
             @Override
             public void onGameStateChanged() {
@@ -203,13 +186,8 @@ public class GameActivity extends AppCompatActivity {
             }
         });
         game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
-        boardRoot.invalidate();
 
-        GameLogic gameLogic = game.getGameLogic();
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurPlayerFigure());
-            }
-        }
+        boardRoot.invalidate();
+        redrawGame();
     }
 }
