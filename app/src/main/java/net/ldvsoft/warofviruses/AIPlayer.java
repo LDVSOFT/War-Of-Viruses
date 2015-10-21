@@ -6,6 +6,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by Сева on 20.10.2015.
  */
@@ -44,6 +46,11 @@ public class AIPlayer extends Player {
                 Log.d("AIPlayer", "do turn at " + moves.get(index).x + " " + moves.get(index).y);
                 gameLogic.doTurn(moves.get(index).x, moves.get(index).y);
                 publishProgress(moves.get(index));
+                try {
+                    sleep(750);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             Log.d("AIPlayer", "Turn finished");
             return null;
@@ -57,6 +64,7 @@ public class AIPlayer extends Player {
             } else {
                 game.doTurn(AIPlayer.this, cells[0].x, cells[0].y);
             }
+
         }
     }
 }
