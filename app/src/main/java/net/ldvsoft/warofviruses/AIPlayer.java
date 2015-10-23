@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static java.lang.Thread.sleep;
+import static net.ldvsoft.warofviruses.GameLogic.*;
 
 /**
  * Created by Сева on 20.10.2015.
@@ -22,10 +23,83 @@ public class AIPlayer extends Player {
         new RandomStrategy(game).execute();
     }
 
-    private class RandomStrategy extends AsyncTask<Void, GameLogic.CoordinatePair, Void> {
+    private class RandomStrategy extends AsyncTask<Void, CoordinatePair, Void> {
         private Game game;
         RandomStrategy(Game game) {
             this.game = game;
+        }
+
+        private double getControlledCellsCount(GameLogic game) {
+            int result = 0;
+            final double DANGER_FACTOR = 1.5, CONTROL_FACTOR = 1.0;
+
+            if (game.getCurPlayerFigure() != ownFigure) {
+                game.setCurrentPlayerToOpponent();
+            }
+
+            for (int sign = 1; sign >= -1; sign -= 2) {
+
+                for (int i = 0; i < BOARD_SIZE; i++) {
+                    for (int j = 0; j < BOARD_SIZE; j++) {
+                        if (game.getCellAt(i, j).isActive()) {
+                            result += sign * CONTROL_FACTOR;
+                            }
+                        if (game.getCellAt(i, j).canMakeTurn() &&
+                                game.getCellAt(i, j).getOwner() == game.getOpponent(game.getCurPlayerFigure())) {
+                            result += sign * DANGER_FACTOR;
+                        }
+                    }
+                }
+
+                game.setCurrentPlayerToOpponent();
+            }
+
+            return result;
+        }
+
+        private void runStrategy(GameLogic gameLogic) {
+            ArrayList<CoordinatePair> optMoves = bruteforceMoves(gameLogic);
+            for (CoordinatePair move : optMoves) {
+
+                publishProgress(move);
+                try {
+                    sleep(750);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
+            ArrayList<CoordinatePair> result = new ArrayList<>();
+
+            if (gameLogic.getCurPlayerFigure() != ownFigure) {
+                return result;
+            }
+
+            ArrayList<CoordinatePair> moves = gameLogic.getMoves();
+            if (moves.size() == 0) {
+                return result;
+            }
+
+            double optScore = -10000;
+
+            for (CoordinatePair move: moves) {
+                GameLogic tmpGameLogic = new GameLogic(gameLogic);
+                tmpGameLogic.doTurn(move.x, move.y);
+                ArrayList<CoordinatePair> optMoves = bruteforceMoves(tmpGameLogic);
+                for (CoordinatePair optMove : optMoves) {
+                    tmpGameLogic.doTurn(optMove.x, optMove.y);
+                }
+
+                double newScore = getControlledCellsCount(tmpGameLogic);
+                if (newScore > optScore) {
+                    optScore = newScore;
+                    result = optMoves;
+                    result.add(0, move);
+                }
+            }
+            return result;
         }
 
         @Override
@@ -34,30 +108,15 @@ public class AIPlayer extends Player {
             Random randomGenerator = new Random();
             GameLogic gameLogic = game.getGameLogic();
             if (!gameLogic.canMove()) {
-                publishProgress(new GameLogic.CoordinatePair(-1, -1));
+                publishProgress(new CoordinatePair(-1, -1));
             }
-
-            while (gameLogic.getCurPlayerFigure() == AIPlayer.this.ownFigure) {
-                ArrayList<GameLogic.CoordinatePair> moves = gameLogic.getMoves();
-                if (moves.size() == 0) {
-                    break;
-                }
-                int index = randomGenerator.nextInt(moves.size());
-                Log.d("AIPlayer", "do turn at " + moves.get(index).x + " " + moves.get(index).y);
-                gameLogic.doTurn(moves.get(index).x, moves.get(index).y);
-                publishProgress(moves.get(index));
-                try {
-                    sleep(750);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            runStrategy(gameLogic);
             Log.d("AIPlayer", "Turn finished");
             return null;
         }
 
         @Override
-        protected void onProgressUpdate(GameLogic.CoordinatePair... cells) {
+        protected void onProgressUpdate(CoordinatePair... cells) {
             Log.d("AIPlayer", "Update progress: do move to " + cells[0].x + " " + cells[0].y);
             if (cells[0].x < 0) {
                 game.skipTurn(AIPlayer.this);

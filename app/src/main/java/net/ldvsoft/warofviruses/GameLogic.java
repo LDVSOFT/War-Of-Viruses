@@ -301,6 +301,13 @@ public class GameLogic {
         }
     }
 
+    //should be used very carefully, as it might broke some game logic.
+    //It's public for easier AI implementations
+    public void setCurrentPlayerToOpponent() {
+        curPlayerFigure = getOpponent(curPlayerFigure);
+        updateGameState();
+    }
+
     public static class CoordinatePair {
         int x, y;
         CoordinatePair(int x, int y) {
