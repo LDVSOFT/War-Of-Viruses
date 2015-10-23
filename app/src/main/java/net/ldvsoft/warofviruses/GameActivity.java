@@ -13,21 +13,20 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import static net.ldvsoft.warofviruses.Game.*;
+import static net.ldvsoft.warofviruses.GameLogic.*;
 
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
     private TextView gameStateText;
 
+    private HumanPlayer humanPlayer = new HumanPlayer();
     public Game game = new Game();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
-        game.newGame();
 
         // Just for now
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
@@ -36,14 +35,22 @@ public class GameActivity extends AppCompatActivity {
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
-        Button passTurnButton = (Button) findViewById(R.id.game_button_passturn);
-        passTurnButton.setOnClickListener(new View.OnClickListener() {
+        Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
+        skipTurnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!game.skipTurn()) {
+                if (!game.skipTurn(humanPlayer)) {
                     return;
                 }
                 redrawGame();
+            }
+        });
+
+        Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
+        giveUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.giveUp(humanPlayer);
             }
         });
 
@@ -54,36 +61,34 @@ public class GameActivity extends AppCompatActivity {
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!game.doTurn(x, y)) {
-                            return;
-                        }
-                        redrawGame();
+                        game.doTurn(humanPlayer, x, y);
                     }
                 });
             }
     }
 
     private void redrawGame() {
+        GameLogic gameLogic = game.getGameLogic();
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], game.getCellAt(i, j), game.getCurPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
             }
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        if (game.getCurPlayerFigure() == PlayerFigure.CROSS) {
+        if (gameLogic.getCurPlayerFigure() == PlayerFigure.CROSS) {
             avatar.setImageDrawable(BoardCellButton.cellCross_forCross);
         } else {
             avatar.setImageDrawable(BoardCellButton.cellCross);
         }
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        if (game.getCurPlayerFigure() == PlayerFigure.ZERO) {
+        if (gameLogic.getCurPlayerFigure() == PlayerFigure.ZERO) {
             avatar.setImageDrawable(BoardCellButton.cellZero_forZero);
         } else {
             avatar.setImageDrawable(BoardCellButton.cellZero);
         }
 
-        gameStateText.setText(game.getCurrentGameState().toString());
+        gameStateText.setText(gameLogic.getCurrentGameState().toString());
     }
 
     @Override
@@ -108,7 +113,7 @@ public class GameActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setButton(BoardCellButton button, Game.Cell cell, Game.PlayerFigure current) {
+    private void setButton(BoardCellButton button, GameLogic.Cell cell, GameLogic.PlayerFigure current) {
         switch (cell.getCellType()) {
             case CROSS:
                 if (cell.isActive()) {
@@ -145,7 +150,7 @@ public class GameActivity extends AppCompatActivity {
             case EMPTY:
                 if (!cell.canMakeTurn()) {
                     button.setImageDrawable(BoardCellButton.cellEmpty);
-                } else if (current == PlayerFigure.CROSS) {
+                } else if (current == GameLogic.PlayerFigure.CROSS) {
                     button.setImageDrawable(BoardCellButton.cellEmpty_forCross);
                 } else {
                     button.setImageDrawable(BoardCellButton.cellEmpty_forZero);
@@ -178,6 +183,14 @@ public class GameActivity extends AppCompatActivity {
             }
             boardRoot.addView(rowLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         }
+
+        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
+            @Override
+            public void onGameStateChanged() {
+                redrawGame();
+            }
+        });
+        game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
 
         boardRoot.invalidate();
         redrawGame();
