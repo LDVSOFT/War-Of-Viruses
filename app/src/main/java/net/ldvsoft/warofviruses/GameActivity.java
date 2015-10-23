@@ -54,13 +54,6 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        avatar.setImageDrawable(BoardCellButton.cellCross);
-        avatar.invalidate();
-        avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        avatar.setImageDrawable(BoardCellButton.cellZero);
-        avatar.invalidate();
-
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 final int x = i;
@@ -80,6 +73,19 @@ public class GameActivity extends AppCompatActivity {
             for (int j = 0; j < BOARD_SIZE; j++) {
                 setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
             }
+        }
+
+        BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
+        if (gameLogic.getCurPlayerFigure() == PlayerFigure.CROSS) {
+            avatar.setImageDrawable(BoardCellButton.cellCross_forCross);
+        } else {
+            avatar.setImageDrawable(BoardCellButton.cellCross);
+        }
+        avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
+        if (gameLogic.getCurPlayerFigure() == PlayerFigure.ZERO) {
+            avatar.setImageDrawable(BoardCellButton.cellZero_forZero);
+        } else {
+            avatar.setImageDrawable(BoardCellButton.cellZero);
         }
 
         gameStateText.setText(gameLogic.getCurrentGameState().toString());
