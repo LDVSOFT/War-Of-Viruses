@@ -54,8 +54,9 @@ public class Game {
         if (sender != getCurrentPlayer()) {
             return false;
         }
+        boolean result = gameLogic.giveUp();
         onGameStateChangedListener.onGameStateChanged();
-        return gameLogic.giveUp();
+        return result;
     }
 
     public boolean skipTurn(Player sender) {

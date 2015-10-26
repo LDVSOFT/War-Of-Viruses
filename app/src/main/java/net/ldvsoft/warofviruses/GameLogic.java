@@ -1,7 +1,5 @@
 package net.ldvsoft.warofviruses;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 /**
@@ -194,7 +192,7 @@ public class GameLogic {
 
         if (currentTurn > 1) {
             if (!isCrossAlive) {
-                zeroWin();
+                zeroWon();
             }
             if (!isZeroAlive) {
                 crossWon();
@@ -261,22 +259,34 @@ public class GameLogic {
     }
 
     public boolean giveUp() {
-        return false; //TODO: make sth useful
+        switch (curPlayerFigure) {
+            case CROSS:
+                zeroWon();
+                return true;
+            case ZERO:
+                crossWon();
+                return true;
+            default:
+                return false;
+        }
     }
 
     private void draw() {
         currentGameState = GameState.DRAW;
         curPlayerFigure = PlayerFigure.NONE;
+        updateGameState();
     }
 
     private void crossWon() {
         currentGameState = GameState.CROSS_WON;
         curPlayerFigure = PlayerFigure.NONE;
+        updateGameState();
     }
 
-    private void zeroWin() {
+    private void zeroWon() {
         currentGameState = GameState.ZERO_WON;
         curPlayerFigure = PlayerFigure.NONE;
+        updateGameState();
     }
 
     private void passTurn() {
