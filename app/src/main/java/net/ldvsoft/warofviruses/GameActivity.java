@@ -1,5 +1,6 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -14,6 +15,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import static net.ldvsoft.warofviruses.GameLogic.*;
+import static net.ldvsoft.warofviruses.MenuActivity.*;
 
 public class GameActivity extends AppCompatActivity {
     private LinearLayout boardRoot;
@@ -21,11 +23,33 @@ public class GameActivity extends AppCompatActivity {
     private TextView gameStateText;
 
     private HumanPlayer humanPlayer = new HumanPlayer();
+    private boolean isEnemyLocalPlayer = false;
+
     public Game game = new Game();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
+            @Override
+            public void onGameStateChanged() {
+                redrawGame();
+            }
+        });
+        switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
+            case OPPONENT_BOT:
+                game.startNewGame(humanPlayer, new AIPlayer(PlayerFigure.ZERO));
+                isEnemyLocalPlayer = false;
+                break;
+            case OPPONENT_LOCAL_PLAYER:
+                game.startNewGame(humanPlayer, new HumanPlayer());
+                isEnemyLocalPlayer = true;
+                break;
+            default:
+                Log.wtf("GameActivity", "Could not start new game: incorrect opponent type");
+        }
         setContentView(R.layout.activity_game);
 
         // Just for now
@@ -39,8 +63,15 @@ public class GameActivity extends AppCompatActivity {
         skipTurnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!game.skipTurn(humanPlayer)) {
-                    return;
+                if (isEnemyLocalPlayer) {
+                    if (!game.skipTurn(game.getCurrentPlayer())) {
+                        return;
+                    }
+                }
+                else {
+                    if (!game.skipTurn(humanPlayer)) {
+                        return;
+                    }
                 }
                 redrawGame();
             }
@@ -50,7 +81,12 @@ public class GameActivity extends AppCompatActivity {
         giveUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.giveUp(humanPlayer);
+                if (isEnemyLocalPlayer) {
+                    game.giveUp(game.getCurrentPlayer());
+                }
+                else {
+                    game.giveUp(humanPlayer);
+                }
             }
         });
 
@@ -61,10 +97,21 @@ public class GameActivity extends AppCompatActivity {
                 boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        game.doTurn(humanPlayer, x, y);
+                        if (isEnemyLocalPlayer) {
+                            game.doTurn(game.getCurrentPlayer(), x, y);
+                        } else {
+                            game.doTurn(humanPlayer, x, y);
+                        }
                     }
                 });
             }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+
+        super.onSaveInstanceState(outState);
     }
 
     private void redrawGame() {
@@ -184,13 +231,6 @@ public class GameActivity extends AppCompatActivity {
             boardRoot.addView(rowLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         }
 
-        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-            @Override
-            public void onGameStateChanged() {
-                redrawGame();
-            }
-        });
-        game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
 
         boardRoot.invalidate();
         redrawGame();
