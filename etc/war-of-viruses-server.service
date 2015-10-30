@@ -1,0 +1,13 @@
+[Unit]
+Description=War of Viruses server
+After=nginx.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=cgi-warofviruses
+Group=cgi-warofviruses
+ExecStart=/usr/bin/java -cp '/usr/share/java/*:/usr/local/lib/java/' net.ldvsoft.warofviruses.WarOfVirusesServer
+SuccessExitStatus=143
