@@ -1,6 +1,13 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -12,13 +19,20 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import static net.ldvsoft.warofviruses.Game.*;
 
 public class GameActivity extends AppCompatActivity {
+    public static final int PLAY_SERVICES_DIALOG = 9001;
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
     private TextView gameStateText;
+
+    private BroadcastReceiver tokenSentReceiver;
 
     public Game game = new Game();
 
@@ -26,6 +40,19 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        tokenSentReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean sentToken = prefs.getBoolean(WoVPreferences.GCM_SENT_TOKEN_TO_SERVER, false);
+                if (sentToken) {
+                    Toast.makeText(GameActivity.this, "YEEEEEEEY!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(GameActivity.this, "Oh no, Oh no, Oh no-no-no-no(", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
 
         game.newGame();
 
@@ -61,6 +88,22 @@ public class GameActivity extends AppCompatActivity {
                     }
                 });
             }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager
+                .getInstance(this)
+                .registerReceiver(tokenSentReceiver, new IntentFilter(WoVPreferences.GCM_REGISTRATION_COMPLETE));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager
+                .getInstance(this)
+                .unregisterReceiver(tokenSentReceiver);
+        super.onPause();
     }
 
     private void redrawGame() {
@@ -102,6 +145,21 @@ public class GameActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+
+        if (id == R.id.test) {
+            GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+            int result = availability.isGooglePlayServicesAvailable(this);
+            if (result != ConnectionResult.SUCCESS) {
+                if (availability.isUserResolvableError(result)) {
+                    availability.getErrorDialog(this, result, PLAY_SERVICES_DIALOG).show();
+                } else {
+                    Toast.makeText(this, "No Google Play Services.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                startService(new Intent(this, WoVRegistrationIntentService.class));
+            }
             return true;
         }
 
