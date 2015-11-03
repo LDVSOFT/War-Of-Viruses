@@ -4,4 +4,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="server_cgi">https://ldvsoft.net/cgi/war-of-viruses</string>
+    
+    <string name="title_activity_menu">blablabla</string>
 </resources>
