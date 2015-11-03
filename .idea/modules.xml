@@ -3,9 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/War-Of-Viruses.iml" filepath="$PROJECT_DIR$/War-Of-Viruses.iml" />
-      <module fileurl="file:///media/DATA/LDVSoft/SPbAU/Java/War-Of-Viruses/War-Of-Viruses.iml" filepath="/media/DATA/LDVSoft/SPbAU/Java/War-Of-Viruses/War-Of-Viruses.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file:///media/DATA/LDVSoft/SPbAU/Java/War-Of-Viruses/app/app.iml" filepath="/media/DATA/LDVSoft/SPbAU/Java/War-Of-Viruses/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/warofvirusesserver/warofvirusesserver.iml" filepath="$PROJECT_DIR$/warofvirusesserver/warofvirusesserver.iml" />
     </modules>
   </component>
 </project>
