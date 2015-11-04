@@ -20,19 +20,28 @@ public class AIPlayer extends Player {
     @Override
     public void makeTurn(Game game) {
         Log.d("AIPlayer", "Turn passed to AI player");
-        new RandomStrategy(game).execute();
+        new BruteforceStrategy(game).execute();
     }
 
-    private class RandomStrategy extends AsyncTask<Void, CoordinatePair, Void> {
+    private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
         private Game game;
-        RandomStrategy(Game game) {
+        BruteforceStrategy(Game game) {
             this.game = game;
         }
 
-        private double getControlledCellsCount(GameLogic game) {
+        private double getControlledCellsScore(GameLogic game) {
             int result = 0;
             final double DANGER_FACTOR = 1.5, CONTROL_FACTOR = 1.0;
 
+            switch (game.getCurrentGameState()) {
+                case DRAW:
+                    return 0;
+                case CROSS_WON:
+                    return ownFigure == PlayerFigure.CROSS ? +100000 : -100000;
+                case ZERO_WON:
+                    return ownFigure == PlayerFigure.ZERO  ? +100000 : -100000;
+            }
+            
             if (game.getCurPlayerFigure() != ownFigure) {
                 game.setCurrentPlayerToOpponent();
             }
@@ -92,7 +101,7 @@ public class AIPlayer extends Player {
                     tmpGameLogic.doTurn(optMove.x, optMove.y);
                 }
 
-                double newScore = getControlledCellsCount(tmpGameLogic);
+                double newScore = getControlledCellsScore(tmpGameLogic);
                 if (newScore > optScore) {
                     optScore = newScore;
                     result = optMoves;

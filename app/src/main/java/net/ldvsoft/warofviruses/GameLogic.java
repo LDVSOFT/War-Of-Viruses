@@ -190,6 +190,10 @@ public class GameLogic {
             }
         }
 
+        if (currentGameState != GameState.RUNNING) {
+            return;
+        }
+
         if (currentTurn > 1) {
             if (!isCrossAlive) {
                 zeroWon();
@@ -199,10 +203,6 @@ public class GameLogic {
             }
         }
 
-        //cycle below will work incorrectly in case of curPlayerFigure==NONE
-        if (currentGameState != GameState.RUNNING) {
-            return;
-        }
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
