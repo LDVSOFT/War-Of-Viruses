@@ -11,3 +11,5 @@ User=cgi-warofviruses
 Group=cgi-warofviruses
 ExecStart=/usr/bin/java -cp '/usr/share/java/*:/usr/local/lib/java/' net.ldvsoft.warofviruses.WarOfVirusesServer
 SuccessExitStatus=143
+MemoryLimit=128M
+CPUQuota=10%
