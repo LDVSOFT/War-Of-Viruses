@@ -9,4 +9,5 @@ mainClassName = "net.ldvsoft.warofviruses.WarOfVirusesServer"
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+    compile 'mysql:mysql-connector-java:5.1.37'
 }

@@ -28,6 +28,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="json-lib-2.4-jdk15" level="project" />
+    <orderEntry type="library" exported="" name="mysql-connector-java-5.1.37" level="project" />
     <orderEntry type="library" exported="" name="commons-beanutils-1.8.0" level="project" />
     <orderEntry type="library" exported="" name="commons-collections-3.2.1" level="project" />
     <orderEntry type="library" exported="" name="commons-lang-2.5" level="project" />
