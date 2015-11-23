@@ -46,10 +46,6 @@ public class SmackCcsClient {
     private static final String GCM_ELEMENT_NAME = "gcm";
     private static final String GCM_NAMESPACE = "google:mobile:data";
 
-    private static final String YOUR_PROJECT_ID = "<your ID here>";
-    private static final String YOUR_API_KEY = "<your API Key here>"; // your API Key
-    private static final String YOUR_PHONE_REG_ID = "<your test phone's registration id here>";
-
     static {
         ProviderManager.addExtensionProvider(GCM_ELEMENT_NAME, GCM_NAMESPACE, new ExtensionElementProvider<ExtensionElement>() {
             @Override
@@ -60,6 +56,11 @@ public class SmackCcsClient {
             }
         });
     }
+
+    /**
+     * Project Id, given by Google APIs
+     */
+    private String projectId;
 
     /**
      * Indicates whether the connection is in draining state, which means that it
@@ -120,30 +121,30 @@ public class SmackCcsClient {
     }
 
     //TODO Remove that
-    public static void main(String[] args) throws Exception {
-
-        SmackCcsClient ccsClient = new SmackCcsClient();
-
-        ccsClient.connect(YOUR_PROJECT_ID, YOUR_API_KEY);
-
-        // Send a sample hello downstream message to a device.
-        String messageId = ccsClient.nextMessageId();
-        JSONObject payload = new JSONObject();
-        payload.put("Message", "Ahha, it works!");
-        payload.put("CCS", "Dummy Message");
-        payload.put("EmbeddedMessageId", messageId);
-        String collapseKey = "sample";
-        Long timeToLive = 10000L;
-        String message = createJsonMessage(YOUR_PHONE_REG_ID, messageId, payload,
-                collapseKey, timeToLive, true);
-
-        ccsClient.sendDownstreamMessage(message);
-        logger.info("Message sent.");
-
-        //crude loop to keep connection open for receiving messages
-        while (2 + 2 == 2 * 2) {
-        }
-    }
+//    public static void main(String[] args) throws Exception {
+//
+//        SmackCcsClient ccsClient = new SmackCcsClient();
+//
+//        ccsClient.connect(projectId, apiKey);
+//
+//        // Send a sample hello downstream message to a device.
+//        String messageId = ccsClient.nextMessageId();
+//        JSONObject payload = new JSONObject();
+//        payload.put("Message", "Ahha, it works!");
+//        payload.put("CCS", "Dummy Message");
+//        payload.put("EmbeddedMessageId", messageId);
+//        String collapseKey = "sample";
+//        Long timeToLive = 10000L;
+//        String message = createJsonMessage(YOUR_PHONE_REG_ID, messageId, payload,
+//                collapseKey, timeToLive, true);
+//
+//        ccsClient.sendDownstreamMessage(message);
+//        logger.info("Message sent.");
+//
+//        //crude loop to keep connection open for receiving messages
+//        while (2 + 2 == 2 * 2) {
+//        }
+//    }
 
     /**
      * Sends a downstream message to GCM.
@@ -246,6 +247,7 @@ public class SmackCcsClient {
      */
     public void connect(String senderId, String apiKey)
             throws XMPPException, IOException, SmackException {
+        projectId = senderId;
         XMPPTCPConnectionConfiguration config =
                 XMPPTCPConnectionConfiguration.builder()
                         .setServiceName(GCM_SERVER)
@@ -354,7 +356,7 @@ public class SmackCcsClient {
         @Override
         public boolean accept(Stanza stanza) {
             if (stanza.getTo() != null)
-                if (stanza.getTo().startsWith(YOUR_PROJECT_ID))
+                if (stanza.getTo().startsWith(projectId))
                     return true;
             return false;
         }
