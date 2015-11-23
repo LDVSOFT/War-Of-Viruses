@@ -2,7 +2,7 @@ package net.ldvsoft.warofviruses;
 
 import com.github.gist.ArtemGr.SCGI;
 
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +19,7 @@ public class WarOfVirusesServer {
     public static final String ACTION_TEST = "test";
     public static final String PARAM_TOKEN = "token";
     public static final String RESULT = "result";
-    public static final JSONObject JSON_RESULT_FAILURE = new JSONObject().accumulate(RESULT, RESULT_FAILURE);
+    public static final JSONObject JSON_RESULT_FAILURE = new JSONObject().put(RESULT, RESULT_FAILURE);
 
     public static final String SCGI_CONTENT_LENGTH = "CONTENT_LENGTH";
 
@@ -65,13 +65,13 @@ public class WarOfVirusesServer {
                                 throw new IOException("UAT?!");
                             String body = new String(buffer);
 
-                            JSONObject request = JSONObject.fromObject(body);
+                            JSONObject request = new JSONObject(body);
 
                             System.err.print("Got JSON: ");
                             System.err.print(request.toString());
                             System.err.print("\n");
 
-                            if (!request.containsKey(REQUEST_ACTION))
+                            if (!request.has(REQUEST_ACTION))
                                 break processing;
                             String action = String.valueOf(request.get(REQUEST_ACTION));
 

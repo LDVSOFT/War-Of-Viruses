@@ -1,7 +1,7 @@
 package net.ldvsoft.warofviruses;
 
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ConnectionListener;
@@ -371,7 +371,7 @@ public class SmackCcsClient {
                             getExtension(GCM_NAMESPACE);
             String json = gcmPacket.getJson();
             try {
-                JSONObject jsonObject = JSONObject.fromObject(json);
+                JSONObject jsonObject = new JSONObject(json);
 
                 // present for "ack"/"nack", null otherwise
                 Object messageType = jsonObject.get("message_type");

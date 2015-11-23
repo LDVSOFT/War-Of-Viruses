@@ -8,8 +8,8 @@ mainClassName = "net.ldvsoft.warofviruses.WarOfVirusesServer"
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'net.sf.json-lib:json-lib:2.4:jdk15'
     compile 'org.igniterealtime.smack:smack-java7:4.1.4'
     compile 'org.igniterealtime.smack:smack-tcp:4.1.4'
     compile 'org.igniterealtime.smack:smack-im:4.1.4'
+    compile 'org.json:json:20140107'
 }
