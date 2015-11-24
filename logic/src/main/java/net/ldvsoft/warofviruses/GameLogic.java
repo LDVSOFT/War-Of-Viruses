@@ -203,11 +203,12 @@ public class GameLogic {
             }
         }
 
-
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                if (!board[i][j].isActive && board[i][j].getOwner() == curPlayerFigure && !board[i][j].isDead()) {
-                    updateAdjacentCells(i, j);
+        if (curPlayerFigure != PlayerFigure.NONE) {
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    if (!board[i][j].isActive && board[i][j].getOwner() == curPlayerFigure && !board[i][j].isDead()) {
+                        updateAdjacentCells(i, j);
+                    }
                 }
             }
         }
