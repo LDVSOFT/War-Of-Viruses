@@ -29,21 +29,78 @@ public class AIPlayer extends Player {
             this.game = game;
         }
 
-        private double getControlledCellsScore(GameLogic game) {
-            int result = 0;
-            final double DANGER_FACTOR = 1.5, CONTROL_FACTOR = 1.0;
-
+        //always returns score for ai player.
+        private double getEndGameScore(GameLogic game) {
             switch (game.getCurrentGameState()) {
-                case DRAW:
-                    return 0;
                 case CROSS_WON:
                     return ownFigure == PlayerFigure.CROSS ? +100000 : -100000;
                 case ZERO_WON:
                     return ownFigure == PlayerFigure.ZERO  ? +100000 : -100000;
+                default:
+                    return 0;
             }
-            
-            if (game.getCurPlayerFigure() != ownFigure) {
+        }
+
+        //always returns score for ai player.
+        private double getConnectivityScore(GameLogic game) {
+            final double CONTROL_FACTOR = 1.0, CONNECTIVITY_FACTOR = 0.2;
+            final int ADJACENT_SAFE_CNT = 3;
+
+            if (game.getCurrentGameState() != GameState.RUNNING) {
+                return getEndGameScore(game);
+            }
+
+            double result = 0;
+
+            boolean currentPlayerChanged = false;
+            if (game.getCurrentPlayerFigure() != ownFigure) {
                 game.setCurrentPlayerToOpponent();
+                currentPlayerChanged = true;
+            }
+
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    if (game.getCellAt(i, j).isActive()) {
+                        result += CONTROL_FACTOR;
+                    }
+                    if (game.getCellAt(i, j).getOwner() == ownFigure) {
+                        int adjacentCnt = 0;
+                        for (int [] dir : ADJACENT_DIRECTIONS) {
+                            int dx = i + dir[0], dy = j + dir[1];
+                            if (isInside(dx) && isInside(dy) && game.getCellAt(dx, dy).getOwner() == ownFigure) {
+                                adjacentCnt++;
+                            }
+                        }
+                        if (adjacentCnt < ADJACENT_SAFE_CNT) {
+                            result -= CONNECTIVITY_FACTOR;
+                        }
+                    }
+
+                }
+            }
+
+            //we've probably just damaged current game state
+            if (currentPlayerChanged) {
+                game.setCurrentPlayerToOpponent();
+            }
+
+            return result;
+        }
+
+        //always returns score for ai player.
+        private double getControlledCellsScore(GameLogic game) {
+            final double DANGER_FACTOR = 1.25, CONTROL_FACTOR = 1.0;
+
+            if (game.getCurrentGameState() != GameState.RUNNING) {
+                return getEndGameScore(game);
+            }
+
+            double result = 0;
+
+            boolean currentPlayerChanged = false;
+            if (game.getCurrentPlayerFigure() != ownFigure) {
+                game.setCurrentPlayerToOpponent();
+                currentPlayerChanged = true;
             }
 
             for (int sign = 1; sign >= -1; sign -= 2) {
@@ -54,12 +111,17 @@ public class AIPlayer extends Player {
                             result += sign * CONTROL_FACTOR;
                             }
                         if (game.getCellAt(i, j).canMakeTurn() &&
-                                game.getCellAt(i, j).getOwner() == game.getOpponent(game.getCurPlayerFigure())) {
+                                game.getCellAt(i, j).getOwner() == game.getOpponent(game.getCurrentPlayerFigure())) {
                             result += sign * DANGER_FACTOR;
                         }
                     }
                 }
 
+                game.setCurrentPlayerToOpponent();
+            }
+
+            //we've probably just damaged current game state
+            if (currentPlayerChanged) {
                 game.setCurrentPlayerToOpponent();
             }
 
@@ -82,7 +144,7 @@ public class AIPlayer extends Player {
         private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
             ArrayList<CoordinatePair> result = new ArrayList<>();
 
-            if (gameLogic.getCurPlayerFigure() != ownFigure) {
+            if (gameLogic.getCurrentPlayerFigure() != ownFigure) {
                 return result;
             }
 
@@ -101,7 +163,8 @@ public class AIPlayer extends Player {
                     tmpGameLogic.doTurn(optMove.x, optMove.y);
                 }
 
-                double newScore = getControlledCellsScore(tmpGameLogic);
+                double newScore = gameLogic.getCurrentTurn() < 8 ? getConnectivityScore(tmpGameLogic) :
+                        getControlledCellsScore(tmpGameLogic);
                 if (newScore > optScore) {
                     optScore = newScore;
                     result = optMoves;
