@@ -178,6 +178,7 @@ public class GameActivity extends AppCompatActivity {
                     });
                     isEnemyLocalPlayer = true; //at least for now...
                     initButtons();
+                    redrawGame();
                 }
             }
         };
