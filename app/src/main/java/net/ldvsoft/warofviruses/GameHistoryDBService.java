@@ -30,8 +30,8 @@ public class GameHistoryDBService extends IntentService {
     }
 
     private void saveGame(Intent intent) {
-        gameHistoryDBOpenHelper.addGame(intent.getByteArrayExtra(GameActivity.GAME_KEY),
-                intent.getBooleanExtra(GameActivity.GAME_IS_FINISHED_KEY, false));
+        gameHistoryDBOpenHelper.addGame(intent.getByteArrayExtra(WoVPreferences.GAME_KEY),
+                intent.getBooleanExtra(WoVPreferences.GAME_IS_FINISHED_KEY, false));
     }
 
     private void loadGame() {
@@ -44,8 +44,8 @@ public class GameHistoryDBService extends IntentService {
         }
 
         if (data != null) {
-            Intent intent = new Intent(GameActivity.LOAD_GAME_BROADCAST);
-            intent.putExtra(GameActivity.LOAD_GAME_KEY, data);
+            Intent intent = new Intent(WoVPreferences.LOAD_GAME_BROADCAST);
+            intent.putExtra(WoVPreferences.LOAD_GAME_KEY, data);
             sendBroadcast(intent);
 //todo: send intent to game
         }
@@ -55,9 +55,9 @@ public class GameHistoryDBService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "intent recieved!");
 
-        if (intent.hasExtra(GameActivity.GAME_KEY)) {
+        if (intent.hasExtra(WoVPreferences.GAME_KEY)) {
             saveGame(intent);
-        } else if (intent.hasExtra(GameActivity.LOAD_GAME_KEY)) {
+        } else if (intent.hasExtra(WoVPreferences.LOAD_GAME_KEY)) {
             loadGame();
         }
     }

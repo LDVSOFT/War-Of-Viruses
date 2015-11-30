@@ -28,4 +28,9 @@ public class MenuActivity extends AppCompatActivity {
         intent.putExtra(OPPONENT_TYPE, OPPONENT_LOCAL_PLAYER);
         startActivity(intent);
     }
+
+    public void viewGameHistory(View view) {
+        Intent intent = new Intent(this, GameHistoryActivity.class);
+        startActivity(intent);
+    }
 }

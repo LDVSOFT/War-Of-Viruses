@@ -5,8 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-    <permission android:name="net.ldvsoft.warofviruses.permission.C2D_MESSAGE" />
     <uses-permission android:name="net.ldvsoft.warofviruses.permission.C2D_MESSAGE" />
 
     <application
@@ -14,7 +12,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.NoBar" >
-
         <activity
             android:name=".GameActivity"
             android:label="@string/app_name"
@@ -35,41 +32,39 @@
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
-            android:permission="com.google.android.permission.SEND">
-
+            android:permission="com.google.android.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="net.ldvsoft.warofviruses" />
             </intent-filter>
         </receiver>
 
         <service
             android:name=".WoVGcmListenerService"
-            android:exported="false">
-
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
-
         <service
             android:name=".WoVInstanceIDListenerService"
-            android:exported="false">
-
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
-
         <service
             android:name=".WoVRegistrationIntentService"
-            android:exported="false">
+            android:exported="false" >
         </service>
-
         <service
             android:name=".GameHistoryDBService"
             android:exported="false" >
         </service>
+
+        <activity android:name=".GameHistoryActivity" >
+        </activity>
     </application>
 
 </manifest>

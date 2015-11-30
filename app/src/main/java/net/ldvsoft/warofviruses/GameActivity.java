@@ -29,10 +29,6 @@ import static net.ldvsoft.warofviruses.MenuActivity.*;
 
 public class GameActivity extends AppCompatActivity {
     public static final int PLAY_SERVICES_DIALOG = 9001;
-    public static final String GAME_KEY = "gameKey";
-    public static final String LOAD_GAME_KEY = "loadGameKey";
-    public static final String GAME_IS_FINISHED_KEY = "gameIsFinishedKey";
-    public static final String LOAD_GAME_BROADCAST = "loadGameBroadcast";
 
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
@@ -51,12 +47,7 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-            @Override
-            public void onGameStateChanged() {
-                redrawGame();
-            }
-        });
+        setCurrentGameListeners();
         switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
             case OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(PlayerFigure.ZERO));
@@ -103,8 +94,7 @@ public class GameActivity extends AppCompatActivity {
                     if (!game.skipTurn(game.getCurrentPlayer())) {
                         return;
                     }
-                }
-                else {
+                } else {
                     if (!game.skipTurn(humanPlayer)) {
                         return;
                     }
@@ -119,8 +109,7 @@ public class GameActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (isEnemyLocalPlayer) {
                     game.giveUp(game.getCurrentPlayer());
-                }
-                else {
+                } else {
                     game.giveUp(humanPlayer);
                 }
             }
@@ -145,10 +134,7 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         Log.d("GameActivity", "onStop");
-        Intent intent = new Intent(this, GameHistoryDBService.class);
-        intent.putExtra(GAME_KEY, game.toBytes());
-        intent.putExtra(GAME_IS_FINISHED_KEY, game.isFinished());
-        startService(intent);
+        saveCurrentGame();
         unregisterReceiver(loadedGameReceiver);
         super.onStop();
     }
@@ -167,25 +153,42 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d("GameActivity", "Broadcast receiver message");
-                if (intent.hasExtra(LOAD_GAME_KEY)) {
+                if (intent.hasExtra(WoVPreferences.LOAD_GAME_KEY)) {
                     Log.d("GameActivity", "Game load message received");
-                    game = Game.fromBytes(intent.getByteArrayExtra(LOAD_GAME_KEY));
-                    game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-                        @Override
-                        public void onGameStateChanged() {
-                            redrawGame();
-                        }
-                    });
+                    game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_KEY));
+                    setCurrentGameListeners();
                     isEnemyLocalPlayer = true; //at least for now...
                     initButtons();
                     redrawGame();
                 }
             }
         };
-        registerReceiver(loadedGameReceiver, new IntentFilter(LOAD_GAME_BROADCAST));
+        registerReceiver(loadedGameReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_BROADCAST));
         Log.d("GameActivity", "onStart");
         Intent intent = new Intent(this, GameHistoryDBService.class);
-        intent.putExtra(LOAD_GAME_KEY, "");
+        intent.putExtra(WoVPreferences.LOAD_GAME_KEY, "");
+        startService(intent);
+    }
+
+    private void setCurrentGameListeners() {
+        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
+            @Override
+            public void onGameStateChanged() {
+                redrawGame();
+            }
+        });
+        game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
+            @Override
+            public void onGameFinished() {
+                saveCurrentGame();
+            }
+        });
+    }
+
+    private void saveCurrentGame() {
+        Intent intent = new Intent(this, GameHistoryDBService.class);
+        intent.putExtra(WoVPreferences.GAME_KEY, game.toBytes());
+        intent.putExtra(WoVPreferences.GAME_IS_FINISHED_KEY, game.isFinished());
         startService(intent);
     }
 

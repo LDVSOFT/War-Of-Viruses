@@ -10,6 +10,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
+
+import android.content.Intent;
 import android.util.Log;
 
 /**
@@ -21,7 +23,7 @@ public class Game implements Serializable {
     private GameLogic gameLogic;
 
     private transient OnGameStateChangedListener onGameStateChangedListener = null;
-
+    private transient OnGameFinishedListener onGameFinishedListener = null;
     private ArrayList<AbstractGameEvent> gameEventHistory = null;
 
     public byte[] toBytes() {
@@ -56,6 +58,10 @@ public class Game implements Serializable {
         void onGameStateChanged();
     }
 
+    public interface OnGameFinishedListener {
+        void onGameFinished();
+    }
+
     //returns COPY of gameLogic instance to prevent corrupting it
     public GameLogic getGameLogic() {
         return new GameLogic(gameLogic);
@@ -65,15 +71,24 @@ public class Game implements Serializable {
         this.onGameStateChangedListener = onGameStateChangedListener;
     }
 
+    public void setOnGameFinishedListener(OnGameFinishedListener onGameFinishedListener) {
+        this.onGameFinishedListener = onGameFinishedListener;
+    }
+
     public void startNewGame(Player cross, Player zero) {
         if (gameEventHistory != null) {
-            //todo:: save game
+            if (onGameFinishedListener != null) {
+                onGameFinishedListener.onGameFinished();
+            }
         }
         crossPlayer = cross;
         zeroPlayer = zero;
         gameLogic = new GameLogic();
         gameLogic.newGame();
         gameEventHistory = new ArrayList<>();
+    }
+
+    private void startService(Intent intent) {
     }
 
     public Player getCurrentPlayer() {
@@ -142,4 +157,5 @@ public class Game implements Serializable {
         }
         return result;
     }
+
 }
