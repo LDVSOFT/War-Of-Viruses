@@ -9,5 +9,8 @@ WantedBy=multi-user.target
 Type=simple
 User=cgi-warofviruses
 Group=cgi-warofviruses
-ExecStart=/usr/bin/java -cp '/usr/share/java/*:/usr/local/lib/java/' net.ldvsoft.warofviruses.WarOfVirusesServer
+Environment="JAVA_OPTS=-Xms128M -Xmx128M"
+ExecStart=/opt/war-of-viruses-server/bin/server
 SuccessExitStatus=143
+MemoryLimit=130M
+CPUQuota=10%
