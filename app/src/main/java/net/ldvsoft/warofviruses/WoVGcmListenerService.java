@@ -18,9 +18,8 @@ public class WoVGcmListenerService extends GcmListenerService {
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
+        Log.i(TAG, "From: " + from);
+        Log.i(TAG, "Message: " + data.toString());
 
         /**
          * Production applications would usually process the message here.

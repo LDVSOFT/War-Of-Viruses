@@ -35,16 +35,17 @@
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
-            android:permission="com.google.android.permission.SEND">
+            android:permission="com.google.android.c2dm.permission.SEND" >
 
             <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <category android:name="net.ldvsoft.warofviruses" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name=".WoVGcmListenerService"
+            android:name="net.ldvsoft.warofviruses.WoVGcmListenerService"
             android:exported="false">
 
             <intent-filter>
@@ -53,7 +54,7 @@
         </service>
 
         <service
-            android:name=".WoVInstanceIDListenerService"
+            android:name="net.ldvsoft.warofviruses.WoVInstanceIDListenerService"
             android:exported="false">
 
             <intent-filter>
@@ -62,7 +63,7 @@
         </service>
 
         <service
-            android:name=".WoVRegistrationIntentService"
+            android:name="net.ldvsoft.warofviruses.WoVRegistrationIntentService"
             android:exported="false">
         </service>
     </application>
