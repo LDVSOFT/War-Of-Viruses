@@ -40,9 +40,6 @@ public abstract class SmackCcsClient {
 
     private static final Logger logger = Logger.getLogger("SmackCcsClient");
 
-    private static final String GCM_SERVER = "localhost";
-    private static final int GCM_PORT = 8080;
-
     private static final String GCM_ELEMENT_NAME = "gcm";
     private static final String GCM_NAMESPACE = "google:mobile:data";
 
@@ -211,15 +208,15 @@ public abstract class SmackCcsClient {
      * @param projectId Your GCM project number
      * @param apiKey   API Key of your project
      */
-    public void connect(String projectId, String apiKey)
+    public void connect(String projectId, String apiKey, String gcmServer, int gcmPort)
             throws XMPPException, IOException, SmackException {
         this.projectId = projectId;
         XMPPTCPConnectionConfiguration config =
                 XMPPTCPConnectionConfiguration.builder()
-                        .setServiceName(GCM_SERVER)
-                        .setHost(GCM_SERVER)
+                        .setServiceName(gcmServer)
+                        .setHost(gcmServer)
                         .setCompressionEnabled(false)
-                        .setPort(GCM_PORT)
+                        .setPort(gcmPort)
                         .setConnectTimeout(30000)
                         .setSecurityMode(SecurityMode.disabled)
                         .setSendPresence(false)

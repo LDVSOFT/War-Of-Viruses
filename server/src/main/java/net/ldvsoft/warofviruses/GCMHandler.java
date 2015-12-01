@@ -17,7 +17,12 @@ public class GCMHandler extends SmackCcsClient {
 
     public GCMHandler(WarOfVirusesServer server) throws XMPPException, IOException, SmackException {
         this.server = server;
-        connect(server.getSetting("google.projectId", ""), server.getSetting("google.apiKey", ""));
+
+        String projectId = server.getSetting("google.projectId", "");
+        String apiKey = server.getSetting("google.apiKey", "");
+        String gcmServer = server.getSetting("gcm.server", "");
+        int gcmPort = Integer.parseInt(server.getSetting("gcm.port", ""));
+        connect(projectId, apiKey, gcmServer, gcmPort);
     }
 
     @Override
