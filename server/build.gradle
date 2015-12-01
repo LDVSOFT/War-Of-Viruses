@@ -11,6 +11,7 @@ dependencies {
     compile 'org.igniterealtime.smack:smack-java7:4.1.4'
     compile 'org.igniterealtime.smack:smack-tcp:4.1.4'
     compile 'org.igniterealtime.smack:smack-im:4.1.4'
+    compile 'org.igniterealtime.smack:smack-debug:4.1.4'
     compile 'org.json:json:20140107'
     compile project(':logic')
 }

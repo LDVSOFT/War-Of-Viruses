@@ -12,36 +12,38 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.ACTION_TEST;
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.MAX_MESSAGE_LENGTH;
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.REQUEST_ACTION;
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.RESULT;
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.RESULT_FAILURE;
-import static net.ldvsoft.warofviruses.WoVHTTPProtocol.RESULT_SUCCESS;
+import static net.ldvsoft.warofviruses.WoVProtocol.MAX_MESSAGE_LENGTH;
 
 /**
  * Created by ldvsoft on 23.11.15.
  */
 public class HTTPHandler {
-    public static final JSONObject JSON_RESULT_FAILURE = new JSONObject().put(RESULT, RESULT_FAILURE);
-    public static final String SCGI_CONTENT_LENGTH = "CONTENT_LENGTH";
+    protected static final String SCGI_CONTENT_LENGTH = "CONTENT_LENGTH";
+
+    protected Logger logger = Logger.getLogger(HTTPHandler.class.getName());
+
+    protected WarOfVirusesServer server;
 
     protected final ServerSocket serverSocket;
     protected final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-    public HTTPHandler(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
+    public HTTPHandler(WarOfVirusesServer server) throws IOException {
+        this.server = server;
+        serverSocket = new ServerSocket(Integer.parseInt(server.getSetting("http.port", "9001")));
         new Thread(new Runnable() {
             @Override
             public void run() {
-                System.err.print("HTTP Server started\n");
+                logger.info("HTTP Server started\n");
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         final Socket socket;
-                        if (serverSocket.isClosed())
-                            break;
-                        socket = serverSocket.accept();
+                        synchronized (serverSocket) {
+                            if (serverSocket.isClosed())
+                                break;
+                            socket = serverSocket.accept();
+                        }
                         threadPool.submit(new Runnable() {
                             @Override
                             public void run() {
@@ -52,7 +54,7 @@ public class HTTPHandler {
                         e.printStackTrace();
                     }
                 }
-                System.err.print("HTTP Server stopped\n");
+                logger.info("HTTP Server stopped\n");
             }
         }).start();
     }
@@ -65,18 +67,6 @@ public class HTTPHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    protected JSONObject process(JSONObject request) {
-        if (!request.has(REQUEST_ACTION))
-            return JSON_RESULT_FAILURE;
-        String action = String.valueOf(request.get(REQUEST_ACTION));
-
-        System.err.printf("action: %s\n", action);
-        if (!action.equals(ACTION_TEST))
-            return JSON_RESULT_FAILURE;
-
-        return new JSONObject().accumulate("result", RESULT_SUCCESS);
     }
 
     protected void accept(Socket socket) {
@@ -94,19 +84,23 @@ public class HTTPHandler {
                 if (length != is.read(buffer))
                     throw new IOException("UAT?!");
                 String body = new String(buffer);
+                JSONObject message = new JSONObject(body);
 
-                JSONObject request = new JSONObject(body);
-                System.err.print("Got JSON: ");
-                System.err.print(request.toString());
-                System.err.print("\n");
+                JSONObject answer = server.process(message);
+                if (answer == null) {
+                    answer = WarOfVirusesServer.JSON_RESULT_FAILURE;
+                }
 
-                JSONObject answer = process(request);
+                String answerString = answer.toString();
+                logger.info("Answering with " + answerString);
 
+                // Header
                 os.write("Status: 200 OK\r\n".getBytes());
-                os.write("Content-Type: application/json\r\n\r\n".getBytes());
-                System.err.print(answer.toString());
-                os.write(answer.toString().getBytes());
+                os.write("Content-Type: application/json\r\n".getBytes());
+                //os.write(String.format("Content-Length: %d\r\n\r\n", answerString.length()).getBytes());
                 os.write("\r\n".getBytes());
+                //Message
+                os.write(answerString.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
