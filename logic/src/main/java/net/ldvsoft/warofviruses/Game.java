@@ -8,11 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.StreamCorruptedException;
 import java.util.ArrayList;
-
-import android.content.Intent;
-import android.util.Log;
 
 /**
  * Created by Сева on 19.10.2015.
@@ -88,9 +84,6 @@ public class Game implements Serializable {
         gameEventHistory = new ArrayList<>();
     }
 
-    private void startService(Intent intent) {
-    }
-
     public Player getCurrentPlayer() {
         switch (gameLogic.getCurrentPlayerFigure()) {
             case CROSS:
@@ -140,7 +133,6 @@ public class Game implements Serializable {
     }
 
     public boolean doTurn(Player sender, int x, int y) {
-        Log.d("Game", "Do turn at (" + x + "," + y + "), sender=" + sender + " while current player = " + getCurrentPlayer());
         if (sender != getCurrentPlayer()) {
             return false;
         }
