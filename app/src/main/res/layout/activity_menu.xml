@@ -21,4 +21,11 @@
         android:id="@+id/button_play_against_player"
         android:layout_gravity="center_horizontal"
         android:onClick="playAgainstLocalPlayer" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View game history"
+        android:onClick="viewGameHistory"
+        android:id="@+id/button" />
 </LinearLayout>

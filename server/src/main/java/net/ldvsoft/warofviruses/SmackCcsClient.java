@@ -36,12 +36,9 @@ import javax.net.ssl.SSLSocketFactory;
  * <p/>
  * <p>For illustration purposes only.
  */
-public class SmackCcsClient {
+public abstract class SmackCcsClient {
 
     private static final Logger logger = Logger.getLogger("SmackCcsClient");
-
-    private static final String GCM_SERVER = "gcm.googleapis.com";
-    private static final int GCM_PORT = 5235;
 
     private static final String GCM_ELEMENT_NAME = "gcm";
     private static final String GCM_NAMESPACE = "google:mobile:data";
@@ -83,11 +80,13 @@ public class SmackCcsClient {
      * @param collapseKey    GCM collapse_key parameter (Optional).
      * @param timeToLive     GCM time_to_live parameter (Optional).
      * @param delayWhileIdle GCM delay_while_idle parameter (Optional).
+     * @param priority       GCM priority parameter (Optional).
      * @return JSON encoded GCM message.
      */
-    public static String createJsonMessage(String to, String messageId,
-                                           JSONObject payload, String collapseKey, Long timeToLive,
-                                           Boolean delayWhileIdle) {
+    public static String createJsonMessage(
+            String to, String messageId,
+            JSONObject payload, String collapseKey, Long timeToLive,
+            Boolean delayWhileIdle, String priority) {
         JSONObject message = new JSONObject();
         message.put("to", to);
         if (collapseKey != null) {
@@ -98,6 +97,9 @@ public class SmackCcsClient {
         }
         if (delayWhileIdle != null && delayWhileIdle) {
             message.put("delay_while_idle", true);
+        }
+        if (priority != null) {
+            message.put("priority", priority);
         }
         message.put("message_id", messageId);
         message.put("data", payload);
@@ -119,32 +121,6 @@ public class SmackCcsClient {
         message.put("message_id", messageId);
         return message.toString();
     }
-
-    //TODO Remove that
-//    public static void main(String[] args) throws Exception {
-//
-//        SmackCcsClient ccsClient = new SmackCcsClient();
-//
-//        ccsClient.connect(projectId, apiKey);
-//
-//        // Send a sample hello downstream message to a device.
-//        String messageId = ccsClient.nextMessageId();
-//        JSONObject payload = new JSONObject();
-//        payload.put("Message", "Ahha, it works!");
-//        payload.put("CCS", "Dummy Message");
-//        payload.put("EmbeddedMessageId", messageId);
-//        String collapseKey = "sample";
-//        Long timeToLive = 10000L;
-//        String message = createJsonMessage(YOUR_PHONE_REG_ID, messageId, payload,
-//                collapseKey, timeToLive, true);
-//
-//        ccsClient.sendDownstreamMessage(message);
-//        logger.info("Message sent.");
-//
-//        //crude loop to keep connection open for receiving messages
-//        while (2 + 2 == 2 * 2) {
-//        }
-//    }
 
     /**
      * Sends a downstream message to GCM.
@@ -186,22 +162,9 @@ public class SmackCcsClient {
      * Subclasses should override this method to properly process upstream messages.
      */
     protected void handleUpstreamMessage(JSONObject jsonObject) {
-        // PackageName of the application that sent this message.
-        String category = (String) jsonObject.get("category");
-        String from = (String) jsonObject.get("from");
-        JSONObject payload = jsonObject.getJSONObject("data");
-        payload.put("ECHO", "Application: " + category);
-
-        // Send an ECHO response back
-        String echo = createJsonMessage(from, nextMessageId(), payload,
-                "echo:CollapseKey", null, false);
-
-        try {
-            sendDownstreamMessage(echo);
-        } catch (NotConnectedException e) {
-            logger.log(Level.WARNING, "Not connected anymore, echo message is not sent", e);
-        }
-
+        String messageId = jsonObject.getString("message_id");
+        String from = jsonObject.getString("from");
+        logger.log(Level.INFO, "handleUpstreamMessage() from: " + from + ",messageId: " + messageId);
     }
 
     /**
@@ -242,18 +205,18 @@ public class SmackCcsClient {
     /**
      * Connects to GCM Cloud Connection Server using the supplied credentials.
      *
-     * @param senderId Your GCM project number
+     * @param projectId Your GCM project number
      * @param apiKey   API Key of your project
      */
-    public void connect(String senderId, String apiKey)
+    public void connect(String projectId, String apiKey, String gcmServer, int gcmPort)
             throws XMPPException, IOException, SmackException {
-        projectId = senderId;
+        this.projectId = projectId;
         XMPPTCPConnectionConfiguration config =
                 XMPPTCPConnectionConfiguration.builder()
-                        .setServiceName(GCM_SERVER)
-                        .setHost(GCM_SERVER)
+                        .setServiceName(gcmServer)
+                        .setHost(gcmServer)
                         .setCompressionEnabled(false)
-                        .setPort(GCM_PORT)
+                        .setPort(gcmPort)
                         .setConnectTimeout(30000)
                         .setSecurityMode(SecurityMode.disabled)
                         .setSendPresence(false)
@@ -277,8 +240,12 @@ public class SmackCcsClient {
         // Log all outgoing packets
         connection.addPacketInterceptor(new MyStanzaInterceptor(), new MyStanzaFilter());
 
-        connection.login(senderId + "@gcm.googleapis.com", apiKey);
+        connection.login(projectId + "@gcm.googleapis.com", apiKey);
+    }
 
+    public void disconnect() {
+        logger.info("Disconnecting...");
+        connection.disconnect();
     }
 
     /**

@@ -1,18 +1,20 @@
 package net.ldvsoft.warofviruses;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Сева on 21.10.2015.
  */
-public class GameLogic {
+public class GameLogic implements Serializable{
     public static final int BOARD_SIZE = 10;
+
 
     public enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY}
     public enum PlayerFigure {CROSS, ZERO, NONE}
     public enum GameState {NOT_RUNNING, RUNNING, DRAW, CROSS_WON, ZERO_WON}
 
-    public static class Cell {
+    public static class Cell implements Serializable {
         private CellType cellType = CellType.EMPTY;
         private boolean canMakeTurn = false;
         private boolean isActive = false;
@@ -85,14 +87,14 @@ public class GameLogic {
     private Cell board[][] = new Cell[BOARD_SIZE][BOARD_SIZE];
 
     private GameState currentGameState = GameState.NOT_RUNNING;
-    private PlayerFigure curPlayerFigure = PlayerFigure.CROSS;
+    private PlayerFigure currentPlayerFigure = PlayerFigure.CROSS;
 
     private boolean previousTurnSkipped = false;
     int currentTurn = 0;
     int currentMiniturn = 0;
 
-    public PlayerFigure getCurPlayerFigure() {
-        return curPlayerFigure;
+    public PlayerFigure getCurrentPlayerFigure() {
+        return currentPlayerFigure;
     }
 
     public GameLogic() {
@@ -113,7 +115,7 @@ public class GameLogic {
         currentTurn = logic.currentTurn;
         previousTurnSkipped = logic.previousTurnSkipped;
         currentGameState = logic.currentGameState;
-        curPlayerFigure = logic.curPlayerFigure;
+        currentPlayerFigure = logic.currentPlayerFigure;
     }
 
     public void newGame() {
@@ -125,7 +127,7 @@ public class GameLogic {
             }
         }
         previousTurnSkipped = false;
-        curPlayerFigure = PlayerFigure.CROSS;
+        currentPlayerFigure = PlayerFigure.CROSS;
         currentGameState = GameState.RUNNING;
         updateGameState();
     }
@@ -134,18 +136,30 @@ public class GameLogic {
         return currentGameState;
     }
 
+    static boolean isInside(int pos) {
+        return pos >= 0 && pos < BOARD_SIZE;
+    }
+
+    public int getCurrentTurn() {
+        return currentTurn;
+    }
+
+    public int getCurrentMiniturn() {
+        return currentMiniturn;
+    }
+
     private void updateAdjacentCells(int x, int y) {
         board[x][y].isActive = true;
         for (int[] adjacentDirection : ADJACENT_DIRECTIONS) {
             int dx = x + adjacentDirection[0], dy = y + adjacentDirection[1];
-            if (dx >= 0 && dx < BOARD_SIZE && dy >= 0 && dy < BOARD_SIZE) {
-                if ((board[dx][dy].getOwner() == getOpponent(curPlayerFigure) && !board[dx][dy].isDead()) ||
+            if (isInside(dx) && isInside(dy)) {
+                if ((board[dx][dy].getOwner() == getOpponent(currentPlayerFigure) && !board[dx][dy].isDead()) ||
                         board[dx][dy].cellType == CellType.EMPTY) {
                     board[dx][dy].canMakeTurn = true;
                 }
 
                 if (!board[dx][dy].isActive) {
-                    if (board[dx][dy].isDead() && board[dx][dy].getOwner() == curPlayerFigure) {
+                    if (board[dx][dy].isDead() && board[dx][dy].getOwner() == currentPlayerFigure) {
                         updateAdjacentCells(dx, dy);
                     }
                 }
@@ -203,10 +217,10 @@ public class GameLogic {
             }
         }
 
-        if (curPlayerFigure != PlayerFigure.NONE) {
+        if (currentPlayerFigure != PlayerFigure.NONE) {
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
-                    if (!board[i][j].isActive && board[i][j].getOwner() == curPlayerFigure && !board[i][j].isDead()) {
+                    if (!board[i][j].isActive && board[i][j].getOwner() == currentPlayerFigure && !board[i][j].isDead()) {
                         updateAdjacentCells(i, j);
                     }
                 }
@@ -224,6 +238,12 @@ public class GameLogic {
 
     //returns true is can pass turn (it's beginning of player's turn), false otherwise
     //probably it's better just to not allow to press 'pass' button
+
+    public boolean isFinished() {
+        return currentGameState == GameState.CROSS_WON ||
+                currentGameState == GameState.ZERO_WON ||
+                currentGameState == GameState.DRAW;
+    }
 
     public boolean skipTurn() {
         if (currentMiniturn != 0 || currentTurn < 2) {
@@ -250,9 +270,9 @@ public class GameLogic {
         previousTurnSkipped = false;
 
         if (board[x][y].cellType != CellType.EMPTY) {
-            board[x][y].setOwnerOnDead(curPlayerFigure);
+            board[x][y].setOwnerOnDead(currentPlayerFigure);
         } else {
-            board[x][y].setOwner(curPlayerFigure);
+            board[x][y].setOwner(currentPlayerFigure);
         }
 
         passTurn();
@@ -260,7 +280,7 @@ public class GameLogic {
     }
 
     public boolean giveUp() {
-        switch (curPlayerFigure) {
+        switch (currentPlayerFigure) {
             case CROSS:
                 zeroWon();
                 return true;
@@ -274,19 +294,19 @@ public class GameLogic {
 
     private void draw() {
         currentGameState = GameState.DRAW;
-        curPlayerFigure = PlayerFigure.NONE;
+        currentPlayerFigure = PlayerFigure.NONE;
         updateGameState();
     }
 
     private void crossWon() {
         currentGameState = GameState.CROSS_WON;
-        curPlayerFigure = PlayerFigure.NONE;
+        currentPlayerFigure = PlayerFigure.NONE;
         updateGameState();
     }
 
     private void zeroWon() {
         currentGameState = GameState.ZERO_WON;
-        curPlayerFigure = PlayerFigure.NONE;
+        currentPlayerFigure = PlayerFigure.NONE;
         updateGameState();
     }
 
@@ -295,7 +315,7 @@ public class GameLogic {
         if (currentMiniturn == 3 ) {
             currentTurn++;
             currentMiniturn = 0;
-            curPlayerFigure = getOpponent(curPlayerFigure);
+            currentPlayerFigure = getOpponent(currentPlayerFigure);
         }
 
         updateGameState();
@@ -315,7 +335,7 @@ public class GameLogic {
     //should be used very carefully, as it might broke some game logic.
     //It's public for easier AI implementations
     public void setCurrentPlayerToOpponent() {
-        curPlayerFigure = getOpponent(curPlayerFigure);
+        currentPlayerFigure = getOpponent(currentPlayerFigure);
         updateGameState();
     }
 

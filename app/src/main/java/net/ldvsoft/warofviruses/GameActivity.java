@@ -3,7 +3,6 @@ package net.ldvsoft.warofviruses;
 import android.content.Intent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -30,6 +29,7 @@ import static net.ldvsoft.warofviruses.MenuActivity.*;
 
 public class GameActivity extends AppCompatActivity {
     public static final int PLAY_SERVICES_DIALOG = 9001;
+
     private LinearLayout boardRoot;
     private BoardCellButton[][] boardButtons;
     private TextView gameStateText;
@@ -40,18 +40,14 @@ public class GameActivity extends AppCompatActivity {
     private BroadcastReceiver tokenSentReceiver;
 
     public Game game = new Game();
+    private BroadcastReceiver loadedGameReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-            @Override
-            public void onGameStateChanged() {
-                redrawGame();
-            }
-        });
+        setCurrentGameListeners();
         switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
             case OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(PlayerFigure.ZERO));
@@ -86,6 +82,10 @@ public class GameActivity extends AppCompatActivity {
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
+        initButtons();
+    }
+
+    private void initButtons() {
         Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
         skipTurnButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,8 +94,7 @@ public class GameActivity extends AppCompatActivity {
                     if (!game.skipTurn(game.getCurrentPlayer())) {
                         return;
                     }
-                }
-                else {
+                } else {
                     if (!game.skipTurn(humanPlayer)) {
                         return;
                     }
@@ -110,8 +109,7 @@ public class GameActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (isEnemyLocalPlayer) {
                     game.giveUp(game.getCurrentPlayer());
-                }
-                else {
+                } else {
                     game.giveUp(humanPlayer);
                 }
             }
@@ -133,12 +131,12 @@ public class GameActivity extends AppCompatActivity {
                 });
             }
     }
-
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-
-
-        super.onSaveInstanceState(outState);
+    protected void onStop() {
+        Log.d("GameActivity", "onStop");
+        saveCurrentGame();
+        unregisterReceiver(loadedGameReceiver);
+        super.onStop();
     }
 
     protected void onResume() {
@@ -146,6 +144,52 @@ public class GameActivity extends AppCompatActivity {
         LocalBroadcastManager
                 .getInstance(this)
                 .registerReceiver(tokenSentReceiver, new IntentFilter(WoVPreferences.GCM_REGISTRATION_COMPLETE));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadedGameReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("GameActivity", "Broadcast receiver message");
+                if (intent.hasExtra(WoVPreferences.LOAD_GAME_KEY)) {
+                    Log.d("GameActivity", "Game load message received");
+                    game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_KEY));
+                    setCurrentGameListeners();
+                    isEnemyLocalPlayer = true; //at least for now...
+                    initButtons();
+                    redrawGame();
+                }
+            }
+        };
+        registerReceiver(loadedGameReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_BROADCAST));
+        Log.d("GameActivity", "onStart");
+        Intent intent = new Intent(this, GameHistoryDBService.class);
+        intent.putExtra(WoVPreferences.LOAD_GAME_KEY, "");
+        startService(intent);
+    }
+
+    private void setCurrentGameListeners() {
+        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
+            @Override
+            public void onGameStateChanged() {
+                redrawGame();
+            }
+        });
+        game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
+            @Override
+            public void onGameFinished() {
+                saveCurrentGame();
+            }
+        });
+    }
+
+    private void saveCurrentGame() {
+        Intent intent = new Intent(this, GameHistoryDBService.class);
+        intent.putExtra(WoVPreferences.GAME_KEY, game.toBytes());
+        intent.putExtra(WoVPreferences.GAME_IS_FINISHED_KEY, game.isFinished());
+        startService(intent);
     }
 
     @Override
@@ -160,18 +204,18 @@ public class GameActivity extends AppCompatActivity {
         GameLogic gameLogic = game.getGameLogic();
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurrentPlayerFigure());
             }
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        if (gameLogic.getCurPlayerFigure() == PlayerFigure.CROSS) {
+        if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.CROSS) {
             avatar.setImageDrawable(BoardCellButton.cellCross_forCross);
         } else {
             avatar.setImageDrawable(BoardCellButton.cellCross);
         }
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        if (gameLogic.getCurPlayerFigure() == PlayerFigure.ZERO) {
+        if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO) {
             avatar.setImageDrawable(BoardCellButton.cellZero_forZero);
         } else {
             avatar.setImageDrawable(BoardCellButton.cellZero);
