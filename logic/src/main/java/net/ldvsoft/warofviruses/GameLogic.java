@@ -9,7 +9,6 @@ import java.util.ArrayList;
 public class GameLogic implements Serializable{
     public static final int BOARD_SIZE = 10;
 
-
     public enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY}
     public enum PlayerFigure {CROSS, ZERO, NONE}
     public enum GameState {NOT_RUNNING, RUNNING, DRAW, CROSS_WON, ZERO_WON}

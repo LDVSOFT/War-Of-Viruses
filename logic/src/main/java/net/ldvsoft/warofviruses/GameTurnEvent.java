@@ -15,6 +15,6 @@ public class GameTurnEvent extends AbstractGameEvent {
 
     @Override
     public void applyEvent(Game game) {
-        game.doTurn(movedPlayer, turnX, turnY);
+        game.doTurn(game.getCurrentPlayer(), turnX, turnY);
     }
 }

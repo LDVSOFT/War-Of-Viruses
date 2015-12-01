@@ -11,6 +11,6 @@ public class GameSkipTurnEvent extends AbstractGameEvent {
 
     @Override
     public void applyEvent(Game game) {
-        game.skipTurn(movedPlayer);
+        game.skipTurn(game.getCurrentPlayer());
     }
 }

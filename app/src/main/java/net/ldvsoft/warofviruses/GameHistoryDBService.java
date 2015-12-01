@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * Created by Сева on 04.11.2015.
  */
@@ -47,7 +49,6 @@ public class GameHistoryDBService extends IntentService {
             Intent intent = new Intent(WoVPreferences.LOAD_GAME_BROADCAST);
             intent.putExtra(WoVPreferences.LOAD_GAME_KEY, data);
             sendBroadcast(intent);
-//todo: send intent to game
         }
     }
 
@@ -59,6 +60,33 @@ public class GameHistoryDBService extends IntentService {
             saveGame(intent);
         } else if (intent.hasExtra(WoVPreferences.LOAD_GAME_KEY)) {
             loadGame();
+        } else if (intent.hasExtra(WoVPreferences.LOAD_GAME_HISTORY_KEY)) {
+            loadGameHistory();
+        } else if (intent.hasExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY)) {
+            loadGameById(intent.getIntExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY, 0));
         }
+    }
+
+    private void loadGameById(int id) {
+        byte[] data = gameHistoryDBOpenHelper.getGameById(id);
+
+        if (data == null) {
+            Log.d("DBService", "FAIL: Null game data loaded");
+        } else {
+            Log.d("DBService", "OK: game data loaded");
+        }
+
+        if (data != null) {
+            Intent intent = new Intent(WoVPreferences.LOAD_GAME_BY_ID_BROADCAST);
+            intent.putExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY, data);
+            sendBroadcast(intent);
+        }
+    }
+
+    private void loadGameHistory() {
+        ArrayList<String> history = gameHistoryDBOpenHelper.getGameHistory();
+        Intent intent = new Intent(WoVPreferences.LOAD_GAME_HISTORY_BROADCAST);
+        intent.putStringArrayListExtra(WoVPreferences.LOAD_GAME_HISTORY_KEY, history);
+        sendBroadcast(intent);
     }
 }
