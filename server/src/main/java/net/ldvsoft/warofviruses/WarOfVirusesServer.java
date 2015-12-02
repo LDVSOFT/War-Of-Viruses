@@ -37,19 +37,16 @@ public final class WarOfVirusesServer {
     }
 
     /**
-     * Process incoming message from client.
+     * Process incoming via HTTP message from client.
      * If simple answer is required, returns an answer.
      * May return null, but then client will get generic answer.
      * @param message Message from the client.
      * @return (Optional) Answer to client.
      */
-    public JSONObject process(JSONObject message) {
-        if (! message.has(ACTION))
-            return null;
+    public JSONObject processHTTP(JSONObject message) {
         try {
-            switch (message.getString(ACTION)) {
-                case ACTION_PING:
-                    return processPing(message);
+            String action = message.getString(ACTION);
+            switch (action) {
                 case ACTION_TEST:
                     return processTest(message);
                 default:
@@ -61,10 +58,31 @@ public final class WarOfVirusesServer {
         }
     }
 
+    /**
+     * Process incoming via GCM message from client.
+     * If simple answer is required, returns an answer.
+     * May return null, but then client will get generic answer.
+     * @param message Message from the client.
+     * @return (Optional) Answer to client.
+     */
+    public JSONObject processGCM(JSONObject message) {
+        try {
+            String action = message.getJSONObject("data").getString(ACTION);
+            switch (action) {
+                case ACTION_PING:
+                    return processPing(message);
+                default:
+                    return null;
+            }
+        } catch (JSONException e) {
+            logger.log(Level.WARNING, "Wrong message format", e);
+            return null;
+        }
+    }
+
     private JSONObject processPing(JSONObject message) {
-        JSONObject data = message.getJSONObject("data");
-        String sender = data.getString("from");
-        String messageId = data.getString("message_id");
+        String sender = message.getString("from");
+        String messageId = message.getString("message_id");
 
         JSONObject answer = new JSONObject()
                 .put(RESULT, RESULT_SUCCESS)

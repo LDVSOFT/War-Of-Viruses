@@ -86,7 +86,7 @@ public class HTTPHandler {
                 String body = new String(buffer);
                 JSONObject message = new JSONObject(body);
 
-                JSONObject answer = server.process(message);
+                JSONObject answer = server.processHTTP(message);
                 if (answer == null) {
                     answer = WarOfVirusesServer.JSON_RESULT_FAILURE;
                 }
