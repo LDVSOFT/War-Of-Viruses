@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_PING;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_TEST;
-import static net.ldvsoft.warofviruses.WoVProtocol.PARAM_TOKEN;
 import static net.ldvsoft.warofviruses.WoVProtocol.PING_ID;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_FAILURE;
@@ -29,33 +27,10 @@ public final class WarOfVirusesServer {
 
     private Properties config = new Properties();
 
-    private HTTPHandler httpHandler;
     private GCMHandler gcmHandler;
 
     public String getSetting(String name, String defaultValue) {
         return config.getProperty(name, defaultValue);
-    }
-
-    /**
-     * Process incoming via HTTP message from client.
-     * If simple answer is required, returns an answer.
-     * May return null, but then client will get generic answer.
-     * @param message Message from the client.
-     * @return (Optional) Answer to client.
-     */
-    public JSONObject processHTTP(JSONObject message) {
-        try {
-            String action = message.getString(ACTION);
-            switch (action) {
-                case ACTION_TEST:
-                    return processTest(message);
-                default:
-                    return null;
-            }
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "Wrong message format", e);
-            return null;
-        }
     }
 
     /**
@@ -100,27 +75,6 @@ public final class WarOfVirusesServer {
         return null;
     }
 
-    public JSONObject processTest(JSONObject message) {
-        String token = message.getString(PARAM_TOKEN);
-
-        JSONObject gcmTestMessage = new JSONObject()
-                .put(RESULT, RESULT_SUCCESS)
-                .put("Hello", "World");
-
-        boolean sent = gcmHandler.sendDownstreamMessage(SmackCcsClient.createJsonMessage(
-                        token,
-                        gcmHandler.nextMessageId(),
-                        gcmTestMessage,
-                        "TRALALALALA",
-                        (long) 3600,
-                        false,
-                        "high")
-        );
-
-        return new JSONObject()
-                .put(RESULT, sent ? RESULT_SUCCESS : RESULT_FAILURE);
-    }
-
     public void run() {
         String configFile = System.getenv("CONFIG");
         if (configFile == null) {
@@ -138,13 +92,11 @@ public final class WarOfVirusesServer {
         logger = Logger.getLogger(WarOfVirusesServer.class.getName());
 
         try {
-            httpHandler = new HTTPHandler(this);
             gcmHandler = new GCMHandler(this);
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    httpHandler.stop();
                     gcmHandler.stop();
                 }
             }));

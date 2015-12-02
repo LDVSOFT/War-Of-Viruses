@@ -236,6 +236,21 @@ public class GameActivity extends AppCompatActivity {
         return true;
     }
 
+    public boolean checkGoogleServices() {
+        GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+        int result = availability.isGooglePlayServicesAvailable(this);
+        if (result != ConnectionResult.SUCCESS) {
+            if (availability.isUserResolvableError(result)) {
+                availability.getErrorDialog(this, result, PLAY_SERVICES_DIALOG).show();
+            } else {
+                Toast.makeText(this, "No Google Play Services.", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -248,21 +263,6 @@ public class GameActivity extends AppCompatActivity {
             return true;
         }
 
-        if (id == R.id.test) {
-            GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
-            int result = availability.isGooglePlayServicesAvailable(this);
-            if (result != ConnectionResult.SUCCESS) {
-                if (availability.isUserResolvableError(result)) {
-                    availability.getErrorDialog(this, result, PLAY_SERVICES_DIALOG).show();
-                } else {
-                    Toast.makeText(this, "No Google Play Services.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                startService(new Intent(this, WoVRegistrationIntentService.class));
-            }
-            return true;
-        }
-
         if (id == R.id.test2) {
             new AsyncTask<Void, Void, String>() {
                 @Override
@@ -272,7 +272,7 @@ public class GameActivity extends AppCompatActivity {
                         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(GameActivity.this);
 
                         Bundle data = new Bundle();
-                        data.putString("action", "ping");
+                        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_PING);
                         String id = UUID.randomUUID().toString();
                         gcm.send(getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
                         msg = "Sent message";
@@ -289,6 +289,7 @@ public class GameActivity extends AppCompatActivity {
                     Toast.makeText(GameActivity.this, msg, Toast.LENGTH_SHORT).show();
                 }
             }.execute(null, null, null);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
