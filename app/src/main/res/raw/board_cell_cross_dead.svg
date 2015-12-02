@@ -14,8 +14,8 @@
    id="svg3984"
    version="1.1"
    adjustViewBounds="true"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="board_cell_x_dead.svg">
+   inkscape:version="0.91 r"
+   sodipodi:docname="board_cell_cross_dead.svg">
   <defs
      id="defs3986" />
   <sodipodi:namedview
@@ -80,14 +80,14 @@
        transform="translate(0,952.36218)"
        ry="10" />
     <path
-       style="fill:none;stroke:#ff0000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#ff0000;stroke-width:7.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="M 25,25 75,75"
        id="path4502"
        inkscape:connector-curvature="0"
        transform="translate(0,952.36218)"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#ff0000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#ff0000;stroke-width:7.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="M 75,25 25,75"
        id="path4504"
        inkscape:connector-curvature="0"
