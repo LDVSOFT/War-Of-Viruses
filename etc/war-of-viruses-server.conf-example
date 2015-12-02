@@ -9,7 +9,6 @@ java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter
 # Server
 google.projectId=555379223441
 google.apiKey=YOU-KNOW-IT-IS-A-SECRET
-http.port=9001
 
 # Real running
 gcm.server=gcm-xmpp.googleapis.com

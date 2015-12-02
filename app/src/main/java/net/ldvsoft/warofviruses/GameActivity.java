@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -16,6 +17,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
+import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_BOT;
@@ -26,7 +31,6 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
  * Created by Сева on 01.12.2015.
  */
 public class GameActivity extends GameActivityBase {
-    public static final int PLAY_SERVICES_DIALOG = 9001;
     private BroadcastReceiver loadedGameReceiver = null;
     private BroadcastReceiver tokenSentReceiver;
     private HumanPlayer humanPlayer = new HumanPlayer();
@@ -182,6 +186,7 @@ public class GameActivity extends GameActivityBase {
         startService(intent);
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -194,18 +199,32 @@ public class GameActivity extends GameActivityBase {
             return true;
         }
 
-        if (id == R.id.test) {
-            GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
-            int result = availability.isGooglePlayServicesAvailable(this);
-            if (result != ConnectionResult.SUCCESS) {
-                if (availability.isUserResolvableError(result)) {
-                    availability.getErrorDialog(this, result, PLAY_SERVICES_DIALOG).show();
-                } else {
-                    Toast.makeText(this, "No Google Play Services.", Toast.LENGTH_SHORT).show();
+        if (id == R.id.test2) {
+            new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    String msg;
+                    try {
+                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(GameActivity.this);
+
+                        Bundle data = new Bundle();
+                        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_PING);
+                        String id = UUID.randomUUID().toString();
+                        gcm.send(getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
+                        msg = "Sent message";
+                    } catch (IOException ex) {
+                        msg = "Error :" + ex.getMessage();
+                    }
+                    return msg;
                 }
-            } else {
-                startService(new Intent(this, WoVRegistrationIntentService.class));
-            }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    if (msg == null)
+                        return;
+                    Toast.makeText(GameActivity.this, msg, Toast.LENGTH_SHORT).show();
+                }
+            }.execute(null, null, null);
             return true;
         }
 

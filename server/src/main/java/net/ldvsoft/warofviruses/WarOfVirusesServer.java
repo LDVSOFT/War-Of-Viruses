@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_PING;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_TEST;
-import static net.ldvsoft.warofviruses.WoVProtocol.PARAM_TOKEN;
 import static net.ldvsoft.warofviruses.WoVProtocol.PING_ID;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_FAILURE;
@@ -29,7 +27,6 @@ public final class WarOfVirusesServer {
 
     private Properties config = new Properties();
 
-    private HTTPHandler httpHandler;
     private GCMHandler gcmHandler;
 
     public String getSetting(String name, String defaultValue) {
@@ -37,21 +34,18 @@ public final class WarOfVirusesServer {
     }
 
     /**
-     * Process incoming message from client.
+     * Process incoming via GCM message from client.
      * If simple answer is required, returns an answer.
      * May return null, but then client will get generic answer.
      * @param message Message from the client.
      * @return (Optional) Answer to client.
      */
-    public JSONObject process(JSONObject message) {
-        if (! message.has(ACTION))
-            return null;
+    public JSONObject processGCM(JSONObject message) {
         try {
-            switch (message.getString(ACTION)) {
+            String action = message.getJSONObject("data").getString(ACTION);
+            switch (action) {
                 case ACTION_PING:
                     return processPing(message);
-                case ACTION_TEST:
-                    return processTest(message);
                 default:
                     return null;
             }
@@ -62,9 +56,8 @@ public final class WarOfVirusesServer {
     }
 
     private JSONObject processPing(JSONObject message) {
-        JSONObject data = message.getJSONObject("data");
-        String sender = data.getString("from");
-        String messageId = data.getString("message_id");
+        String sender = message.getString("from");
+        String messageId = message.getString("message_id");
 
         JSONObject answer = new JSONObject()
                 .put(RESULT, RESULT_SUCCESS)
@@ -80,27 +73,6 @@ public final class WarOfVirusesServer {
                         "high")
         );
         return null;
-    }
-
-    public JSONObject processTest(JSONObject message) {
-        String token = message.getString(PARAM_TOKEN);
-
-        JSONObject gcmTestMessage = new JSONObject()
-                .put(RESULT, RESULT_SUCCESS)
-                .put("Hello", "World");
-
-        boolean sent = gcmHandler.sendDownstreamMessage(SmackCcsClient.createJsonMessage(
-                        token,
-                        gcmHandler.nextMessageId(),
-                        gcmTestMessage,
-                        "TRALALALALA",
-                        (long) 3600,
-                        false,
-                        "high")
-        );
-
-        return new JSONObject()
-                .put(RESULT, sent ? RESULT_SUCCESS : RESULT_FAILURE);
     }
 
     public void run() {
@@ -120,13 +92,11 @@ public final class WarOfVirusesServer {
         logger = Logger.getLogger(WarOfVirusesServer.class.getName());
 
         try {
-            httpHandler = new HTTPHandler(this);
             gcmHandler = new GCMHandler(this);
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    httpHandler.stop();
                     gcmHandler.stop();
                 }
             }));

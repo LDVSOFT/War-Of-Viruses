@@ -38,7 +38,7 @@ public class GCMHandler extends SmackCcsClient {
     @Override
     protected void handleUpstreamMessage(JSONObject message) {
         super.handleUpstreamMessage(message);
-        JSONObject answer = server.process(message);
+        JSONObject answer = server.processGCM(message);
         if (answer != null) {
             sendDownstreamMessage(SmackCcsClient.createJsonMessage(
                     message.getString("from"),

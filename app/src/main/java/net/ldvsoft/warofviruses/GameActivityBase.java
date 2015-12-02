@@ -9,11 +9,16 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
 
 public abstract class GameActivityBase extends AppCompatActivity {
+    protected static final int PLAY_SERVICES_DIALOG = 9001;
 
     protected LinearLayout boardRoot;
     protected BoardCellButton[][] boardButtons;
@@ -66,6 +71,21 @@ public abstract class GameActivityBase extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_game, menu);
         return true;
+    }
+
+    public boolean checkGoogleServices() {
+        GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
+        int result = availability.isGooglePlayServicesAvailable(this);
+        if (result != ConnectionResult.SUCCESS) {
+            if (availability.isUserResolvableError(result)) {
+                availability.getErrorDialog(this, result, PLAY_SERVICES_DIALOG).show();
+            } else {
+                Toast.makeText(this, "No Google Play Services.", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        } else {
+            return true;
+        }
     }
 
 
