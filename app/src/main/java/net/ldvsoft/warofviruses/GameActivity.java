@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -23,6 +24,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
+import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.*;
 import static net.ldvsoft.warofviruses.MenuActivity.*;
@@ -256,6 +261,34 @@ public class GameActivity extends AppCompatActivity {
                 startService(new Intent(this, WoVRegistrationIntentService.class));
             }
             return true;
+        }
+
+        if (id == R.id.test2) {
+            new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    String msg;
+                    try {
+                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(GameActivity.this);
+
+                        Bundle data = new Bundle();
+                        data.putString("action", "ping");
+                        String id = UUID.randomUUID().toString();
+                        gcm.send(getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
+                        msg = "Sent message";
+                    } catch (IOException ex) {
+                        msg = "Error :" + ex.getMessage();
+                    }
+                    return msg;
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    if (msg == null)
+                        return;
+                    Toast.makeText(GameActivity.this, msg, Toast.LENGTH_SHORT).show();
+                }
+            }.execute(null, null, null);
         }
 
         return super.onOptionsItemSelected(item);
