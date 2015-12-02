@@ -14,13 +14,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
  * Created by Сева on 04.11.2015.
  */
 public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 5;
+    private static final int VERSION = 8;
     private static final String DB_NAME = "gameHistoryDB";
     private static final String GAME_HISTORY_TABLE = "gameHistoryTable";
     private static final String ID = "id";
@@ -39,6 +40,9 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
     private static final String GET_ACTIVE_GAME = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 0;";
 
     private static final String DELETE_ACTIVE_GAME = "DELETE FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 0;";
+    private static final String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 1;";
+    private static final String GET_GAME_BY_ID = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + ID + " = ?;";
+
     public GameHistoryDBOpenHelper(Context context) {// TODO: remove saving at SD card in release
         super(context, DB_NAME, null, VERSION);
     }
@@ -79,5 +83,29 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
 
     public void deleteActiveGame() {
         getWritableDatabase().execSQL(DELETE_ACTIVE_GAME);
+    }
+
+    public ArrayList<String> getGameHistory() {
+        Cursor cursor = getReadableDatabase().rawQuery(GET_GAME_HISTORY, null);
+        Log.d("DBHelper", "Loading game history: found " + cursor.getCount() + " games");
+        if (!cursor.moveToFirst()) {
+            return null;
+        }
+        ArrayList<String> history = new ArrayList<>();
+        while (!cursor.isAfterLast()) {
+            history.add(cursor.getInt(0) + ";" + cursor.getString(1));
+            cursor.moveToNext();
+
+        }
+        return history;
+    }
+
+    public byte[] getGameById(int id) {
+        Cursor cursor = getReadableDatabase().rawQuery(GET_GAME_BY_ID, new String[] {Integer.toString(id)});
+        Log.d("DBHelper", "Loading game by id: found " + cursor.getCount() + " games");
+        if (!cursor.moveToFirst()) {
+            return null;
+        }
+        return cursor.getBlob(0);
     }
 }

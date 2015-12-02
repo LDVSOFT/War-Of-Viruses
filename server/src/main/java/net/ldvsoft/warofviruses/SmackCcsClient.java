@@ -343,7 +343,10 @@ public abstract class SmackCcsClient {
                 JSONObject jsonObject = new JSONObject(json);
 
                 // present for "ack"/"nack", null otherwise
-                Object messageType = jsonObject.get("message_type");
+                Object messageType = null;
+                if (jsonObject.has("message_type")) {
+                    messageType = jsonObject.get("message_type");
+                }
 
                 if (messageType == null) {
                     // Normal upstream data message

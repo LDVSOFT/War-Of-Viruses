@@ -10,7 +10,7 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/test"
-        android:title="Try GCM"
-        android:orderInCategory="101" />
+        android:id="@+id/test2"
+        android:title="Ping GCM"
+        android:orderInCategory="102" />
 </menu>

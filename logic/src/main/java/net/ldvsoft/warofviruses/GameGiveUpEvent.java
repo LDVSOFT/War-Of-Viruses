@@ -12,6 +12,6 @@ public class GameGiveUpEvent extends AbstractGameEvent {
 
     @Override
     public void applyEvent(Game game) {
-        game.giveUp(movedPlayer);
+        game.giveUp(game.getCurrentPlayer());
     }
 }

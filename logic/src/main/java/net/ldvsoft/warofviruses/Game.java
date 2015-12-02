@@ -18,9 +18,11 @@ public class Game implements Serializable {
 
     private GameLogic gameLogic;
 
+    private boolean isReplaying = false;
     private transient OnGameStateChangedListener onGameStateChangedListener = null;
     private transient OnGameFinishedListener onGameFinishedListener = null;
     private ArrayList<AbstractGameEvent> gameEventHistory = null;
+    private int currentEventNumber;
 
     public byte[] toBytes() {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -49,6 +51,47 @@ public class Game implements Serializable {
         }
         return null;
     }
+
+    public void setReplayMode() {
+        isReplaying = true;
+        toBeginOfGame();
+    }
+
+    public void toBeginOfGame() {
+        gameLogic.newGame();
+        currentEventNumber = 0;
+    }
+
+    public void toEndOfGame() {
+        for (int i = currentEventNumber; i < gameEventHistory.size(); i++) {
+            gameEventHistory.get(i).applyEvent(this);
+        }
+        currentEventNumber = gameEventHistory.size();
+    }
+
+    public void nextEvent() {
+        if (currentEventNumber < gameEventHistory.size()) {
+            gameEventHistory.get(currentEventNumber++).applyEvent(this);
+        }
+    }
+
+    public void prevEvent() {
+        int lastStep = currentEventNumber;
+        toBeginOfGame();
+        for (int i = 0; i < lastStep; i++) {
+            gameEventHistory.get(i).applyEvent(this);
+        }
+        currentEventNumber = lastStep == 0 ? 0 : lastStep - 1;
+    }
+
+    public int getEventCount() {
+        return gameEventHistory.size();
+    }
+
+    public int getCurrentEventNumber() {
+        return currentEventNumber;
+    }
+
 
     public interface OnGameStateChangedListener {
         void onGameStateChanged();
@@ -108,7 +151,9 @@ public class Game implements Serializable {
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            gameEventHistory.add(new GameGiveUpEvent(sender));
+            if (!isReplaying) {
+                gameEventHistory.add(new GameGiveUpEvent(sender));
+            }
             onGameStateChangedListener.onGameStateChanged();
         }
         return result;
@@ -126,7 +171,9 @@ public class Game implements Serializable {
             if (oldPlayer != currentPlayer) {
                 notifyPlayer();
             }
-            gameEventHistory.add(new GameSkipTurnEvent(sender));
+            if (!isReplaying) {
+                gameEventHistory.add(new GameSkipTurnEvent(sender));
+            }
             onGameStateChangedListener.onGameStateChanged();
         }
         return result;
@@ -144,7 +191,9 @@ public class Game implements Serializable {
             if (oldPlayer != currentPlayer) {
                 notifyPlayer();
             }
-            gameEventHistory.add(new GameTurnEvent(x, y, sender));
+            if (!isReplaying) {
+                gameEventHistory.add(new GameTurnEvent(x, y, sender));
+            }
             onGameStateChangedListener.onGameStateChanged();
         }
         return result;
