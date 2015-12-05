@@ -32,7 +32,8 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
     private static final String GET_ACTIVE_GAME = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 0;";
 
     private static final String DELETE_ACTIVE_GAME = "DELETE FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 0;";
-    private static final String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 1;";
+    private static final String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_HISTORY_TABLE + " WHERE " +
+            IS_FINISHED + " = 1 ORDER BY " + GAME_DATE + " DESC;";
     private static final String GET_GAME_BY_ID = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + ID + " = ?;";
 
     public GameHistoryDBOpenHelper(Context context) {// TODO: remove saving at SD card in release
