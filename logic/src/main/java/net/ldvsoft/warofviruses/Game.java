@@ -146,7 +146,7 @@ public class Game implements Serializable {
     }
 
     public boolean giveUp(Player sender) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
         boolean result = gameLogic.giveUp();
@@ -160,7 +160,7 @@ public class Game implements Serializable {
     }
 
     public boolean skipTurn(Player sender) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
 
@@ -168,7 +168,7 @@ public class Game implements Serializable {
         boolean result = gameLogic.skipTurn();
         if (result) {
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
-            if (oldPlayer != currentPlayer) {
+            if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
             if (!isReplaying) {
@@ -180,7 +180,7 @@ public class Game implements Serializable {
     }
 
     public boolean doTurn(Player sender, int x, int y) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
 
@@ -188,7 +188,7 @@ public class Game implements Serializable {
         boolean result = gameLogic.doTurn(x, y);
         if (result) {
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
-            if (oldPlayer != currentPlayer) {
+            if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
             if (!isReplaying) {

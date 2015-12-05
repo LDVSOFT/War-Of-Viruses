@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static java.lang.Thread.sleep;
-import static net.ldvsoft.warofviruses.GameLogic.*;
+import static net.ldvsoft.warofviruses.GameLogic.ADJACENT_DIRECTIONS;
+import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.CoordinatePair;
+import static net.ldvsoft.warofviruses.GameLogic.GameState;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
+import static net.ldvsoft.warofviruses.GameLogic.isInside;
 
 /**
  * Created by Сева on 20.10.2015.
@@ -15,6 +20,7 @@ import static net.ldvsoft.warofviruses.GameLogic.*;
 public class AIPlayer extends Player {
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
+        id = new Random().nextInt();
     }
 
     @Override
