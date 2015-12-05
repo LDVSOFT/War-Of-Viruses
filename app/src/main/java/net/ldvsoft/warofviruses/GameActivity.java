@@ -35,7 +35,7 @@ public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
     private HumanPlayer humanPlayer = new HumanPlayer();
     private boolean isEnemyLocalPlayer = false;
-
+    private Game game;
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -69,7 +69,7 @@ public class GameActivity extends GameActivityBase {
         }
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
         initButtons();
-        redrawGame();
+        redrawGame(game.getGameLogic());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class GameActivity extends GameActivityBase {
                         return;
                     }
                 }
-                redrawGame();
+                redrawGame(game.getGameLogic());
             }
         });
 
@@ -144,7 +144,7 @@ public class GameActivity extends GameActivityBase {
         game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
             @Override
             public void onGameStateChanged() {
-                redrawGame();
+                redrawGame(game.getGameLogic());
             }
         });
         game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
@@ -175,7 +175,7 @@ public class GameActivity extends GameActivityBase {
                     setCurrentGameListeners();
                     isEnemyLocalPlayer = true; //at least for now...
                     initButtons();
-                    redrawGame();
+                    redrawGame(game.getGameLogic());
                 }
             }
         };

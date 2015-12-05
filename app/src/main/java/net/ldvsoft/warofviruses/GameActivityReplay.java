@@ -15,6 +15,7 @@ import android.widget.TextView;
 public class GameActivityReplay extends GameActivityBase {
     private BroadcastReceiver loadedGameReceiver;
     private int id;
+    GameReplay gameReplay;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -33,14 +34,14 @@ public class GameActivityReplay extends GameActivityBase {
                 Log.d("GameActivityBase", "Broadcast receiver message");
                 if (intent.hasExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY)) {
                     Log.d("GameActivityBase", "Game load message received");
-                    game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY));
+                    Game game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY));
+                    gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
                     initButtons();
-                    game.setReplayMode();
-                    redrawGame();
+                    redrawGame(gameReplay.getGameLogic());
                     game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
                         @Override
                         public void onGameStateChanged() {
-                            redrawGame();
+                            redrawGame(gameReplay.getGameLogic());
                         }
                     });
                 }
@@ -55,10 +56,11 @@ public class GameActivityReplay extends GameActivityBase {
     }
 
     @Override
-    protected void redrawGame() {
-        super.redrawGame();
-        if (game != null) {
-            ((TextView) findViewById(R.id.game_text_game_position)).setText(String.format("%d/%d", game.getCurrentEventNumber(), game.getEventCount()));
+    protected void redrawGame(GameLogic gameLogic) {
+        super.redrawGame(gameLogic);
+        if (gameReplay != null) {
+            ((TextView) findViewById(R.id.game_text_game_position)).setText(String.format("%d/%d",
+                    gameReplay.getCurrentEventNumber(), gameReplay.getEventCount()));
         }
     }
     @Override
@@ -72,29 +74,29 @@ public class GameActivityReplay extends GameActivityBase {
         findViewById(R.id.game_button_first).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.toBeginOfGame();
-                redrawGame();
+                gameReplay.toBeginOfGame();
+                redrawGame(gameReplay.getGameLogic());
             }
         });
         findViewById(R.id.game_button_last).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.toEndOfGame();
-                redrawGame();
+                gameReplay.toEndOfGame();
+                redrawGame(gameReplay.getGameLogic());
             }
         });
         findViewById(R.id.game_button_next).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.nextEvent();
-                redrawGame();
+                gameReplay.nextEvent();
+                redrawGame(gameReplay.getGameLogic());
             }
         });
         findViewById(R.id.game_button_prev).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.prevEvent();
-                redrawGame();
+                gameReplay.prevEvent();
+                redrawGame(gameReplay.getGameLogic());
             }
         });
 

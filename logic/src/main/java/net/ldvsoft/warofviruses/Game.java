@@ -18,11 +18,8 @@ public class Game implements Serializable {
 
     private GameLogic gameLogic;
 
-    private boolean isReplaying = false;
     private transient OnGameStateChangedListener onGameStateChangedListener = null;
     private transient OnGameFinishedListener onGameFinishedListener = null;
-    private ArrayList<AbstractGameEvent> gameEventHistory = null;
-    private int currentEventNumber;
 
     public byte[] toBytes() {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -52,46 +49,6 @@ public class Game implements Serializable {
         return null;
     }
 
-    public void setReplayMode() {
-        isReplaying = true;
-        toBeginOfGame();
-    }
-
-    public void toBeginOfGame() {
-        gameLogic.newGame();
-        currentEventNumber = 0;
-    }
-
-    public void toEndOfGame() {
-        for (int i = currentEventNumber; i < gameEventHistory.size(); i++) {
-            gameEventHistory.get(i).applyEvent(this);
-        }
-        currentEventNumber = gameEventHistory.size();
-    }
-
-    public void nextEvent() {
-        if (currentEventNumber < gameEventHistory.size()) {
-            gameEventHistory.get(currentEventNumber++).applyEvent(this);
-        }
-    }
-
-    public void prevEvent() {
-        int lastStep = currentEventNumber;
-        toBeginOfGame();
-        for (int i = 0; i < lastStep; i++) {
-            gameEventHistory.get(i).applyEvent(this);
-        }
-        currentEventNumber = lastStep == 0 ? 0 : lastStep - 1;
-    }
-
-    public int getEventCount() {
-        return gameEventHistory.size();
-    }
-
-    public int getCurrentEventNumber() {
-        return currentEventNumber;
-    }
-
 
     public interface OnGameStateChangedListener {
         void onGameStateChanged();
@@ -115,16 +72,10 @@ public class Game implements Serializable {
     }
 
     public void startNewGame(Player cross, Player zero) {
-        if (gameEventHistory != null) {
-            if (onGameFinishedListener != null) {
-                onGameFinishedListener.onGameFinished();
-            }
-        }
         crossPlayer = cross;
         zeroPlayer = zero;
         gameLogic = new GameLogic();
         gameLogic.newGame();
-        gameEventHistory = new ArrayList<>();
     }
 
     public Player getCurrentPlayer() {
@@ -151,9 +102,6 @@ public class Game implements Serializable {
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            if (!isReplaying) {
-                gameEventHistory.add(new GameGiveUpEvent(sender));
-            }
             onGameStateChangedListener.onGameStateChanged();
         }
         return result;
@@ -170,9 +118,6 @@ public class Game implements Serializable {
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
-            }
-            if (!isReplaying) {
-                gameEventHistory.add(new GameSkipTurnEvent(sender));
             }
             onGameStateChangedListener.onGameStateChanged();
         }
@@ -191,12 +136,8 @@ public class Game implements Serializable {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            if (!isReplaying) {
-                gameEventHistory.add(new GameTurnEvent(x, y, sender));
-            }
             onGameStateChangedListener.onGameStateChanged();
         }
         return result;
     }
-
 }
