@@ -1,9 +1,7 @@
 package net.ldvsoft.warofviruses;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.widget.TextView;
  * Created by Сева on 01.12.2015.
  */
 public class GameActivityReplay extends GameActivityBase {
-    private BroadcastReceiver loadedGameReceiver;
     private int id;
     GameReplay gameReplay;
 
@@ -28,31 +25,37 @@ public class GameActivityReplay extends GameActivityBase {
     @Override
     protected void onStart() {
         super.onStart();
-        loadedGameReceiver = new BroadcastReceiver() {
+        new AsyncTask<Void, Void, Void>() {
+            private byte[] data;
+
             @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d("GameActivityBase", "Broadcast receiver message");
-                if (intent.hasExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY)) {
-                    Log.d("GameActivityBase", "Game load message received");
-                    Game game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY));
-                    gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
-                    initButtons();
-                    redrawGame(gameReplay.getGameLogic());
-                    game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-                        @Override
-                        public void onGameStateChanged() {
-                            redrawGame(gameReplay.getGameLogic());
-                        }
-                    });
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (data != null) {
+                    onGameLoaded(data);
                 }
             }
-        };
-        registerReceiver(loadedGameReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_BY_ID_BROADCAST));
-        Log.d("GameActivityBase", "onStart");
-        Intent intent = new Intent(this, GameHistoryDBService.class);
-        intent.putExtra(WoVPreferences.LOAD_GAME_BY_ID_KEY, id);
-        startService(intent);
 
+            @Override
+            protected Void doInBackground(Void... params) {
+                data = GameHistoryDBOpenHelper.getInstance(GameActivityReplay.this).getGameById(id);
+
+                if (data == null) {
+                    Log.d("DBService", "FAIL: Null game data loaded");
+                } else {
+                    Log.d("DBService", "OK: game data loaded");
+                }
+
+                return null;
+            }
+        }.execute();
+    }
+
+    private void onGameLoaded(byte[] data) {
+        Game game = Game.fromBytes(data);
+        gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
+        initButtons();
+        redrawGame(gameReplay.getGameLogic());
     }
 
     @Override
@@ -66,7 +69,6 @@ public class GameActivityReplay extends GameActivityBase {
     @Override
     protected void onStop() {
         Log.d("GameActivityBase", "onStop");
-        unregisterReceiver(loadedGameReceiver);
         super.onStop();
     }
 

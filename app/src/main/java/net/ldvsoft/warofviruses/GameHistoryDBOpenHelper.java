@@ -36,7 +36,16 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
             IS_FINISHED + " = 1 ORDER BY " + GAME_DATE + " DESC;";
     private static final String GET_GAME_BY_ID = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + ID + " = ?;";
 
-    public GameHistoryDBOpenHelper(Context context) {// TODO: remove saving at SD card in release
+    private static GameHistoryDBOpenHelper instance;
+
+    public synchronized static GameHistoryDBOpenHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new GameHistoryDBOpenHelper(context);
+        }
+        return instance;
+    }
+
+    private GameHistoryDBOpenHelper(Context context) {// TODO: remove saving at SD card in release
         super(context, DB_NAME, null, VERSION);
     }
 

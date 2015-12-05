@@ -31,7 +31,6 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
  * Created by Сева on 01.12.2015.
  */
 public class GameActivity extends GameActivityBase {
-    private BroadcastReceiver loadedGameReceiver = null;
     private BroadcastReceiver tokenSentReceiver;
     private HumanPlayer humanPlayer = new HumanPlayer();
     private boolean isEnemyLocalPlayer = false;
@@ -129,7 +128,6 @@ public class GameActivity extends GameActivityBase {
     protected void onStop() {
         Log.d("GameActivityBase", "onStop");
         saveCurrentGame();
-        unregisterReceiver(loadedGameReceiver);
         super.onStop();
     }
 
@@ -156,35 +154,49 @@ public class GameActivity extends GameActivityBase {
     }
 
     private void saveCurrentGame() {
-        Intent intent = new Intent(this, GameHistoryDBService.class);
-        intent.putExtra(WoVPreferences.GAME_KEY, game.toBytes());
-        intent.putExtra(WoVPreferences.GAME_IS_FINISHED_KEY, game.isFinished());
-        startService(intent);
+        new AsyncTask<Game, Void, Void> (){
+            @Override
+            protected Void doInBackground(Game... params) {
+                for (Game game : params) { //actually, there is only one game
+                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game.toBytes(),
+                            game.isFinished());
+
+                }
+                return null;
+            }
+        }.execute(game);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        loadedGameReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d("GameActivityBase", "Broadcast receiver message");
-                if (intent.hasExtra(WoVPreferences.LOAD_GAME_KEY)) {
-                    Log.d("GameActivityBase", "Game load message received");
-                    game = Game.fromBytes(intent.getByteArrayExtra(WoVPreferences.LOAD_GAME_KEY));
-                    setCurrentGameListeners();
-                    isEnemyLocalPlayer = true; //at least for now...
-                    initButtons();
-                    redrawGame(game.getGameLogic());
-                }
-            }
-        };
-        registerReceiver(loadedGameReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_BROADCAST));
-        Log.d("GameActivityBase", "onStart");
-        Intent intent = new Intent(this, GameHistoryDBService.class);
-        intent.putExtra(WoVPreferences.LOAD_GAME_KEY, "");
-        startService(intent);
+        new AsyncTask<Void, Void, Void>() {
 
+            @Override
+            protected Void doInBackground(Void... params) {
+                byte[] data = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getSerializedActiveGame();
+
+                if (data == null) {
+                    Log.d("DBService", "FAIL: Null game data loaded");
+                } else {
+                    Log.d("DBService", "OK: game data loaded");
+                }
+
+                if (data != null) {
+                    onGameLoaded(data);
+                }
+
+                return null;
+            }
+        }.execute();
+    }
+
+    private void onGameLoaded(byte[] data) {
+        game = Game.fromBytes(data);
+        setCurrentGameListeners();
+        isEnemyLocalPlayer = true; //at least for now...
+        initButtons();
+        redrawGame(game.getGameLogic());
     }
 
     @Override
