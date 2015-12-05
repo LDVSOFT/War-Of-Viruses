@@ -58,7 +58,7 @@ public class GameActivityReplay extends GameActivityBase {
     protected void redrawGame() {
         super.redrawGame();
         if (game != null) {
-            ((TextView) findViewById(R.id.game_text_game_position)).setText(game.getCurrentEventNumber() + "/" + game.getEventCount());
+            ((TextView) findViewById(R.id.game_text_game_position)).setText(String.format("%d/%d", game.getCurrentEventNumber(), game.getEventCount()));
         }
     }
     @Override

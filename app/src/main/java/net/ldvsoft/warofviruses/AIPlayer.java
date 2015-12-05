@@ -177,7 +177,6 @@ public class AIPlayer extends Player {
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("AIPlayer", "AIPlayer::run");
-            Random randomGenerator = new Random();
             GameLogic gameLogic = game.getGameLogic();
             if (!gameLogic.canMove()) {
                 publishProgress(new CoordinatePair(-1, -1));

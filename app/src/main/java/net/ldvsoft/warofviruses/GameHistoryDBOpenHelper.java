@@ -5,17 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Created by Сева on 04.11.2015.
@@ -33,9 +28,6 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
             GAME_DATA + " BLOB, " + IS_FINISHED + " INTEGER, " + GAME_DATE + " TEXT);";
 
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS " + GAME_HISTORY_TABLE + ";";
-
-    private static final String ADD_GAME = "INSERT INTO " + GAME_HISTORY_TABLE + "(" + GAME_DATA + ", " + IS_FINISHED +
-            ", " + GAME_DATE + ") VALUES (?, ?);";
 
     private static final String GET_ACTIVE_GAME = "SELECT " + GAME_DATA + " FROM " + GAME_HISTORY_TABLE + " WHERE " + IS_FINISHED + " = 0;";
 
@@ -63,7 +55,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         cv.put(GAME_DATA, serializedGame);
         cv.put(IS_FINISHED, isFinished);
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         String formattedDate = df.format(c.getTime());
         cv.put(GAME_DATE, formattedDate);
         getWritableDatabase().insert(GAME_HISTORY_TABLE, null, cv);
@@ -78,6 +70,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         byte[] data = cursor.getBlob(0);
         getWritableDatabase().rawQuery(DELETE_ACTIVE_GAME, null);
         deleteActiveGame();
+        cursor.close();
         return data;
     }
 
@@ -95,8 +88,8 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         while (!cursor.isAfterLast()) {
             history.add(cursor.getInt(0) + ";" + cursor.getString(1));
             cursor.moveToNext();
-
         }
+        cursor.close();
         return history;
     }
 
@@ -106,6 +99,8 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         if (!cursor.moveToFirst()) {
             return null;
         }
-        return cursor.getBlob(0);
+        byte[] data = cursor.getBlob(0);
+        cursor.close();
+        return data;
     }
 }

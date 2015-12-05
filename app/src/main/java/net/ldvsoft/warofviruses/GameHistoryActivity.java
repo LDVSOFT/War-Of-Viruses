@@ -19,6 +19,11 @@ public class GameHistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_history);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         gameHistoryReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -48,10 +53,15 @@ public class GameHistoryActivity extends AppCompatActivity {
                 }
             }
         };
-        registerReceiver(gameHistoryReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_HISTORY_BROADCAST));
-        Log.d("GameActivityBase", "onStart");
         Intent intent = new Intent(this, GameHistoryDBService.class);
         intent.putExtra(WoVPreferences.LOAD_GAME_HISTORY_KEY, "");
         startService(intent);
+        registerReceiver(gameHistoryReceiver, new IntentFilter(WoVPreferences.LOAD_GAME_HISTORY_BROADCAST));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(gameHistoryReceiver);
     }
 }
