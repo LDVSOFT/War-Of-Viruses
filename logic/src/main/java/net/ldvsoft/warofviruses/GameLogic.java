@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * Created by Сева on 21.10.2015.
  */
-public class GameLogic implements Serializable{
+public class GameLogic {
     private ArrayList<GameEvent> events;
 
     public static final int BOARD_SIZE = 10;
@@ -19,7 +19,7 @@ public class GameLogic implements Serializable{
     public enum PlayerFigure {CROSS, ZERO, NONE}
     public enum GameState {NOT_RUNNING, RUNNING, DRAW, CROSS_WON, ZERO_WON}
 
-    public static class Cell implements Serializable {
+    public static class Cell {
         private CellType cellType = CellType.EMPTY;
         private boolean canMakeTurn = false;
         private boolean isActive = false;
@@ -32,6 +32,10 @@ public class GameLogic implements Serializable{
             this.canMakeTurn = canMakeTurn;
         }
 
+        private Cell(CellType cellType) {
+            this.cellType = cellType;
+        }
+
         public Cell(Cell cell) {
             if (cell == null) {
                 return;
@@ -40,6 +44,39 @@ public class GameLogic implements Serializable{
             cellType = cell.cellType;
             canMakeTurn = cell.canMakeTurn;
             isActive = cell.isActive;
+        }
+
+        public char toChar() {
+            switch (cellType) {
+                case CROSS:
+                    return 'x';
+                case DEAD_CROSS:
+                    return 'X';
+                case ZERO:
+                    return 'o';
+                case DEAD_ZERO:
+                    return 'O';
+                case EMPTY:
+                    return '.';
+                default:
+                    return '#';
+            }
+        }
+
+        public static Cell fromChar(char c) {
+            switch (c) {
+                case 'x':
+                    return new Cell(CellType.CROSS);
+                case 'X':
+                    return new Cell(CellType.DEAD_CROSS);
+                case 'o':
+                    return new Cell(CellType.ZERO);
+                case 'O':
+                    return new Cell(CellType.DEAD_ZERO);
+                case '.':
+                default:
+                    return new Cell(CellType.EMPTY);
+            }
         }
 
         public PlayerFigure getOwner() {
@@ -100,6 +137,24 @@ public class GameLogic implements Serializable{
 
     public PlayerFigure getCurrentPlayerFigure() {
         return currentPlayerFigure;
+    }
+
+    public static GameLogic deserializeGameLogic(String serializedBoard, ArrayList<GameEvent> events,
+                                                 int gameState, int playerFigure, boolean previousTurnSkipped, int currentMiniturn,
+                                                 int currentTurn) {
+        GameLogic logic = new GameLogic();
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                logic.board[i][j] = Cell.fromChar(serializedBoard.charAt(BOARD_SIZE * i + j));
+            }
+        }
+        logic.events = (ArrayList) events.clone();
+        logic.currentGameState = GameState.values()[gameState];
+        logic.currentPlayerFigure = PlayerFigure.values()[playerFigure];
+        logic.previousTurnSkipped = previousTurnSkipped;
+        logic.currentMiniturn = currentMiniturn;
+        logic.currentTurn = currentTurn;
+        return logic;
     }
 
     public GameLogic() {
@@ -379,5 +434,15 @@ public class GameLogic implements Serializable{
             }
         }
         return false;
+    }
+
+    public String getSerializedBoard() {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                builder.append(board[i][j].toChar());
+            }
+        }
+        return builder.toString();
     }
 }
