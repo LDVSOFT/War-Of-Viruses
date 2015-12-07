@@ -8,7 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 
 /**
- * Created by Сева on 01.12.2015.
+ * Activity that replays saved finished game. Should be created with intent, containing id of game that
+ * should be replayed
  */
 public class GameActivityReplay extends GameActivityBase {
     private int id;
@@ -22,6 +23,7 @@ public class GameActivityReplay extends GameActivityBase {
         id = intent.getIntExtra(WoVPreferences.REPLAY_GAME_ID, 0);
         findViewById(R.id.game_bar_play).setVisibility(View.GONE);
     }
+
     @Override
     protected void onStart() {
         super.onStart();

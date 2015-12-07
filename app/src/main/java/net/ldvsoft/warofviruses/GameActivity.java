@@ -27,14 +27,12 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_BOT;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_LOCAL_PLAYER;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
-/**
- * Created by Сева on 01.12.2015.
- */
 public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
     private HumanPlayer humanPlayer = new HumanPlayer();
     private boolean isEnemyLocalPlayer = false;
     private Game game;
+
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);

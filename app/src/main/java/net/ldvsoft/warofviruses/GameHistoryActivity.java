@@ -15,6 +15,10 @@ import android.widget.LinearLayout;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+/**
+ * Activity which displays all the played finished games that stored locally.
+ * User can select some game to replay it
+ */
 public class GameHistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
