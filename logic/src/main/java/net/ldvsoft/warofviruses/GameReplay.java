@@ -6,12 +6,17 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
- * Created by Сева on 05.12.2015.
+ * Class that provides interaction between saved finished game and human, allowing to view replay of
+ * that games.
  */
 public class GameReplay {
     ArrayList<GameLogic> gameStates;
     private int currentEventNumber;
 
+    /**
+     * Constructor for gameReplay
+     * @param gameEventHistory history of events from GameLogic class that should be reproduced
+     */
     GameReplay(ArrayList<GameEvent> gameEventHistory) {
         GameLogic gameLogic = new GameLogic();
         gameLogic.newGame();
@@ -25,18 +30,30 @@ public class GameReplay {
         currentEventNumber = 0;
     }
 
+    /**
+     * Sets internal state to beginning of game(empty field)
+     */
     public void toBeginOfGame() {
         currentEventNumber = 0;
     }
 
+    /**
+     * Sets internal state to the end of game
+     */
     public void toEndOfGame() {
         currentEventNumber = gameStates.size() - 1;
     }
 
+    /**
+     * Applies next event to the internal state
+     */
     public void nextEvent() {
         currentEventNumber = min(currentEventNumber + 1, gameStates.size() - 1);
     }
 
+    /**
+     * Cancel last event
+     */
     public void prevEvent() {
         currentEventNumber = max(0, currentEventNumber - 1);
     }
@@ -49,6 +66,11 @@ public class GameReplay {
         return currentEventNumber + 1;
     }
 
+    /**
+     *
+     * @return copy of the current internal gameLogic state that is changed during calls of toBeginOfGame(),
+     * toEndOfGame(), nextEvent(), prevEvent()
+     */
     public GameLogic getGameLogic() {
         return new GameLogic(gameStates.get(currentEventNumber));
     }
