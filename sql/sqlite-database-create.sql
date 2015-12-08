@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `Game` (
   `playerCrosses` INT UNSIGNED NOT NULL,
   `playerZeroes` INT UNSIGNED NOT NULL,
   `isFinished` INT NOT NULL,
+  `gameDate` TEXT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`playerCrosses` , `playerZeroes`)
   REFERENCES `User` (`id` , `id`)
