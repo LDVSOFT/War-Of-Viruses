@@ -21,21 +21,6 @@ CREATE TABLE IF NOT EXISTS `User` (
   ON UPDATE CASCADE
 );
 
-
--- -----------------------------------------------------
--- Table `Device`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Device` (
-  `token` STRING NOT NULL,
-  `user`  NOT NULL,
-  PRIMARY KEY (`token`),
-  FOREIGN KEY (`user`)
-  REFERENCES `User` (`id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE
-);
-
-
 -- -----------------------------------------------------
 -- Table `Contacts`
 -- -----------------------------------------------------
@@ -57,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `Game` (
   `id` INTEGER,
   `playerCrosses` INT UNSIGNED NOT NULL,
   `playerZeroes` INT UNSIGNED NOT NULL,
-  `status` INT NOT NULL,
+  `isFinished` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`playerCrosses` , `playerZeroes`)
   REFERENCES `User` (`id` , `id`)

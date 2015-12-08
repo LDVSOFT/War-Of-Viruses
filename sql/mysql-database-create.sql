@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `WarOfViruses`.`Game` (
   `id` INT UNSIGNED NOT NULL,
   `playerCrosses` INT UNSIGNED NOT NULL,
   `playerZeroes` INT UNSIGNED NOT NULL,
-  `status` INT NOT NULL,
+  `isFinished` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fkPlayers_idx` (`playerCrosses` ASC, `playerZeroes` ASC),
   CONSTRAINT `fkPlayers`
