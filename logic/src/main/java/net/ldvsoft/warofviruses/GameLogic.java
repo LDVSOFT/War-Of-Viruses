@@ -139,21 +139,12 @@ public class GameLogic {
         return currentPlayerFigure;
     }
 
-    public static GameLogic deserializeGameLogic(String serializedBoard, ArrayList<GameEvent> events,
-                                                 int gameState, int playerFigure, boolean previousTurnSkipped, int currentMiniturn,
-                                                 int currentTurn) {
+    public static GameLogic deserializeGameLogic(ArrayList<GameEvent> events) {
         GameLogic logic = new GameLogic();
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                logic.board[i][j] = Cell.fromChar(serializedBoard.charAt(BOARD_SIZE * i + j));
-            }
+        logic.newGame();
+        for (GameEvent event : events) {
+            event.applyEvent(logic);
         }
-        logic.events = (ArrayList) events.clone();
-        logic.currentGameState = GameState.values()[gameState];
-        logic.currentPlayerFigure = PlayerFigure.values()[playerFigure];
-        logic.previousTurnSkipped = previousTurnSkipped;
-        logic.currentMiniturn = currentMiniturn;
-        logic.currentTurn = currentTurn;
         return logic;
     }
 
@@ -208,6 +199,10 @@ public class GameLogic {
 
     public int getCurrentMiniturn() {
         return currentMiniturn;
+    }
+
+    public int getGameStateAsInt() {
+        return currentGameState.ordinal();
     }
 
     private void updateAdjacentCells(int x, int y) {
@@ -434,15 +429,5 @@ public class GameLogic {
             }
         }
         return false;
-    }
-
-    public String getSerializedBoard() {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                builder.append(board[i][j].toChar());
-            }
-        }
-        return builder.toString();
     }
 }

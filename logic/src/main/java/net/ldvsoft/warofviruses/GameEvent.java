@@ -8,12 +8,30 @@ import java.io.Serializable;
 public class GameEvent implements Serializable {
     public enum GameEventType {TURN_EVENT, SKIP_TURN_EVENT, GIVE_UP_EVENT};
 
-    int turnX, turnY;
+    private int turnX, turnY;
     GameEventType type;
     GameEvent(int turnX, int turnY, GameEventType type) {
         this.turnX = turnX;
         this.turnY = turnY;
         this.type = type;
+    }
+
+    GameEvent(int turnX, int turnY, int type) {
+        this.turnX = turnX;
+        this.turnY = turnY;
+        this.type = GameEventType.values()[type];
+    }
+
+    int getTurnX() {
+        return turnX;
+    }
+
+    int getTurnY() {
+        return turnY;
+    }
+
+    int getEventTypeAsInt() {
+        return type.ordinal();
     }
 
     static GameEvent newGiveUpEvent() {
