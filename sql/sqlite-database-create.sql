@@ -8,10 +8,10 @@
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `User` (
   `id` INTEGER,
-  `googleToken` STRING NOT NULL UNIQUE,
+  `googleToken` TEXT NOT NULL UNIQUE,
   `userType` INT NOT NULL,
-  `nicknameStr` STRING NOT NULL,
-  `nicknameId` STRING NOT NULL,
+  `nicknameStr` TEXT NOT NULL,
+  `nicknameId` TEXT NOT NULL,
   `color` INT UNSIGNED NOT NULL,
   `invitationTarget` INTEGER NULL,
   PRIMARY KEY (`id`),
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `Game` (
   `playerCrosses` INTEGER NOT NULL,
   `playerZeroes` INTEGER NOT NULL,
   `status` INT NOT NULL,
-  `gameDate` STRING NOT NULL,
+  `gameDate` TEXT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`playerCrosses` , `playerZeroes`)
   REFERENCES `User` (`id` , `id`)
