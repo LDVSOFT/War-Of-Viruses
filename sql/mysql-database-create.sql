@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `WarOfViruses`.`User` (
   `nicknameStr` VARCHAR(45) NOT NULL,
   `nicknameId` VARCHAR(45) NOT NULL,
   `color` INT UNSIGNED NOT NULL,
-  `invitationTarget`  NULL,
+  `invitationTarget` INT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `googleToken_UNIQUE` (`googleToken` ASC),
   INDEX `fkIvitation_idx` (`invitationTarget` ASC),
