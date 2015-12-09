@@ -9,6 +9,10 @@ java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter
 # Server
 google.projectId=555379223441
 google.apiKey=YOU-KNOW-IT-IS-A-SECRET
+db.server=localhost
+db.name=War-Of-Viruses
+db.user=wov
+db.password=
 
 # Real running
 gcm.server=gcm-xmpp.googleapis.com
