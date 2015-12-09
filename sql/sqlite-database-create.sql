@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `User` (
   `nicknameStr` STRING NOT NULL,
   `nicknameId` STRING NOT NULL,
   `color` INT UNSIGNED NOT NULL,
-  `invitationTarget` INT NULL,
+  `invitationTarget` INTEGER NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`invitationTarget`)
   REFERENCES `User` (`id`)
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS `Contacts` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Game` (
   `id` INTEGER,
-  `playerCrosses` INT UNSIGNED NOT NULL,
-  `playerZeroes` INT UNSIGNED NOT NULL,
+  `playerCrosses` INTEGER NOT NULL,
+  `playerZeroes` INTEGER NOT NULL,
   `status` INT NOT NULL,
   `gameDate` STRING NOT NULL,
   PRIMARY KEY (`id`),
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `Game` (
 -- Table `Turn`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Turn` (
-  `game` INT UNSIGNED NOT NULL,
+  `game` INTEGER NOT NULL,
   `turnNo` INT UNSIGNED NOT NULL,
   `type` INT NOT NULL,
   `x` INT NULL,
