@@ -15,8 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -156,9 +154,7 @@ public class GameActivity extends GameActivityBase {
             @Override
             protected Void doInBackground(Game... params) {
                 for (Game game : params) { //actually, there is only one game
-                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game.toBytes(),
-                            game.isFinished());
-
+                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game);
                 }
                 return null;
             }
@@ -172,25 +168,28 @@ public class GameActivity extends GameActivityBase {
 
             @Override
             protected Void doInBackground(Void... params) {
-                byte[] data = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getSerializedActiveGame();
+                Game game = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getActiveGame();
 
-                if (data == null) {
-                    Log.d("DBService", "FAIL: Null game data loaded");
+                if (game == null) {
+                    Log.d("DBService", "FAIL: Null game loaded");
                 } else {
-                    Log.d("DBService", "OK: game data loaded");
-                }
-
-                if (data != null) {
-                    onGameLoaded(data);
+                    Log.d("DBService", "OK: game loaded");
                 }
 
                 return null;
             }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (game != null) {
+                    onGameLoaded(game);
+                }
+            }
         }.execute();
     }
 
-    private void onGameLoaded(byte[] data) {
-        game = Game.fromBytes(data);
+    private void onGameLoaded(Game game) {
+        this.game = game;
         setCurrentGameListeners();
         isEnemyLocalPlayer = true; //at least for now...
         initButtons();

@@ -13,40 +13,32 @@ import java.util.ArrayList;
 /**
  * Created by Сева on 19.10.2015.
  */
-public class Game implements Serializable {
+public class Game {
     private Player crossPlayer, zeroPlayer;
 
     private GameLogic gameLogic;
 
-    private transient OnGameStateChangedListener onGameStateChangedListener = null;
-    private transient OnGameFinishedListener onGameFinishedListener = null;
+    private OnGameStateChangedListener onGameStateChangedListener = null;
+    private OnGameFinishedListener onGameFinishedListener = null;
 
-    public byte[] toBytes() {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(this);
-            return bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace(); // at least for now
-            return null;
-        }
+    public static Game deserializeGame(Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
+        Game game = new Game();
+        game.crossPlayer = crossPlayer;
+        game.zeroPlayer = zeroPlayer;
+        game.gameLogic = gameLogic;
+        return game;
     }
 
     public boolean isFinished() {
         return gameLogic.isFinished();
     }
 
-    public static Game fromBytes(byte[] data) {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(data)) {
-            try (ObjectInput in = new ObjectInputStream(bis)) {
-                return (Game) in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Player getZeroPlayer() {
+        return zeroPlayer;
+    }
+
+    public Player getCrossPlayer() {
+        return crossPlayer;
     }
 
 
