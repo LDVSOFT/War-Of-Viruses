@@ -153,9 +153,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         Cursor turnsCursor = getReadableDatabase().rawQuery(GET_ACTIVE_GAME_TURNS, null);
 
         Log.d("DBHelper", "Loading active game: found " + gameCursor.getCount() + " games and " + turnsCursor.getCount() + " turns");
-        if (!gameCursor.moveToFirst()) {
-            return null;
-        }
+
         Game game = getGameFromCursors(gameCursor, turnsCursor);
         gameCursor.close();
         turnsCursor.close();
@@ -187,6 +185,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
         if (!gameCursor.moveToFirst()) {
             return null;
         }
+        turnsCursor.moveToFirst(); //no need to check it since game may have 0 turns
         Player cross = null, zero = null;
         try {
             cross = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", long.class, GameLogic.PlayerFigure.class).
