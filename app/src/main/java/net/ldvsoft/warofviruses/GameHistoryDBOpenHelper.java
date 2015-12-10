@@ -51,7 +51,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
             "PRIMARY KEY(" + GAME_ID + ", " + TURN_NUMBER + "), FOREIGN KEY (" + GAME_ID + ") REFERENCES " + GAME_ID + "(" + ID + ")" +
             "ON DELETE CASCADE ON UPDATE CASCADE);";
 
-    private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGEREGER, " + GOOGLE_TOKEN +
+    private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGER, " + GOOGLE_TOKEN +
             " TEXT NOT NULL UNIQUE, " + USER_TYPE + " INT NOT NULL," + NICKNAME_STR + "TEXT NOT NULL, " + NICKNAME_ID +
             " TEXT NOT NULL, " + COLOR + " INT UNSIGNED NOT NULL, " + INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID +
             "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " + USER_TABLE + " (" + ID +
