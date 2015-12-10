@@ -35,6 +35,7 @@ public class GameHistoryActivity extends AppCompatActivity {
                 return;
             }
             LinearLayout layout = (LinearLayout) findViewById(R.id.history_layout);
+            layout.removeAllViewsInLayout();
             for (String game : gameHistory) {
                 String[] data = game.split(";");
                 Button button = new Button(GameHistoryActivity.this);
