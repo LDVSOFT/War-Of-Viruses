@@ -15,4 +15,5 @@ public abstract class WoVPreferences {
     public static final String REPLAY_GAME_ID = "replayGameId";
     public static final String LOAD_GAME_BY_ID_KEY = "loadGameByIdKey";
     public static final String LOAD_GAME_BY_ID_BROADCAST = "loadGameByIdBroadcast";
+    public static final String REPLAY_GAME_TURN = "replayGameTurn";
 }

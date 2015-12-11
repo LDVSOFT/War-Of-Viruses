@@ -14,14 +14,31 @@ import android.widget.TextView;
 public class GameActivityReplay extends GameActivityBase {
     private long id;
     GameReplay gameReplay;
+    private int turnToStartReplay;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
         Intent intent = getIntent();
-        id = intent.getLongExtra(WoVPreferences.REPLAY_GAME_ID, 0);
+        if (bundle == null) {
+            id = intent.getLongExtra(WoVPreferences.REPLAY_GAME_ID, 0);
+        } else {
+            id = bundle.getLong(WoVPreferences.REPLAY_GAME_ID);
+            turnToStartReplay = bundle.getInt(WoVPreferences.REPLAY_GAME_TURN);
+        }
         findViewById(R.id.game_bar_play).setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(WoVPreferences.REPLAY_GAME_ID, id);
+        if (gameReplay != null) {
+            outState.putInt(WoVPreferences.REPLAY_GAME_TURN, gameReplay.getCurrentEventNumber());
+        } else {
+            outState.putInt(WoVPreferences.REPLAY_GAME_TURN, 0);
+        }
     }
 
     @Override
@@ -56,6 +73,9 @@ public class GameActivityReplay extends GameActivityBase {
     private void onGameLoaded(Game game) {
         gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
         initButtons();
+        for (int i = 0; i < turnToStartReplay - 1; i++) {
+            gameReplay.nextEvent();
+        }
         redrawGame(gameReplay.getGameLogic());
     }
 
