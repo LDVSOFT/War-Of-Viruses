@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS `User` (
   `userType` INT NOT NULL,
   `nicknameStr` TEXT NOT NULL,
   `nicknameId` TEXT NOT NULL,
-  `color` INT UNSIGNED NOT NULL,
+  `colorCross` INT UNSIGNED NOT NULL,
+  `colorZero` INT UNSIGNED NOT NULL,
   `invitationTarget` INTEGER NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`invitationTarget`)
