@@ -205,12 +205,13 @@ public class GameActivity extends GameActivityBase {
 
             @Override
             protected Void doInBackground(Void... params) {
-                game = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getActiveGame();
+                Game loadedGame = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getActiveGame();
 
-                if (game == null) {
-                    Log.d("DBService", "FAIL: Null game loaded");
+                if (loadedGame == null) {
+                    Log.d("GameActivity", "FAIL: Null game loaded");
                 } else {
-                    Log.d("DBService", "OK: game loaded");
+                    Log.d("GameActivity", "OK: game loaded");`x
+                    game = loadedGame;
                 }
 
                 return null;
