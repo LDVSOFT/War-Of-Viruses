@@ -6,25 +6,24 @@ import java.io.Serializable;
  * Created by Сева on 20.10.2015.
  */
 public abstract class Player implements Serializable {
-    protected String name;
     protected GameLogic.PlayerFigure ownFigure;
-    protected long id;
+    protected User user;
 
     public abstract void makeTurn(Game game);
 
     public String getName() {
-        return name;
+        return user.getFullNickname();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Player) {
-            return id == ((Player) obj).id;
+            return getId() == ((Player) obj).getId();
         }
         return false;
     }
 
     public long getId() {
-        return id;
+        return user.getId();
     }
 }
