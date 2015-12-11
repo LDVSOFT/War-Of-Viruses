@@ -29,8 +29,8 @@ public final class WarOfVirusesServer {
 
     private GCMHandler gcmHandler;
 
-    public String getSetting(String name, String defaultValue) {
-        return config.getProperty(name, defaultValue);
+    public String getSetting(String name) {
+        return config.getProperty(name, "");
     }
 
     /**

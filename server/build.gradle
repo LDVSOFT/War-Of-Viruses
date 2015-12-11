@@ -13,5 +13,6 @@ dependencies {
     compile 'org.igniterealtime.smack:smack-im:4.1.4'
     compile 'org.igniterealtime.smack:smack-debug:4.1.4'
     compile 'org.json:json:20140107'
+    compile 'mysql:mysql-connector-java:5.1.38'
     compile project(':logic')
 }
