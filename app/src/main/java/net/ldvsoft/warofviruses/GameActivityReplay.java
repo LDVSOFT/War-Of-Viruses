@@ -12,7 +12,7 @@ import android.widget.TextView;
  * should be replayed
  */
 public class GameActivityReplay extends GameActivityBase {
-    private int id;
+    private long id;
     GameReplay gameReplay;
 
     @Override
@@ -20,7 +20,7 @@ public class GameActivityReplay extends GameActivityBase {
         super.onCreate(bundle);
 
         Intent intent = getIntent();
-        id = intent.getIntExtra(WoVPreferences.REPLAY_GAME_ID, 0);
+        id = intent.getLongExtra(WoVPreferences.REPLAY_GAME_ID, 0);
         findViewById(R.id.game_bar_play).setVisibility(View.GONE);
     }
 
@@ -28,24 +28,24 @@ public class GameActivityReplay extends GameActivityBase {
     protected void onStart() {
         super.onStart();
         new AsyncTask<Void, Void, Void>() {
-            private byte[] data;
+            private Game game;
 
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                if (data != null) {
-                    onGameLoaded(data);
+                if (game!= null) {
+                    onGameLoaded(game);
                 }
             }
 
             @Override
             protected Void doInBackground(Void... params) {
-                data = GameHistoryDBOpenHelper.getInstance(GameActivityReplay.this).getGameById(id);
+                game = GameHistoryDBOpenHelper.getInstance(GameActivityReplay.this).getGameById(id);
 
-                if (data == null) {
-                    Log.d("DBService", "FAIL: Null game data loaded");
+                if (game == null) {
+                    Log.d("GameActivityReplay", "FAIL: Null game loaded");
                 } else {
-                    Log.d("DBService", "OK: game data loaded");
+                    Log.d("GameActivityReplay", "OK: game loaded");
                 }
 
                 return null;
@@ -53,8 +53,7 @@ public class GameActivityReplay extends GameActivityBase {
         }.execute();
     }
 
-    private void onGameLoaded(byte[] data) {
-        Game game = Game.fromBytes(data);
+    private void onGameLoaded(Game game) {
         gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
         initButtons();
         redrawGame(gameReplay.getGameLogic());

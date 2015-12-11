@@ -10,16 +10,14 @@ public class GameEvent implements Serializable {
 
     private int turnX, turnY;
     GameEventType type;
-    GameEvent(int turnX, int turnY, GameEventType type) {
+    public GameEvent(int turnX, int turnY, GameEventType type) {
         this.turnX = turnX;
         this.turnY = turnY;
         this.type = type;
     }
 
-    GameEvent(int turnX, int turnY, int type) {
-        this.turnX = turnX;
-        this.turnY = turnY;
-        this.type = GameEventType.values()[type];
+    public static GameEvent deserialize(int type, int turnX, int turnY) {
+        return new GameEvent(turnX, turnY, GameEventType.values()[type]);
     }
 
     int getTurnX() {

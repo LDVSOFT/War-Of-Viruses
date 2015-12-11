@@ -20,7 +20,13 @@ import static net.ldvsoft.warofviruses.GameLogic.isInside;
 public class AIPlayer extends Player {
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
-        id = new Random().nextInt();
+        id = 0;
+    }
+
+    public static AIPlayer deserialize(long id, GameLogic.PlayerFigure ownFigure) {
+        AIPlayer player = new AIPlayer(ownFigure);
+        player.id = id;
+        return player;
     }
 
     @Override

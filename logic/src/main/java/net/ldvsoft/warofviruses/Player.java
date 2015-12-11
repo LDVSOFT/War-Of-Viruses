@@ -8,7 +8,7 @@ import java.io.Serializable;
 public abstract class Player implements Serializable {
     protected String name;
     protected GameLogic.PlayerFigure ownFigure;
-    protected int id;
+    protected long id;
 
     public abstract void makeTurn(Game game);
 
@@ -22,5 +22,9 @@ public abstract class Player implements Serializable {
             return id == ((Player) obj).id;
         }
         return false;
+    }
+
+    public long getId() {
+        return id;
     }
 }

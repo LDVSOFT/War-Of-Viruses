@@ -35,11 +35,12 @@ public class GameHistoryActivity extends AppCompatActivity {
                 return;
             }
             LinearLayout layout = (LinearLayout) findViewById(R.id.history_layout);
+            layout.removeAllViewsInLayout();
             for (String game : gameHistory) {
                 String[] data = game.split(";");
                 Button button = new Button(GameHistoryActivity.this);
                 button.setText(data[1]);
-                final int id = Integer.parseInt(data[0]);
+                final long id = Long.parseLong(data[0]);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

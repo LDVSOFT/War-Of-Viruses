@@ -139,7 +139,7 @@ public class GameLogic {
         return currentPlayerFigure;
     }
 
-    public static GameLogic deserializeGameLogic(ArrayList<GameEvent> events) {
+    public static GameLogic deserialize(ArrayList<GameEvent> events) {
         GameLogic logic = new GameLogic();
         logic.newGame();
         for (GameEvent event : events) {

@@ -15,8 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -76,52 +74,83 @@ public class GameActivity extends GameActivityBase {
                 .unregisterReceiver(tokenSentReceiver);
         super.onPause();
     }
+
+    private class OnSkipTurnListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    if (isEnemyLocalPlayer) {
+                        if (!game.skipTurn(game.getCurrentPlayer())) {
+                            return null;
+                        }
+                    } else {
+                        if (!game.skipTurn(humanPlayer)) {
+                            return null;
+                        }
+                    }
+                    return null;
+                }
+            }.execute();
+
+        }
+    }
+
+    private class OnGiveUpListener implements  View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    if (isEnemyLocalPlayer) {
+                        game.giveUp(game.getCurrentPlayer());
+                    } else {
+                        game.giveUp(humanPlayer);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
+    }
+
+    private class OnBoardClickListener implements View.OnClickListener {
+        private final int x, y;
+
+        OnBoardClickListener(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+        @Override
+        public void onClick(View v) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    if (isEnemyLocalPlayer) {
+                        game.doTurn(game.getCurrentPlayer(), x, y);
+                    } else {
+                        game.doTurn(humanPlayer, x, y);
+                    }
+                    return null;
+                }
+            }.execute();
+        }
+    }
+
     private void initButtons() {
         Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
-        skipTurnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isEnemyLocalPlayer) {
-                    if (!game.skipTurn(game.getCurrentPlayer())) {
-                        return;
-                    }
-                } else {
-                    if (!game.skipTurn(humanPlayer)) {
-                        return;
-                    }
-                }
-                redrawGame(game.getGameLogic());
-            }
-        });
-
+        skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
-        giveUpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isEnemyLocalPlayer) {
-                    game.giveUp(game.getCurrentPlayer());
-                } else {
-                    game.giveUp(humanPlayer);
-                }
-            }
-        });
+        giveUpButton.setOnClickListener(new OnGiveUpListener());
 
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
-                final int x = i;
-                final int y = j;
-                boardButtons[i][j].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (isEnemyLocalPlayer) {
-                            game.doTurn(game.getCurrentPlayer(), x, y);
-                        } else {
-                            game.doTurn(humanPlayer, x, y);
-                        }
-                    }
-                });
+                boardButtons[i][j].setOnClickListener(new OnBoardClickListener(i, j));
             }
     }
+
     @Override
     protected void onStop() {
         Log.d("GameActivityBase", "onStop");
@@ -140,9 +169,15 @@ public class GameActivity extends GameActivityBase {
         game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
             @Override
             public void onGameStateChanged() {
-                redrawGame(game.getGameLogic());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        redrawGame(game.getGameLogic());
+                    }
+                });
             }
         });
+
         game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
             @Override
             public void onGameFinished() {
@@ -156,9 +191,7 @@ public class GameActivity extends GameActivityBase {
             @Override
             protected Void doInBackground(Game... params) {
                 for (Game game : params) { //actually, there is only one game
-                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game.toBytes(),
-                            game.isFinished());
-
+                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game);
                 }
                 return null;
             }
@@ -172,25 +205,28 @@ public class GameActivity extends GameActivityBase {
 
             @Override
             protected Void doInBackground(Void... params) {
-                byte[] data = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getSerializedActiveGame();
+                game = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getActiveGame();
 
-                if (data == null) {
-                    Log.d("DBService", "FAIL: Null game data loaded");
+                if (game == null) {
+                    Log.d("DBService", "FAIL: Null game loaded");
                 } else {
-                    Log.d("DBService", "OK: game data loaded");
-                }
-
-                if (data != null) {
-                    onGameLoaded(data);
+                    Log.d("DBService", "OK: game loaded");
                 }
 
                 return null;
             }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (game != null) {
+                    onGameLoaded(game);
+                }
+            }
         }.execute();
     }
 
-    private void onGameLoaded(byte[] data) {
-        game = Game.fromBytes(data);
+    private void onGameLoaded(Game game) {
+        this.game = game;
         setCurrentGameListeners();
         isEnemyLocalPlayer = true; //at least for now...
         initButtons();
