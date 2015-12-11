@@ -17,29 +17,9 @@ import java.util.Locale;
 /**
  * Created by Сева on 04.11.2015.
  */
-public class DBOpenHelper extends SQLiteOpenHelper {
+public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     private static final int VERSION = 10;
     private static final String DB_NAME = "gameHistoryDB";
-    private static final String GAME_TABLE = "Game";
-    private static final String ID = "id";
-    private static final String GAME_STATUS = "status";
-    private static final String GAME_DATE = "gameDate";
-    private static final String PLAYER_ZERO = "playerZero";
-    private static final String PLAYER_CROSSES = "playerCrosses";
-
-    private static final String TURN_TABLE = "Turn";
-    private static final String GAME_ID = "game";
-    private static final String TURN_NUMBER = "turnNo";
-    private static final String TURN_TYPE = "type";
-    private static final String TURN_X = "x";
-    private static final String TURN_Y = "y";
-    private static final String USER_TABLE = "User";
-    private static final String GOOGLE_TOKEN = "googleToken";
-    private static final String USER_TYPE = "userType";
-    private static final String NICKNAME_STR = "nicknameStr";
-    private static final String NICKNAME_ID = "nicknameID";
-    private static final String COLOR = "color";
-    private static final String INVITATION_TARGET = "invocationTarget";
 
     private static final String CREATE_GAME_TABLE = "CREATE TABLE " + GAME_TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             PLAYER_CROSSES + " INTEGER UNSIGNED NOT NULL, " + PLAYER_ZERO + " INTEGER  UNSIGNED NOT NULL, " + GAME_STATUS +
@@ -57,35 +37,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
             "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " + USER_TABLE + " (" + ID +
             ") ON DELETE CASCADE ON UPDATE CASCADE);";
 
-    private static final String GET_ACTIVE_GAME = "SELECT " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
-            " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
-
-    private static final String GET_ACTIVE_GAME_TURNS = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
-            " FROM " + TURN_TABLE + " INNER JOIN " + GAME_TABLE + " ON " + GAME_TABLE + "." + ID + " = " + TURN_TABLE + "." + GAME_ID +
-            " AND " + GAME_TABLE + "." + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + " ORDER BY " + TURN_NUMBER + " ASC;";
-
-    private static final String DELETE_ACTIVE_GAME_TURNS = "DELETE FROM " + TURN_TABLE + " WHERE " + GAME_ID + " IN (" +
-            " SELECT " + ID + " FROM " + GAME_TABLE + " WHERE " + ID + " = " + GAME_ID + " AND " + GAME_STATUS + " = " +
-            GameStatus.RUNNING.ordinal() + ");";
-
-    private static final String DELETE_ACTIVE_GAME = "DELETE FROM " + GAME_TABLE + " WHERE " + GAME_STATUS +
-            " =" + GameStatus.RUNNING.ordinal() + ";";
-
-    private static final String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_TABLE + " WHERE " +
-            GAME_STATUS + " = 1 ORDER BY " + GAME_DATE + " DESC;";
-
-    private static final String GET_GAME_BY_ID = "SELECT " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
-            " WHERE " + ID + " = ?;";
-
-    private static final String GET_TURNS_BY_GAME_ID = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
-            " FROM " + TURN_TABLE + " WHERE " + GAME_ID + " =?;";
-
-    private static final String ADD_GAME = "INSERT INTEGER " + GAME_TABLE + "(" + ID + ", " + PLAYER_CROSSES + ", " + PLAYER_ZERO +
-            ", " + GAME_STATUS + ", " + GAME_DATE + ") VALUES (?, ?, ?, ?, ?);";
-
-    private static final String ADD_GAME_TURNS = "INSERT INTEGER " + TURN_TABLE + "(" + GAME_ID + ", " + TURN_NUMBER + ", " + TURN_TYPE +
-            ", " + TURN_X + ", " + TURN_Y + ") VALUES (?, ?, ?, ?, ?);";
-
     private static DBOpenHelper instance;
 
     private static final String DROP_GAME_TABLE = "DROP TABLE IF EXISTS " + GAME_TABLE + ";";
@@ -93,7 +44,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     private static final String DROP_USER_TABLE = "DROP TABLE IF EXISTS " + USER_TABLE + ";";
 
     private static final Class<?>[] playerClasses = {HumanPlayer.class, AIPlayer.class};
-    private enum GameStatus {RUNNING, FINISHED, DELETED}; //probably not there, in some other class
 
     public synchronized static DBOpenHelper getInstance(Context context) {
         if (instance == null) {
@@ -102,7 +52,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         return instance;
     }
 
-    private DBOpenHelper(Context context) {// TODO: remove saving at SD card in release
+    private DBOpenHelper(Context context) {
         super(context, DB_NAME, null, VERSION);
     }
 
