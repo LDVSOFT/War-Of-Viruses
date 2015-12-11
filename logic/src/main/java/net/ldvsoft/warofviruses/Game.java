@@ -8,12 +8,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 /**
  * Created by Сева on 19.10.2015.
  */
 public class Game {
+    private long id;
     private Player crossPlayer, zeroPlayer;
 
     private GameLogic gameLogic;
@@ -21,8 +23,9 @@ public class Game {
     private OnGameStateChangedListener onGameStateChangedListener = null;
     private OnGameFinishedListener onGameFinishedListener = null;
 
-    public static Game deserializeGame(Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
+    public static Game deserializeGame(long id, Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
         Game game = new Game();
+        game.id = id;
         game.crossPlayer = crossPlayer;
         game.zeroPlayer = zeroPlayer;
         game.gameLogic = gameLogic;
@@ -41,6 +44,9 @@ public class Game {
         return crossPlayer;
     }
 
+    public long getGameId() {
+        return id;
+    }
 
     public interface OnGameStateChangedListener {
         void onGameStateChanged();
@@ -64,6 +70,7 @@ public class Game {
     }
 
     public void startNewGame(Player cross, Player zero) {
+        id = new SecureRandom().nextLong();
         crossPlayer = cross;
         zeroPlayer = zero;
         gameLogic = new GameLogic();

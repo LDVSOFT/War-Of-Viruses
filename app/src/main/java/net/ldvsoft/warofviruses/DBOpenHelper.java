@@ -18,7 +18,7 @@ import java.util.Locale;
  * Created by Сева on 04.11.2015.
  */
 public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
-    private static final int VERSION = 10;
+    private static final int VERSION = 11;
     private static final String DB_NAME = "gameHistoryDB";
 
     private static final String CREATE_GAME_TABLE = "CREATE TABLE " + GAME_TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -33,9 +33,9 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGER, " + GOOGLE_TOKEN +
             " TEXT NOT NULL UNIQUE, " + USER_TYPE + " INT NOT NULL," + NICKNAME_STR + "TEXT NOT NULL, " + NICKNAME_ID +
-            " TEXT NOT NULL, " + COLOR + " INT UNSIGNED NOT NULL, " + INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID +
-            "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " + USER_TABLE + " (" + ID +
-            ") ON DELETE CASCADE ON UPDATE CASCADE);";
+            " TEXT NOT NULL, " + COLOR_CROSS + " INT UNSIGNED NOT NULL, " + COLOR_ZERO + " INT UNSIGNED NOT NULL, " +
+            INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID + "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " +
+            USER_TABLE + " (" + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
 
     private static DBOpenHelper instance;
 
@@ -137,11 +137,12 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         }
         turnsCursor.moveToFirst(); //no need to check it since game may have 0 turns
         Player cross = null, zero = null;
+        long id = gameCursor.getLong(0);
         try {
             cross = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", long.class, GameLogic.PlayerFigure.class).
-                    invoke(null, gameCursor.getLong(0), GameLogic.PlayerFigure.CROSS);
+                    invoke(null, gameCursor.getLong(1), GameLogic.PlayerFigure.CROSS);
             zero = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", long.class, GameLogic.PlayerFigure.class).
-                    invoke(null, gameCursor.getLong(1), GameLogic.PlayerFigure.ZERO);
+                    invoke(null, gameCursor.getLong(2), GameLogic.PlayerFigure.ZERO);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -152,7 +153,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             turnsCursor.moveToNext();
         }
 
-        return Game.deserializeGame(cross, zero, GameLogic.deserialize(turns));
+        return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(turns));
     }
 
     public Game getGameById(long id) {

@@ -24,14 +24,15 @@ public interface DBProvider {
     String USER_TYPE = "userType";
     String NICKNAME_STR = "nicknameStr";
     String NICKNAME_ID = "nicknameID";
-    String COLOR = "color";
+    String COLOR_CROSS = "colorCross";
+    String COLOR_ZERO = "colorZero";
     String INVITATION_TARGET = "invocationTarget";
 
     enum GameStatus {RUNNING, FINISHED, DELETED}
 
     ; //probably not there, in some other class
 
-    String GET_ACTIVE_GAME = "SELECT " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
+    String GET_ACTIVE_GAME = "SELECT " + ID + ", " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
             " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
 
     String GET_ACTIVE_GAME_TURNS = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
@@ -48,16 +49,16 @@ public interface DBProvider {
     String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_TABLE + " WHERE " +
             GAME_STATUS + " = 1 ORDER BY " + GAME_DATE + " DESC;";
 
-    String GET_GAME_BY_ID = "SELECT " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
+    String GET_GAME_BY_ID = "SELECT " + ID + ", "+ PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
             " WHERE " + ID + " = ?;";
 
     String GET_TURNS_BY_GAME_ID = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
-            " FROM " + TURN_TABLE + " WHERE " + GAME_ID + " =?;";
+            " FROM " + TURN_TABLE + " WHERE " + GAME_ID + " = ? ORDER BY " + TURN_NUMBER + " ASC;";
 
-    String ADD_GAME = "INSERT INTEGER " + GAME_TABLE + "(" + ID + ", " + PLAYER_CROSSES + ", " + PLAYER_ZERO +
+    String ADD_GAME = "INSERT INTO " + GAME_TABLE + "(" + ID + ", " + PLAYER_CROSSES + ", " + PLAYER_ZERO +
             ", " + GAME_STATUS + ", " + GAME_DATE + ") VALUES (?, ?, ?, ?, ?);";
 
-    String ADD_GAME_TURNS = "INSERT INTEGER " + TURN_TABLE + "(" + GAME_ID + ", " + TURN_NUMBER + ", " + TURN_TYPE +
+    String ADD_GAME_TURNS = "INSERT INTO " + TURN_TABLE + "(" + GAME_ID + ", " + TURN_NUMBER + ", " + TURN_TYPE +
             ", " + TURN_X + ", " + TURN_Y + ") VALUES (?, ?, ?, ?, ?);";
 
     void addGame(Game game);
