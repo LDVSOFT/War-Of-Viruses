@@ -40,7 +40,7 @@ public class GameActivityReplay extends GameActivityBase {
 
             @Override
             protected Void doInBackground(Void... params) {
-                game = GameHistoryDBOpenHelper.getInstance(GameActivityReplay.this).getGameById(id);
+                game = DBOpenHelper.getInstance(GameActivityReplay.this).getGameById(id);
 
                 if (game == null) {
                     Log.d("GameActivityReplay", "FAIL: Null game loaded");

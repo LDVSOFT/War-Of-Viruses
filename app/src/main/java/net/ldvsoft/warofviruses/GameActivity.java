@@ -191,7 +191,7 @@ public class GameActivity extends GameActivityBase {
             @Override
             protected Void doInBackground(Game... params) {
                 for (Game game : params) { //actually, there is only one game
-                    GameHistoryDBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    DBOpenHelper.getInstance(GameActivity.this).addGame(game);
                 }
                 return null;
             }
@@ -205,12 +205,12 @@ public class GameActivity extends GameActivityBase {
 
             @Override
             protected Void doInBackground(Void... params) {
-                Game loadedGame = GameHistoryDBOpenHelper.getInstance(GameActivity.this).getActiveGame();
+                Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getActiveGame();
 
                 if (loadedGame == null) {
                     Log.d("GameActivity", "FAIL: Null game loaded");
                 } else {
-                    Log.d("GameActivity", "OK: game loaded");`x
+                    Log.d("GameActivity", "OK: game loaded");
                     game = loadedGame;
                 }
 

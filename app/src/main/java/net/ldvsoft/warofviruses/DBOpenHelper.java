@@ -17,7 +17,7 @@ import java.util.Locale;
 /**
  * Created by Сева on 04.11.2015.
  */
-public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
+public class DBOpenHelper extends SQLiteOpenHelper {
     private static final int VERSION = 10;
     private static final String DB_NAME = "gameHistoryDB";
     private static final String GAME_TABLE = "Game";
@@ -86,7 +86,7 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
     private static final String ADD_GAME_TURNS = "INSERT INTEGER " + TURN_TABLE + "(" + GAME_ID + ", " + TURN_NUMBER + ", " + TURN_TYPE +
             ", " + TURN_X + ", " + TURN_Y + ") VALUES (?, ?, ?, ?, ?);";
 
-    private static GameHistoryDBOpenHelper instance;
+    private static DBOpenHelper instance;
 
     private static final String DROP_GAME_TABLE = "DROP TABLE IF EXISTS " + GAME_TABLE + ";";
     private static final String DROP_TURN_TABLE = "DROP TABLE IF EXISTS " + TURN_TABLE + ";";
@@ -95,14 +95,14 @@ public class GameHistoryDBOpenHelper extends SQLiteOpenHelper {
     private static final Class<?>[] playerClasses = {HumanPlayer.class, AIPlayer.class};
     private enum GameStatus {RUNNING, FINISHED, DELETED}; //probably not there, in some other class
 
-    public synchronized static GameHistoryDBOpenHelper getInstance(Context context) {
+    public synchronized static DBOpenHelper getInstance(Context context) {
         if (instance == null) {
-            instance = new GameHistoryDBOpenHelper(context);
+            instance = new DBOpenHelper(context);
         }
         return instance;
     }
 
-    private GameHistoryDBOpenHelper(Context context) {// TODO: remove saving at SD card in release
+    private DBOpenHelper(Context context) {// TODO: remove saving at SD card in release
         super(context, DB_NAME, null, VERSION);
     }
 
