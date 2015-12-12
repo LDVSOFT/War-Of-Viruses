@@ -18,6 +18,8 @@ import java.util.Locale;
  * Created by Сева on 04.11.2015.
  */
 public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
+    private static final String TAG = "DBHelper";
+
     private static final int VERSION = 11;
     private static final String DB_NAME = "gameHistoryDB";
 
@@ -36,7 +38,6 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             " TEXT NOT NULL, " + COLOR_CROSS + " INT UNSIGNED NOT NULL, " + COLOR_ZERO + " INT UNSIGNED NOT NULL, " +
             INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID + "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " +
             USER_TABLE + " (" + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
-
     private static DBOpenHelper instance;
 
     private static final String DROP_GAME_TABLE = "DROP TABLE IF EXISTS " + GAME_TABLE + ";";
@@ -75,8 +76,8 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         ContentValues cv = new ContentValues();
         long gameId = new SecureRandom().nextLong();
         cv.put(GAME_STATUS, game.isFinished() ? GameStatus.FINISHED.ordinal() : GameStatus.RUNNING.ordinal());
-        cv.put(PLAYER_CROSSES, game.getCrossPlayer().getId());
-        cv.put(PLAYER_ZERO, game.getZeroPlayer().getId());
+        cv.put(PLAYER_CROSSES, game.getCrossPlayer().getUser().getId());
+        cv.put(PLAYER_ZERO, game.getZeroPlayer().getUser().getId());
         cv.put(ID, gameId);
 
         Calendar c = Calendar.getInstance();
@@ -102,7 +103,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         Cursor gameCursor = getReadableDatabase().rawQuery(GET_ACTIVE_GAME, null);
         Cursor turnsCursor = getReadableDatabase().rawQuery(GET_ACTIVE_GAME_TURNS, null);
 
-        Log.d("DBHelper", "Loading active game: found " + gameCursor.getCount() + " games and " + turnsCursor.getCount() + " turns");
+        Log.d(TAG, "Loading active game: found " + gameCursor.getCount() + " games and " + turnsCursor.getCount() + " turns");
 
         Game game = getGameFromCursors(gameCursor, turnsCursor);
         gameCursor.close();
@@ -118,7 +119,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
 
     public ArrayList<String> getGameHistory() {
         Cursor cursor = getReadableDatabase().rawQuery(GET_GAME_HISTORY, null);
-        Log.d("DBHelper", "Loading game history: found " + cursor.getCount() + " games");
+        Log.d(TAG, "Loading game history: found " + cursor.getCount() + " games");
         if (!cursor.moveToFirst()) {
             return null;
         }
@@ -137,12 +138,14 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         }
         turnsCursor.moveToFirst(); //no need to check it since game may have 0 turns
         Player cross = null, zero = null;
+        User userCross = getUserById(gameCursor.getLong(1));
+        User userZero  = getUserById(gameCursor.getLong(2));
         long id = gameCursor.getLong(0);
         try {
-            cross = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", long.class, GameLogic.PlayerFigure.class).
-                    invoke(null, gameCursor.getLong(1), GameLogic.PlayerFigure.CROSS);
-            zero = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", long.class, GameLogic.PlayerFigure.class).
-                    invoke(null, gameCursor.getLong(2), GameLogic.PlayerFigure.ZERO);
+            cross = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
+                    invoke(null, userCross, GameLogic.PlayerFigure.CROSS);
+            zero = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
+                    invoke(null, userZero , GameLogic.PlayerFigure.ZERO);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -160,10 +163,36 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         String[] queryArgs = new String[] {Long.toString(id)};
         Cursor gameCursor = getReadableDatabase().rawQuery(GET_GAME_BY_ID, queryArgs);
         Cursor turnsCursor = getReadableDatabase().rawQuery(GET_TURNS_BY_GAME_ID, queryArgs);
-        Log.d("DBHelper", "Loading game by id: found " + gameCursor.getCount() + " games and " + turnsCursor.getCount() + " turns");
+        Log.d(TAG, "Loading game by id: found " + gameCursor.getCount() + " games and " + turnsCursor.getCount() + " turns");
         Game game = getGameFromCursors(gameCursor, turnsCursor);
         gameCursor.close();
         turnsCursor.close();
         return game;
+    }
+
+    @Override
+    public void addUser(User user) {
+        throw new UnsupportedOperationException("DBOpenHelper::addUser()");
+    }
+
+    @Override
+    public User getUserById(long id) {
+        String[] queryArgs = new String[] {Long.toString(id)};
+        Cursor userCursor = getReadableDatabase().rawQuery(GET_USER_BY_ID, queryArgs);
+        Log.d(TAG, "Loading user by id: found " + userCursor.getCount() + " users.");
+
+        User user = new User(
+                userCursor.getLong(0),
+                userCursor.getString(1),
+                userCursor.getString(2),
+                userCursor.getString(3),
+                userCursor.getInt(4),
+                userCursor.getInt(5),
+                null /*FIXME Load separetly*/
+        );
+
+        userCursor.close();
+
+        return user;
     }
 }

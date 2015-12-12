@@ -6,15 +6,24 @@ import java.util.Random;
  * Created by Сева on 21.10.2015.
  */
 public class HumanPlayer extends Player {
-    public static HumanPlayer deserialize(long id, GameLogic.PlayerFigure ownFigure) {
-        HumanPlayer player = new HumanPlayer();
-        player.id = id;
-        return player;
+    public static final User USER_ANNONYMOUS = new User(
+            DBProvider.USER_ANNONYMOUS,
+            "",
+            "Annonimous", "1",
+            0, 0,
+            null);
+
+    public static HumanPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+        return new HumanPlayer(user, ownFigure);
+    }
+
+    public HumanPlayer(User user, GameLogic.PlayerFigure ownFigure) {
+        this.user = user;
+        this.ownFigure = ownFigure;
     }
 
     @Override
     public void makeTurn(Game game) {
 //        id = new Random().nextInt();
-        id = 1; // todo: change before adding network player
     }
 }

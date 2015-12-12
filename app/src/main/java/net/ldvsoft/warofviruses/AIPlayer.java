@@ -18,15 +18,21 @@ import static net.ldvsoft.warofviruses.GameLogic.isInside;
  * Created by Сева on 20.10.2015.
  */
 public class AIPlayer extends Player {
+    private static final User USER = new User(
+            DBProvider.USER_AI_PLAYER,
+            "",
+            "SkyNet", "1",
+            0, 0,
+            null);
+
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
-        id = 0;
+        this.user = USER;
     }
 
-    public static AIPlayer deserialize(long id, GameLogic.PlayerFigure ownFigure) {
-        AIPlayer player = new AIPlayer(ownFigure);
-        player.id = id;
-        return player;
+    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+        // There is only one AI user
+        return new AIPlayer(ownFigure);
     }
 
     @Override

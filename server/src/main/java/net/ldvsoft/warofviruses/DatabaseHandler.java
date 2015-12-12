@@ -41,8 +41,8 @@ public class DatabaseHandler implements DBProvider {
 
                     PreparedStatement addGameStatement = connection.prepareStatement(ADD_GAME);
                     addGameStatement.setLong(1, id);
-                    addGameStatement.setLong(2, game.getCrossPlayer().getId());
-                    addGameStatement.setLong(3, game.getZeroPlayer().getId());
+                    addGameStatement.setLong(2, game.getCrossPlayer().getUser().getId());
+                    addGameStatement.setLong(3, game.getZeroPlayer().getUser().getId());
                     addGameStatement.setInt(4, status.ordinal());
 
                     addGameStatement.execute();
@@ -108,5 +108,15 @@ public class DatabaseHandler implements DBProvider {
             logger.log(Level.SEVERE, "Failed to load game.", e);
             return null;
         }
+    }
+
+    @Override
+    public void addUser(User user) {
+        throw new UnsupportedOperationException("DatabaseHandler::addUser()");
+    }
+
+    @Override
+    public User getUserById(long id) {
+        throw new UnsupportedOperationException("DatabaseHandler::addUser()");
     }
 }

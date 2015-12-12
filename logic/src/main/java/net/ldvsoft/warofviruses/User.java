@@ -4,7 +4,7 @@ package net.ldvsoft.warofviruses;
  * Created by ldvsoft on 11.12.15.
  */
 public class User {
-    private int id;
+    private long id;
     private String googleToken;
     private String nickNameStr;
     private String nickNameId;
@@ -12,7 +12,12 @@ public class User {
     private int colorZero;
     private User invitationTarget;
 
-    public User(int id, String googleToken, String nickNameStr, String nickNameId, int colorCross, int colorZero, User invitationTarget) {
+    public User(
+            long id,
+            String googleToken,
+            String nickNameStr, String nickNameId,
+            int colorCross, int colorZero,
+            User invitationTarget) {
         this.id = id;
         this.googleToken = googleToken;
         this.nickNameStr = nickNameStr;

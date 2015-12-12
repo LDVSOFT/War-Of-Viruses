@@ -28,6 +28,12 @@ public interface DBProvider {
     String COLOR_ZERO = "colorZero";
     String INVITATION_TARGET = "invocationTarget";
 
+    /**
+     * Special user ids.
+     */
+    int USER_AI_PLAYER = 0;
+    int USER_ANNONYMOUS = 1;
+
     enum GameStatus {RUNNING, FINISHED, DELETED}
 
     ; //probably not there, in some other class
@@ -61,8 +67,15 @@ public interface DBProvider {
     String ADD_GAME_TURNS = "INSERT INTO " + TURN_TABLE + "(" + GAME_ID + ", " + TURN_NUMBER + ", " + TURN_TYPE +
             ", " + TURN_X + ", " + TURN_Y + ") VALUES (?, ?, ?, ?, ?);";
 
+    String GET_USER_BY_ID = "SELECT * FROM " + USER_TABLE + " WHERE " + ID + " = ?;";
+
+    String ADD_USER = "INSERT INTO " + USER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
     void addGame(Game game);
     void deleteActiveGame();
     ArrayList<String> getGameHistory();
     Game getGameById(long id);
+
+    void addUser(User user);
+    User getUserById(long id);
 }

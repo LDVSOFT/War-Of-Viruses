@@ -27,7 +27,7 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
-    private HumanPlayer humanPlayer = new HumanPlayer();
+    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANNONYMOUS, GameLogic.PlayerFigure.CROSS);
     private boolean isEnemyLocalPlayer = false;
     private Game game;
 
@@ -56,7 +56,7 @@ public class GameActivity extends GameActivityBase {
                 isEnemyLocalPlayer = false;
                 break;
             case OPPONENT_LOCAL_PLAYER:
-                game.startNewGame(humanPlayer, new HumanPlayer());
+                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
                 isEnemyLocalPlayer = true;
                 break;
             default:
