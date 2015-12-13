@@ -20,7 +20,7 @@ import java.util.Locale;
 public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     private static final String TAG = "DBHelper";
 
-    private static final int VERSION = 11;
+    private static final int VERSION = 16;
     private static final String DB_NAME = "gameHistoryDB";
 
     private static final String CREATE_GAME_TABLE = "CREATE TABLE " + GAME_TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -34,7 +34,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             "ON DELETE CASCADE ON UPDATE CASCADE);";
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGER, " + GOOGLE_TOKEN +
-            " TEXT NOT NULL UNIQUE, " + USER_TYPE + " INT NOT NULL," + NICKNAME_STR + "TEXT NOT NULL, " + NICKNAME_ID +
+            " TEXT NOT NULL UNIQUE, " + USER_TYPE + " INT NOT NULL, " + NICKNAME_STR + " TEXT NOT NULL, " + NICKNAME_ID +
             " TEXT NOT NULL, " + COLOR_CROSS + " INT UNSIGNED NOT NULL, " + COLOR_ZERO + " INT UNSIGNED NOT NULL, " +
             INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID + "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " +
             USER_TABLE + " (" + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
@@ -62,6 +62,8 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         db.execSQL(CREATE_GAME_TABLE);
         db.execSQL(CREATE_TURN_TABLE);
         db.execSQL(CREATE_USER_TABLE);
+        addUser(HumanPlayer.USER_ANONYMOUS, db);
+        addUser(AIPlayer.AI_USER, db);
     }
 
     @Override
@@ -142,9 +144,9 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         User userZero  = getUserById(gameCursor.getLong(2));
         long id = gameCursor.getLong(0);
         try {
-            cross = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
+            cross = (Player) playerClasses[userCross.getType()].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
                     invoke(null, userCross, GameLogic.PlayerFigure.CROSS);
-            zero = (Player) playerClasses[gameCursor.getInt(0)].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
+            zero = (Player) playerClasses[userZero.getType()].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
                     invoke(null, userZero , GameLogic.PlayerFigure.ZERO);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
@@ -170,9 +172,20 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         return game;
     }
 
+    public void addUser(User user, SQLiteDatabase db) {
+        ContentValues cv = new ContentValues();
+        cv.put(ID, user.getId());
+        cv.put(GOOGLE_TOKEN, user.getGoogleToken());
+        cv.put(USER_TYPE, user.getType());
+        cv.put(NICKNAME_STR, user.getNickNameStr());
+        cv.put(NICKNAME_ID, user.getNickNameId());
+        cv.put(COLOR_CROSS, user.getColorCross());
+        cv.put(COLOR_ZERO, user.getColorZero());
+        db.insert(USER_TABLE, null, cv);
+    }
     @Override
     public void addUser(User user) {
-        throw new UnsupportedOperationException("DBOpenHelper::addUser()");
+        addUser(user, getWritableDatabase());
     }
 
     @Override
@@ -181,13 +194,18 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         Cursor userCursor = getReadableDatabase().rawQuery(GET_USER_BY_ID, queryArgs);
         Log.d(TAG, "Loading user by id: found " + userCursor.getCount() + " users.");
 
+        if (!userCursor.moveToFirst()) {
+            Log.d(TAG, "No user loaded!");
+            return null;
+        }
         User user = new User(
                 userCursor.getLong(0),
                 userCursor.getString(1),
-                userCursor.getString(2),
+                userCursor.getInt(2),
                 userCursor.getString(3),
-                userCursor.getInt(4),
+                userCursor.getString(4),
                 userCursor.getInt(5),
+                userCursor.getInt(6),
                 null /*FIXME Load separetly*/
         );
 

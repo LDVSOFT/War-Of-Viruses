@@ -6,10 +6,11 @@ import java.util.Random;
  * Created by Сева on 21.10.2015.
  */
 public class HumanPlayer extends Player {
-    public static final User USER_ANNONYMOUS = new User(
+    public static final User USER_ANONYMOUS = new User(
             DBProvider.USER_ANNONYMOUS,
-            "",
-            "Annonimous", "1",
+            "uniqueGoogleTokenForAnonymousPlayer",
+            0, //DBOpenHelper.playerClasses[0]
+            "Anonymous", "1",
             0, 0,
             null);
 
