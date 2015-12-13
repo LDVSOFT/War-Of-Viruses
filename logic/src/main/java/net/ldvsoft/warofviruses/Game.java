@@ -8,12 +8,13 @@ import java.security.SecureRandom;
 public class Game {
     private long id;
     private Player crossPlayer, zeroPlayer;
+    private OnGameFinishedListener onGameFinishedListener = null;
 
     private GameLogic gameLogic;
 
-    private OnGameStateChangedListener onGameStateChangedListener = null;
-    private OnGameFinishedListener onGameFinishedListener = null;
-
+    public interface OnGameFinishedListener {
+        void onGameFinished();
+    }
     public static Game deserializeGame(long id, Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
         Game game = new Game();
         game.id = id;
@@ -39,25 +40,11 @@ public class Game {
         return id;
     }
 
-    public interface OnGameStateChangedListener {
-        void onGameStateChanged(GameEvent event);
-    }
 
-    public interface OnGameFinishedListener {
-        void onGameFinished();
-    }
 
     //returns COPY of gameLogic instance to prevent corrupting it
     public GameLogic getGameLogic() {
         return new GameLogic(gameLogic);
-    }
-
-    public void setOnGameStateChangedListener(OnGameStateChangedListener onGameStateChangedListener) {
-        this.onGameStateChangedListener = onGameStateChangedListener;
-    }
-
-    public void setOnGameFinishedListener(OnGameFinishedListener onGameFinishedListener) {
-        this.onGameFinishedListener = onGameFinishedListener;
     }
 
     public void startNewGame(Player cross, Player zero) {
@@ -86,13 +73,18 @@ public class Game {
         }
     }
 
+    public void setOnGameFinishedListener(OnGameFinishedListener onGameFinishedListener) {
+        this.onGameFinishedListener = onGameFinishedListener;
+    }
+
     public boolean giveUp(Player sender) {
         if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -109,7 +101,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(this,  gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -126,7 +119,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }

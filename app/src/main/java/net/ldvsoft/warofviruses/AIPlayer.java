@@ -41,6 +41,10 @@ public class AIPlayer extends Player {
         new BruteforceStrategy(game).execute();
     }
 
+    @Override
+    public void onGameStateChanged(Game game, GameEvent event) {
+    }
+
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
         private Game game;
         BruteforceStrategy(Game game) {

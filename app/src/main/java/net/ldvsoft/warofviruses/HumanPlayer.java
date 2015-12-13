@@ -6,6 +6,16 @@ import java.util.Random;
  * Created by Сева on 21.10.2015.
  */
 public class HumanPlayer extends Player {
+    private OnGameStateChangedListener onGameStateChangedListener = null;
+
+    public void setOnGameStateChangedListener(OnGameStateChangedListener onGameStateChangedListener) {
+        this.onGameStateChangedListener = onGameStateChangedListener;
+    }
+
+    public interface OnGameStateChangedListener {
+        void onGameStateChanged(GameLogic gameLogic);
+    }
+
     public static final User USER_ANONYMOUS = new User(
             DBProvider.USER_ANNONYMOUS,
             "uniqueGoogleTokenForAnonymousPlayer",
@@ -23,8 +33,21 @@ public class HumanPlayer extends Player {
         this.ownFigure = ownFigure;
     }
 
+    public HumanPlayer(User user, GameLogic.PlayerFigure ownFigure, OnGameStateChangedListener onGameStateChangedListener) {
+        this.user = user;
+        this.ownFigure = ownFigure;
+        this.onGameStateChangedListener = onGameStateChangedListener;
+    }
+
     @Override
     public void makeTurn(Game game) {
 //        id = new Random().nextInt();
+    }
+
+    @Override
+    public void onGameStateChanged(Game game, GameEvent event) {
+        if (onGameStateChangedListener != null) {
+            onGameStateChangedListener.onGameStateChanged(game.getGameLogic());
+        }
     }
 }

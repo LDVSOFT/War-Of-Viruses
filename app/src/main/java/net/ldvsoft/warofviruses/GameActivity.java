@@ -27,8 +27,22 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS);
     private Game game;
+
+    private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
+            new HumanPlayer.OnGameStateChangedListener() {
+                @Override
+                public void onGameStateChanged(final GameLogic gameLogic) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            redrawGame(gameLogic);
+                        }
+                    });
+                }
+            };
+    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS,
+            ON_GAME_STATE_CHANGED_LISTENER);
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -149,18 +163,6 @@ public class GameActivity extends GameActivityBase {
     }
 
     private void setCurrentGameListeners() {
-        game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
-            @Override
-            public void onGameStateChanged(GameEvent event) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        redrawGame(game.getGameLogic());
-                    }
-                });
-            }
-        });
-
         game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
             @Override
             public void onGameFinished() {
@@ -195,8 +197,12 @@ public class GameActivity extends GameActivityBase {
                 } else {
                     Log.d("GameActivity", "OK: game loaded");
                     game = loadedGame;
+                    if (game.getCrossPlayer() instanceof HumanPlayer) {
+                        ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+                    } else if (game.getZeroPlayer() instanceof HumanPlayer) {
+                        ((HumanPlayer) game.getZeroPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+                    } //it's a dirty hack, don't know how to do better
                 }
-
                 return null;
             }
 

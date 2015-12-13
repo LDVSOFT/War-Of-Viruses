@@ -15,6 +15,8 @@ public abstract class Player implements Serializable {
         return user.getFullNickname();
     }
 
+    public abstract void onGameStateChanged(Game game, GameEvent event);
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Player && user.getId() == ((Player) obj).user.getId();
