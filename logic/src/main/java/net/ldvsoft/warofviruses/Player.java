@@ -17,13 +17,10 @@ public abstract class Player implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Player) {
-            return user.getId() == ((Player) obj).user.getId();
-        }
-        return false;
+        return obj instanceof Player && user.getId() == ((Player) obj).user.getId();
     }
 
     public User getUser() {
         return user;
-    };
+    }
 }

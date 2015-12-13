@@ -32,10 +32,6 @@ public class GameLogic {
             this.canMakeTurn = canMakeTurn;
         }
 
-        private Cell(CellType cellType) {
-            this.cellType = cellType;
-        }
-
         public Cell(Cell cell) {
             if (cell == null) {
                 return;
@@ -44,39 +40,6 @@ public class GameLogic {
             cellType = cell.cellType;
             canMakeTurn = cell.canMakeTurn;
             isActive = cell.isActive;
-        }
-
-        public char toChar() {
-            switch (cellType) {
-                case CROSS:
-                    return 'x';
-                case DEAD_CROSS:
-                    return 'X';
-                case ZERO:
-                    return 'o';
-                case DEAD_ZERO:
-                    return 'O';
-                case EMPTY:
-                    return '.';
-                default:
-                    return '#';
-            }
-        }
-
-        public static Cell fromChar(char c) {
-            switch (c) {
-                case 'x':
-                    return new Cell(CellType.CROSS);
-                case 'X':
-                    return new Cell(CellType.DEAD_CROSS);
-                case 'o':
-                    return new Cell(CellType.ZERO);
-                case 'O':
-                    return new Cell(CellType.DEAD_ZERO);
-                case '.':
-                default:
-                    return new Cell(CellType.EMPTY);
-            }
         }
 
         public PlayerFigure getOwner() {
