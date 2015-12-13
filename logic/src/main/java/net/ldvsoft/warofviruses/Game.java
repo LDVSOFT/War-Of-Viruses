@@ -49,7 +49,7 @@ public class Game {
     }
 
     public interface OnGameStateChangedListener {
-        void onGameStateChanged();
+        void onGameStateChanged(GameEvent event);
     }
 
     public interface OnGameFinishedListener {
@@ -101,7 +101,7 @@ public class Game {
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            onGameStateChangedListener.onGameStateChanged();
+            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -118,7 +118,7 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            onGameStateChangedListener.onGameStateChanged();
+            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -135,7 +135,7 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            onGameStateChangedListener.onGameStateChanged();
+            onGameStateChangedListener.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
