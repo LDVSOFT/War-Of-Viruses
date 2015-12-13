@@ -40,12 +40,12 @@ public class HumanPlayer extends Player {
     }
 
     @Override
-    public void makeTurn(Game game) {
+    public void makeTurn() {
 //        id = new Random().nextInt();
     }
 
     @Override
-    public void onGameStateChanged(Game game, GameEvent event) {
+    public void onGameStateChanged(GameEvent event) {
         if (onGameStateChangedListener != null) {
             onGameStateChangedListener.onGameStateChanged(game.getGameLogic());
         }

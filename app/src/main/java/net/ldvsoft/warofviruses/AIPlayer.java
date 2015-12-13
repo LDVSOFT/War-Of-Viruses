@@ -36,13 +36,13 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    public void makeTurn(Game game) {
+    public void makeTurn() {
         Log.d("AIPlayer", "Turn passed to AI player");
         new BruteforceStrategy(game).execute();
     }
 
     @Override
-    public void onGameStateChanged(Game game, GameEvent event) {
+    public void onGameStateChanged(GameEvent event) {
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {

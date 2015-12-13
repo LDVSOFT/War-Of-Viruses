@@ -8,14 +8,19 @@ import java.io.Serializable;
 public abstract class Player implements Serializable {
     protected GameLogic.PlayerFigure ownFigure;
     protected User user;
+    protected Game game;
 
-    public abstract void makeTurn(Game game);
+    public abstract void makeTurn();
 
     public String getName() {
         return user.getFullNickname();
     }
 
-    public abstract void onGameStateChanged(Game game, GameEvent event);
+    public abstract void onGameStateChanged(GameEvent event);
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
 
     @Override
     public boolean equals(Object obj) {

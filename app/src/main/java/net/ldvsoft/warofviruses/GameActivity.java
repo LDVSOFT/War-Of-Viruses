@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -27,6 +28,7 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
+    private BroadcastReceiver gameLoadedFromServerReceiver;
     private Game game;
 
     private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
@@ -183,36 +185,61 @@ public class GameActivity extends GameActivityBase {
         }.execute(game);
     }
 
+    private final class StoredGameLoader extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getActiveGame();
+
+            if (loadedGame == null) {
+                Log.d("GameActivity", "FAIL: Null game loaded");
+            } else {
+                Log.d("GameActivity", "OK: game loaded");
+                game = loadedGame;
+                if (game.getCrossPlayer() instanceof HumanPlayer) {
+                    ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+                } else if (game.getZeroPlayer() instanceof HumanPlayer) {
+                    ((HumanPlayer) game.getZeroPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+                } //it's a dirty hack, don't know how to do better
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (game != null) {
+                onGameLoaded(game);
+            }
+        }
+    }
     @Override
     protected void onStart() {
         super.onStart();
-        new AsyncTask<Void, Void, Void>() {
-
+        new StoredGameLoader().execute();
+        gameLoadedFromServerReceiver = new BroadcastReceiver() {
             @Override
-            protected Void doInBackground(Void... params) {
-                Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getActiveGame();
+            public void onReceive(Context context, Intent intent) {
+                Bundle data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE);
+                //FUCK IT!!! NOT FROM DB, BUT FROM BUNDLE!! AAAAAAAAAAAARRRRRGH
+                //DAT PAIN
 
-                if (loadedGame == null) {
-                    Log.d("GameActivity", "FAIL: Null game loaded");
+                User cross;
+                User zero;
+
+                //TODO: now i'm going to convert dat bundle to json and then to gson and then I'LL GODLIKE!!!
+                //todo:: don't forget to save users to db
+                Player playerCross, playerZero;
+                //todo: also I should add to message from server field containing my own figure
+                if (cross == null) { //FIXME oooh shiit what we will do with null user???
+                    playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
+                    playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
                 } else {
-                    Log.d("GameActivity", "OK: game loaded");
-                    game = loadedGame;
-                    if (game.getCrossPlayer() instanceof HumanPlayer) {
-                        ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-                    } else if (game.getZeroPlayer() instanceof HumanPlayer) {
-                        ((HumanPlayer) game.getZeroPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-                    } //it's a dirty hack, don't know how to do better
+                    playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
+                    playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
                 }
-                return null;
+                ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(data.getIntArray(WoVProtocol.TURN_ARRAY));
+                game = Game.deserializeGame(data.getInt(WoVProtocol.GAME_ID), playerCross, playerZero, GameLogic.deserialize(events));
             }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                if (game != null) {
-                    onGameLoaded(game);
-                }
-            }
-        }.execute();
+        };
     }
 
     private void onGameLoaded(Game game) {

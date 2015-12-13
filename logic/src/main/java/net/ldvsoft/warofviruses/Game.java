@@ -53,6 +53,8 @@ public class Game {
         zeroPlayer = zero;
         gameLogic = new GameLogic();
         gameLogic.newGame();
+        crossPlayer.setGame(this);
+        zeroPlayer.setGame(this);
     }
 
     public Player getCurrentPlayer() {
@@ -69,7 +71,7 @@ public class Game {
     private void notifyPlayer() {
         Player currentPlayer = getCurrentPlayer();
         if (currentPlayer != null) {
-            currentPlayer.makeTurn(this);
+            currentPlayer.makeTurn();
         }
     }
 
@@ -83,8 +85,8 @@ public class Game {
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -101,8 +103,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(this,  gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
@@ -119,8 +121,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            crossPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(this, gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
         }
         return result;
     }
