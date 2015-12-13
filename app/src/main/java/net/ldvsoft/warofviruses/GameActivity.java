@@ -27,8 +27,7 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANNONYMOUS, GameLogic.PlayerFigure.CROSS);
-    private boolean isEnemyLocalPlayer = false;
+    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS);
     private Game game;
 
     @Override
@@ -53,11 +52,9 @@ public class GameActivity extends GameActivityBase {
         switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
             case OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
-                isEnemyLocalPlayer = false;
                 break;
             case OPPONENT_LOCAL_PLAYER:
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
-                isEnemyLocalPlayer = true;
                 break;
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
@@ -81,14 +78,8 @@ public class GameActivity extends GameActivityBase {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    if (isEnemyLocalPlayer) {
-                        if (!game.skipTurn(game.getCurrentPlayer())) {
-                            return null;
-                        }
-                    } else {
-                        if (!game.skipTurn(humanPlayer)) {
-                            return null;
-                        }
+                    if (!game.skipTurn(game.getCurrentPlayer())) {
+                        return null;
                     }
                     return null;
                 }
@@ -105,11 +96,7 @@ public class GameActivity extends GameActivityBase {
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    if (isEnemyLocalPlayer) {
-                        game.giveUp(game.getCurrentPlayer());
-                    } else {
-                        game.giveUp(humanPlayer);
-                    }
+                    game.giveUp(game.getCurrentPlayer());
                     return null;
                 }
             }.execute();
@@ -128,11 +115,7 @@ public class GameActivity extends GameActivityBase {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    if (isEnemyLocalPlayer) {
-                        game.doTurn(game.getCurrentPlayer(), x, y);
-                    } else {
-                        game.doTurn(humanPlayer, x, y);
-                    }
+                    game.doTurn(game.getCurrentPlayer(), x, y);
                     return null;
                 }
             }.execute();
@@ -168,7 +151,7 @@ public class GameActivity extends GameActivityBase {
     private void setCurrentGameListeners() {
         game.setOnGameStateChangedListener(new Game.OnGameStateChangedListener() {
             @Override
-            public void onGameStateChanged() {
+            public void onGameStateChanged(GameEvent event) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -229,7 +212,6 @@ public class GameActivity extends GameActivityBase {
     private void onGameLoaded(Game game) {
         this.game = game;
         setCurrentGameListeners();
-        isEnemyLocalPlayer = true; //at least for now...
         initButtons();
         redrawGame(game.getGameLogic());
     }
