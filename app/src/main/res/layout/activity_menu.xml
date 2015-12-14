@@ -28,4 +28,11 @@
         android:text="View game history"
         android:onClick="viewGameHistory"
         android:id="@+id/button" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="I wanna play online!"
+        android:onClick="playOnline"
+        android:id="@+id/button_play_online" />
 </LinearLayout>

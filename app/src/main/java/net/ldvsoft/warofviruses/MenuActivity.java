@@ -5,10 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
+
 public class MenuActivity extends AppCompatActivity {
+    private final static String USER_ID = "3"; //todo REMOVE IT!!!
     public final static String OPPONENT_TYPE = "net.ldvsoft.warofviruses.OPPONENT_TYPE";
     public final static int OPPONENT_BOT = 0;
     public final static int OPPONENT_LOCAL_PLAYER = 1;
+    public static final int OPPONENT_NETWORK_PLAYER = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +37,20 @@ public class MenuActivity extends AppCompatActivity {
 
     public void viewGameHistory(View view) {
         Intent intent = new Intent(this, GameHistoryActivity.class);
+        startActivity(intent);
+    }
+
+    public void playOnline(View view) {
+        Intent intent = new Intent(this, GameActivity.class);
+        intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
+        GoogleCloudMessaging gcm = new GoogleCloudMessaging();
+        Bundle data = new Bundle();
+        data.putString(WoVProtocol.ACTION, WoVProtocol.USER_READY);
+        try {
+            gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", USER_ID, data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         startActivity(intent);
     }
 }

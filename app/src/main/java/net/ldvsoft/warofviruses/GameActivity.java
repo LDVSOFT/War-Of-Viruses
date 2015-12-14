@@ -27,6 +27,7 @@ import java.util.UUID;
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_BOT;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_LOCAL_PLAYER;
+import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_NETWORK_PLAYER;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
@@ -74,6 +75,8 @@ public class GameActivity extends GameActivityBase {
                 break;
             case OPPONENT_LOCAL_PLAYER:
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
+                break;
+            case OPPONENT_NETWORK_PLAYER:
                 break;
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
