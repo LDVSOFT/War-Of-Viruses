@@ -31,6 +31,7 @@ public final class WarOfVirusesServer {
     private Properties config = new Properties();
 
     private GCMHandler gcmHandler;
+    private DatabaseHandler databaseHandler;
 
     public String getSetting(String name) {
         return config.getProperty(name, "");
@@ -90,22 +91,24 @@ public final class WarOfVirusesServer {
         logger = Logger.getLogger(WarOfVirusesServer.class.getName());
 
         try {
+            databaseHandler = new DatabaseHandler(this);
             gcmHandler = new GCMHandler(this);
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
                     gcmHandler.stop();
+                    databaseHandler.stop();
                 }
             }));
 
-            while (!Thread.interrupted()) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+//            while (!Thread.interrupted()) {
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Server failed", e);
             System.exit(1);

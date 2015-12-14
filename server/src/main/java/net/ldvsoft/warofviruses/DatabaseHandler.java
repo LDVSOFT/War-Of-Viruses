@@ -30,6 +30,9 @@ public class DatabaseHandler implements DBProvider {
         dataSource.setPassword(server.getSetting("db.password"));
     }
 
+    public void stop() {
+    }
+
     @Override
     public void addGame(Game game) {
         try {
