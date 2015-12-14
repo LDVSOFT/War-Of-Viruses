@@ -8,6 +8,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -27,9 +30,22 @@ public class ClientNetworkPlayer extends Player {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Bundle data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE);
-                GameEvent.deserialize(data.getInt(WoVProtocol.TURN_TYPE),
-                        data.getInt(WoVProtocol.TURN_X), data.getInt(WoVProtocol.TURN_Y));
+                String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
+                JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+                GameEvent event = GameEvent.deserialize(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_TYPE), int.class),
+                        new Gson().fromJson(jsonData.get(WoVProtocol.TURN_X), int.class),
+                        new Gson().fromJson(jsonData.get(WoVProtocol.TURN_Y), int.class));
+                switch (event.type) {
+                    case TURN_EVENT:
+                        game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
+                        break;
+                    case GIVE_UP_EVENT:
+                        game.giveUp(ClientNetworkPlayer.this);
+                        break;
+                    case SKIP_TURN_EVENT:
+                        game.skipTurn(ClientNetworkPlayer.this);
+                        break;
+                }
             }
         };
         context.registerReceiver(receiver, new IntentFilter(WoVPreferences.TURN_BROADCAST));

@@ -17,15 +17,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -219,42 +215,46 @@ public class GameActivity extends GameActivityBase {
         }
     }
 
+    private class GameLoadedFromServerReceiver extends  BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
+            JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+            User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
+            User zero = new Gson().fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+            GameLogic.PlayerFigure myFigure = new Gson().fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
+                    GameLogic.PlayerFigure.class);
+            Player playerCross, playerZero;
+            //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
+            //todo: network? Probably just don't store such game, who knows
+            switch (myFigure) {
+                case CROSS:
+                    playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
+                    playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                    break;
+                case ZERO:
+                    playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
+                    playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Illegal myFigure value!");
+            }
+            ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
+                    int[].class));
+
+            humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+            game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
+                    playerCross, playerZero, GameLogic.deserialize(events));
+        }
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
         new StoredGameLoader().execute();
-        gameLoadedFromServerReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
-                JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
-                User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
-                User zero = new Gson().fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
-                GameLogic.PlayerFigure myFigure = new Gson().fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
-                        GameLogic.PlayerFigure.class);
-                Player playerCross, playerZero;
-                //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
-                //todo: network? Probably just don't store such game, who knows
-                switch (myFigure) {
-                    case CROSS:
-                        playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                        playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
-                        break;
-                    case ZERO:
-                        playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                        playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Illegal myFigure value!");
-                }
-                ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
-                        int[].class));
+        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
+        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
 
-                game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
-                        playerCross, playerZero, GameLogic.deserialize(events));
-            }
-        };
     }
 
     private void onGameLoaded(Game game) {
