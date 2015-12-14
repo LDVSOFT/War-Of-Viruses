@@ -224,6 +224,7 @@ public class GameActivity extends GameActivityBase {
     private class GameLoadedFromServerReceiver extends  BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("GameActivity", "networkLoadGame broadcast recieved!");
             String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
             JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
             User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
@@ -251,6 +252,7 @@ public class GameActivity extends GameActivityBase {
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
             game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                     playerCross, playerZero, GameLogic.deserialize(events));
+            redrawGame(game.getGameLogic());
         }
     }
 

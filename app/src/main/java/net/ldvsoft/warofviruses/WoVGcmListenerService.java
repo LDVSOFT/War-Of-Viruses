@@ -27,7 +27,8 @@ public class WoVGcmListenerService extends GcmListenerService {
         if (action.equals(WoVProtocol.ACTION_TURN)) {
             sendBroadcast(intent, WoVPreferences.TURN_BROADCAST);
         } else if (action.equals(WoVProtocol.GAME_LOADED)) {
-            sendBroadcast(intent, WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST);
+            intent.setAction(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST);
+            sendBroadcast(intent);
         }
         /**
          * Production applications would usually process the message here.
