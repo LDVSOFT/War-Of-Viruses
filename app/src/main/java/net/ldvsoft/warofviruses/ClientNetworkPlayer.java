@@ -20,10 +20,10 @@ import java.util.UUID;
  */
 public class ClientNetworkPlayer extends Player {
     private Context context;
-    private GoogleCloudMessaging gcm;
+    private GoogleCloudMessaging gcm = new GoogleCloudMessaging();
     private BroadcastReceiver receiver;
 
-    ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
+    public ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         this.user = user;
         this.ownFigure = ownFigure;
         this.context = context;
