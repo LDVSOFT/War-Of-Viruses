@@ -25,7 +25,8 @@ public class WoVGcmListenerService extends GcmListenerService {
         Intent intent = new Intent();
         if (action.equals(WoVProtocol.ACTION_TURN)) {
             intent.putExtra(WoVPreferences.TURN_BUNDLE, data);
-            sendBroadcast(intent, WoVPreferences.TURN_BROADCAST);
+            intent.setAction(WoVPreferences.TURN_BROADCAST);
+            sendBroadcast(intent);
         } else if (action.equals(WoVProtocol.GAME_LOADED)) {
             intent.putExtra(WoVPreferences.GAME_BUNDLE, data);
             intent.setAction(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST);

@@ -103,7 +103,7 @@ public class GameActivity extends GameActivityBase {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    if (!game.skipTurn(game.getCurrentPlayer())) {
+                    if (!game.skipTurn(humanPlayer)) {
                         return null;
                     }
                     return null;
@@ -121,7 +121,7 @@ public class GameActivity extends GameActivityBase {
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    game.giveUp(game.getCurrentPlayer());
+                    game.giveUp(humanPlayer);
                     return null;
                 }
             }.execute();
