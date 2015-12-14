@@ -22,7 +22,11 @@ public class WoVProtocol {
     public static final String GAME_BUNDLE = "gameBundle";
     public static final String TURN_ARRAY = "turnArray";
     public static final String GAME_ID = "gameID";
-    
+    public static final String DATA = "data";
+    public static final String CROSS_USER = "crossUser";
+    public static final String ZERO_USER = "zeroUser";
+    public static final String MY_FIGURE = "myFigure";
+
     public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
         ArrayList<GameEvent> events = new ArrayList<>();
         for (int i = 0; i < turnArray.length; i += 3) {

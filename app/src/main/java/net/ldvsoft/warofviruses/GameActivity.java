@@ -16,9 +16,16 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -211,6 +218,8 @@ public class GameActivity extends GameActivityBase {
             }
         }
     }
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -218,26 +227,32 @@ public class GameActivity extends GameActivityBase {
         gameLoadedFromServerReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Bundle data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE);
-                //FUCK IT!!! NOT FROM DB, BUT FROM BUNDLE!! AAAAAAAAAAAARRRRRGH
-                //DAT PAIN
-
-                User cross;
-                User zero;
-
-                //TODO: now i'm going to convert dat bundle to json and then to gson and then I'LL GODLIKE!!!
-                //todo:: don't forget to save users to db
+                String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
+                JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+                User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
+                User zero = new Gson().fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+                GameLogic.PlayerFigure myFigure = new Gson().fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
+                        GameLogic.PlayerFigure.class);
                 Player playerCross, playerZero;
-                //todo: also I should add to message from server field containing my own figure
-                if (cross == null) { //FIXME oooh shiit what we will do with null user???
-                    playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                    playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
-                } else {
-                    playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                    playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
+                //todo: network? Probably just don't store such game, who knows
+                switch (myFigure) {
+                    case CROSS:
+                        playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
+                        playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                        break;
+                    case ZERO:
+                        playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
+                        playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Illegal myFigure value!");
                 }
-                ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(data.getIntArray(WoVProtocol.TURN_ARRAY));
-                game = Game.deserializeGame(data.getInt(WoVProtocol.GAME_ID), playerCross, playerZero, GameLogic.deserialize(events));
+                ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
+                        int[].class));
+
+                game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
+                        playerCross, playerZero, GameLogic.deserialize(events));
             }
         };
     }
