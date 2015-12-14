@@ -29,7 +29,7 @@ public class ClientNetworkPlayer extends Player {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
+                String data = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE).getString(WoVProtocol.DATA);
                 JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
                 GameEvent event = new Gson().fromJson(jsonData.get(WoVProtocol.EVENT), GameEvent.class);
                 switch (event.type) {

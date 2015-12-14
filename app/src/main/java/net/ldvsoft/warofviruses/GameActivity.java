@@ -225,7 +225,8 @@ public class GameActivity extends GameActivityBase {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("GameActivity", "networkLoadGame broadcast recieved!");
-            String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
+            Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
+            String data = tmp.getString(WoVProtocol.DATA);
             JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
             User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
             User zero = new Gson().fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);

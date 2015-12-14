@@ -11,4 +11,5 @@ public abstract class WoVPreferences {
     public static final String TURN_BROADCAST = "turnBroadcast";
     public static final String TURN_BUNDLE = "turnBundle";
     public static final String GAME_LOADED_FROM_SERVER_BROADCAST = "gameLoadedFromServerBroadcast";
+    public static final String GAME_BUNDLE = "gameBundle";
 }

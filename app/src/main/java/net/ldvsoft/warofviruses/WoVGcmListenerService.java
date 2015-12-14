@@ -23,10 +23,11 @@ public class WoVGcmListenerService extends GcmListenerService {
         Log.i(TAG, "Message: " + data.toString());
         String action = (String) data.get(WoVProtocol.ACTION);
         Intent intent = new Intent();
-        intent.putExtra(WoVPreferences.TURN_BUNDLE, data);
         if (action.equals(WoVProtocol.ACTION_TURN)) {
+            intent.putExtra(WoVPreferences.TURN_BUNDLE, data);
             sendBroadcast(intent, WoVPreferences.TURN_BROADCAST);
         } else if (action.equals(WoVProtocol.GAME_LOADED)) {
+            intent.putExtra(WoVPreferences.GAME_BUNDLE, data);
             intent.setAction(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST);
             sendBroadcast(intent);
         }
