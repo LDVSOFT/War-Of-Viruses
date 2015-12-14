@@ -15,9 +15,8 @@ public class WoVProtocol {
 
     public static final String PING_ID = "id";
     public static final String ACTION_TURN = "turn";
-    public static final String TURN_TYPE = "turnType";
-    public static final String TURN_X = "turnX";
-    public static final String TURN_Y = "turnY";
+    public static final String EVENT = "event";
+
     public static final String GAME_LOADED = "gameLoaded";
     public static final String GAME_BUNDLE = "gameBundle";
     public static final String TURN_ARRAY = "turnArray";
@@ -26,8 +25,7 @@ public class WoVProtocol {
     public static final String CROSS_USER = "crossUser";
     public static final String ZERO_USER = "zeroUser";
     public static final String MY_FIGURE = "myFigure";
-    public static final String USER_READY = "userReady";
-    public static final String USER_TOKEN = "userID";
+    public static final String ACTION_USER_READY = "userReady";
 
     public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
         ArrayList<GameEvent> events = new ArrayList<>();

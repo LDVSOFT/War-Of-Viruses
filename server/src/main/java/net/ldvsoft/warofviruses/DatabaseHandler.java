@@ -15,10 +15,10 @@ import java.util.logging.Logger;
  * Created by ldvsoft on 09.12.15.
  */
 public class DatabaseHandler implements DBProvider {
-    private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
-
     protected MysqlDataSource dataSource;
     protected WarOfVirusesServer server;
+    private String GET_USER_BY_TOKEN = "SELECT User FROM Device WHERE user = ?;";
+    private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
     public DatabaseHandler(WarOfVirusesServer server) throws SQLException {
         this.server = server;
@@ -85,28 +85,26 @@ public class DatabaseHandler implements DBProvider {
 
     @Override
     public Game getGameById(long id) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement getGameStatement = connection.prepareStatement(GET_GAME_BY_ID);
-                getGameStatement.setLong(1, id);
-                ResultSet game = getGameStatement.executeQuery();
-                if (!game.first())
-                    return null;
-                //TODO
-                Player cross = null, zero = null;
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getGameStatement = connection.prepareStatement(GET_GAME_BY_ID);
+            getGameStatement.setLong(1, id);
+            ResultSet game = getGameStatement.executeQuery();
+            if (!game.first())
+                return null;
+            //TODO
+            Player cross = null, zero = null;
 
-                PreparedStatement getGameTurnsStatement = connection.prepareStatement(GET_TURNS_BY_GAME_ID);
-                getGameTurnsStatement.setLong(1, id);
-                ResultSet events = getGameTurnsStatement.executeQuery();
-                events.beforeFirst();
-                ArrayList<GameEvent> eventList = new ArrayList<>();
-                while (!events.isAfterLast()) {
-                    eventList.add(GameEvent.deserialize(events.getInt(1), events.getInt(2), events.getInt(3)));
-                    events.next();
-                }
-
-                return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
+            PreparedStatement getGameTurnsStatement = connection.prepareStatement(GET_TURNS_BY_GAME_ID);
+            getGameTurnsStatement.setLong(1, id);
+            ResultSet events = getGameTurnsStatement.executeQuery();
+            events.beforeFirst();
+            ArrayList<GameEvent> eventList = new ArrayList<>();
+            while (!events.isAfterLast()) {
+                eventList.add(GameEvent.deserialize(events.getInt(1), events.getInt(2), events.getInt(3)));
+                events.next();
             }
+
+            return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Failed to load game.", e);
             return null;
@@ -120,6 +118,50 @@ public class DatabaseHandler implements DBProvider {
 
     @Override
     public User getUserById(long id) {
-        throw new UnsupportedOperationException("DatabaseHandler::addUser()");
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getUserStatement = connection.prepareStatement(GET_USER_BY_ID);
+            getUserStatement.setLong(1, id);
+            ResultSet users = getUserStatement.executeQuery();
+            if (!users.first())
+                return null;
+
+            return new User(
+                    users.getLong(1),
+                    users.getString(2),
+                    users.getInt(3),
+                    users.getString(4),
+                    users.getString(5),
+                    users.getInt(6),
+                    users.getInt(7),
+                    null /*FIXME Load separetly*/
+            );
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+            return null;
+        }
+    }
+
+    public User getUserByToken(String token) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getUserStatement = connection.prepareStatement(GET_USER_BY_TOKEN);
+            getUserStatement.setString(1, token);
+            ResultSet users = getUserStatement.executeQuery();
+            if (!users.first())
+                return null;
+
+            return new User(
+                    users.getLong(1),
+                    users.getString(2),
+                    users.getInt(3),
+                    users.getString(4),
+                    users.getString(5),
+                    users.getInt(6),
+                    users.getInt(7),
+                    null /*FIXME Load separetly*/
+            );
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+            return null;
+        }
     }
 }

@@ -47,13 +47,8 @@ public class MenuActivity extends AppCompatActivity {
         intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
         GoogleCloudMessaging gcm = new GoogleCloudMessaging();
         Bundle data = new Bundle();
-        data.putString(WoVProtocol.ACTION, WoVProtocol.USER_READY);
 
         String id = UUID.randomUUID().toString();
-        JsonObject jsonData = new JsonObject();
-        jsonData.addProperty(WoVProtocol.USER_TOKEN, USER_TOKEN);
-        data.putString(WoVProtocol.DATA, jsonData.toString());
-
         try {
             gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
         } catch (IOException e) {

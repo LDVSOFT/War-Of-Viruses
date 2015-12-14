@@ -31,9 +31,7 @@ public class ClientNetworkPlayer extends Player {
             public void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVProtocol.GAME_BUNDLE).getString(WoVProtocol.DATA);
                 JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
-                GameEvent event = GameEvent.deserialize(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_TYPE), int.class),
-                        new Gson().fromJson(jsonData.get(WoVProtocol.TURN_X), int.class),
-                        new Gson().fromJson(jsonData.get(WoVProtocol.TURN_Y), int.class));
+                GameEvent event = new Gson().fromJson(jsonData.get(WoVProtocol.EVENT), GameEvent.class);
                 switch (event.type) {
                     case TURN_EVENT:
                         game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
@@ -57,16 +55,14 @@ public class ClientNetworkPlayer extends Player {
 
     @Override
     public void onGameStateChanged(GameEvent event) {
-        Bundle data = new Bundle();
-        JsonObject jsonData = new JsonObject();
-        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
+        JsonObject data = new JsonObject();
+        data.add(WoVProtocol.EVENT, new Gson().toJsonTree(event));
+        Bundle message = new Bundle();
+        message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
+        message.putString(WoVProtocol.DATA, data.toString());
         String id = UUID.randomUUID().toString();
-        jsonData.addProperty(WoVProtocol.TURN_TYPE, event.getEventTypeAsInt());
-        jsonData.addProperty(WoVProtocol.TURN_X, event.getTurnX());
-        jsonData.addProperty(WoVProtocol.TURN_Y, event.getTurnY());
-        data.putString(WoVProtocol.DATA, jsonData.toString());
         try {
-            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
+            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
         } catch (IOException e) {
             e.printStackTrace();
         }
