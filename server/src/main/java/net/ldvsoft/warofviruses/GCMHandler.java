@@ -2,7 +2,8 @@ package net.ldvsoft.warofviruses;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
-import org.json.JSONObject;
+
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -36,12 +37,12 @@ public class GCMHandler extends SmackCcsClient {
     }
 
     @Override
-    protected void handleUpstreamMessage(JSONObject message) {
+    protected void handleUpstreamMessage(JsonObject message) {
         super.handleUpstreamMessage(message);
-        JSONObject answer = server.processGCM(message);
+        JsonObject answer = server.processGCM(message);
         if (answer != null) {
             sendDownstreamMessage(SmackCcsClient.createJsonMessage(
-                    message.getString("from"),
+                    message.get("from").getAsString(),
                     nextMessageId(),
                     answer,
                     null,
@@ -50,16 +51,6 @@ public class GCMHandler extends SmackCcsClient {
                     "high"
             ));
         }
-    }
-
-    @Override
-    protected void handleAckReceipt(JSONObject jsonObject) {
-        super.handleAckReceipt(jsonObject);
-    }
-
-    @Override
-    protected void handleNackReceipt(JSONObject jsonObject) {
-        super.handleNackReceipt(jsonObject);
     }
 
     public void stop() {

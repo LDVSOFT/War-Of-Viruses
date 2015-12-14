@@ -1,7 +1,6 @@
 package net.ldvsoft.warofviruses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -19,7 +18,11 @@ import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_FAILURE;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_SUCCESS;
 
 public final class WarOfVirusesServer {
-    protected static final JSONObject JSON_RESULT_FAILURE = new JSONObject().put(RESULT, RESULT_FAILURE);
+    protected static final JsonObject JSON_RESULT_FAILURE = new JsonObject();
+
+    static {
+        JSON_RESULT_FAILURE.addProperty(RESULT, RESULT_FAILURE);
+    }
 
     private static final String DEFAULT_CONFIG_FILE = "/etc/war-of-viruses-server.conf";
 
@@ -28,6 +31,7 @@ public final class WarOfVirusesServer {
     private Properties config = new Properties();
 
     private GCMHandler gcmHandler;
+    private DatabaseHandler databaseHandler;
 
     public String getSetting(String name) {
         return config.getProperty(name, "");
@@ -40,28 +44,23 @@ public final class WarOfVirusesServer {
      * @param message Message from the client.
      * @return (Optional) Answer to client.
      */
-    public JSONObject processGCM(JSONObject message) {
-        try {
-            String action = message.getJSONObject("data").getString(ACTION);
-            switch (action) {
-                case ACTION_PING:
-                    return processPing(message);
-                default:
-                    return null;
-            }
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "Wrong message format", e);
-            return null;
+    public JsonObject processGCM(JsonObject message) {
+        String action = message.get("data").getAsJsonObject().get(ACTION).getAsString();
+        switch (action) {
+            case ACTION_PING:
+                return processPing(message);
+            default:
+                return null;
         }
     }
 
-    private JSONObject processPing(JSONObject message) {
-        String sender = message.getString("from");
-        String messageId = message.getString("message_id");
+    private JsonObject processPing(JsonObject message) {
+        String sender = message.get("from").getAsString();
+        String messageId = message.get("message_id").getAsString();
 
-        JSONObject answer = new JSONObject()
-                .put(RESULT, RESULT_SUCCESS)
-                .put(PING_ID, messageId);
+        JsonObject answer = new JsonObject();
+        answer.addProperty(RESULT, RESULT_SUCCESS);
+        answer.addProperty(PING_ID, messageId);
 
         gcmHandler.sendDownstreamMessage(SmackCcsClient.createJsonMessage(
                         sender,
@@ -92,22 +91,24 @@ public final class WarOfVirusesServer {
         logger = Logger.getLogger(WarOfVirusesServer.class.getName());
 
         try {
+            databaseHandler = new DatabaseHandler(this);
             gcmHandler = new GCMHandler(this);
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
                     gcmHandler.stop();
+                    databaseHandler.stop();
                 }
             }));
 
-            while (!Thread.interrupted()) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+//            while (!Thread.interrupted()) {
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Server failed", e);
             System.exit(1);
