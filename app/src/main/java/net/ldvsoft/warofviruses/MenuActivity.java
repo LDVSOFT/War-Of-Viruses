@@ -6,8 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
     private final static String USER_ID = "3"; //todo REMOVE IT!!!
@@ -46,8 +48,14 @@ public class MenuActivity extends AppCompatActivity {
         GoogleCloudMessaging gcm = new GoogleCloudMessaging();
         Bundle data = new Bundle();
         data.putString(WoVProtocol.ACTION, WoVProtocol.USER_READY);
+
+        String id = UUID.randomUUID().toString();
+        JsonObject jsonData = new JsonObject();
+        jsonData.addProperty(WoVProtocol.USER_ID, USER_ID);
+        data.putString(WoVProtocol.DATA, jsonData.toString());
+        
         try {
-            gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", USER_ID, data);
+            gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
         } catch (IOException e) {
             e.printStackTrace();
         }
