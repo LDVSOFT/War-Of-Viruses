@@ -45,9 +45,9 @@ public class MenuActivity extends AppCompatActivity {
     public void playOnline(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
-        GoogleCloudMessaging gcm = new GoogleCloudMessaging();
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         Bundle data = new Bundle();
-
+        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
         String id = UUID.randomUUID().toString();
         try {
             gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);

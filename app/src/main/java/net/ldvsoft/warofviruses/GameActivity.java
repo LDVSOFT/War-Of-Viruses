@@ -77,13 +77,16 @@ public class GameActivity extends GameActivityBase {
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
                 break;
             case OPPONENT_NETWORK_PLAYER:
+                game = null;
                 break;
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
         }
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
         initButtons();
-        redrawGame(game.getGameLogic());
+        if (game != null) {
+            redrawGame(game.getGameLogic());
+        }
     }
 
     @Override
