@@ -98,6 +98,7 @@ public final class WarOfVirusesServer {
             runningGame.startNewGame(
                     new ServerNetworkPlayer(sender, waitingForGame, this, GameLogic.PlayerFigure.CROSS),
                     new ServerNetworkPlayer(waitingForGame, sender, this, GameLogic.PlayerFigure.ZERO));
+            waitingForGame = null;
         }
         return null;
     }
@@ -160,13 +161,13 @@ public final class WarOfVirusesServer {
                 }
             }));
 
-//            while (!Thread.interrupted()) {
-//                try {
-//                    Thread.sleep(10000);
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                }
-//            }
+            while (!Thread.interrupted()) {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Server failed", e);
             System.exit(1);

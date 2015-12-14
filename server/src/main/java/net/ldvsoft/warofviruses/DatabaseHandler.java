@@ -2,7 +2,6 @@ package net.ldvsoft.warofviruses;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +16,7 @@ import java.util.logging.Logger;
 public class DatabaseHandler implements DBProvider {
     protected MysqlDataSource dataSource;
     protected WarOfVirusesServer server;
-    private String GET_USER_BY_TOKEN = "SELECT User FROM Device WHERE user = ?;";
+    private String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + " WHERE " + GOOGLE_TOKEN + " = ?;";
     private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
     public DatabaseHandler(WarOfVirusesServer server) throws SQLException {
