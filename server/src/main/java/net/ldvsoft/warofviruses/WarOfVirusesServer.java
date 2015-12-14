@@ -62,9 +62,10 @@ public final class WarOfVirusesServer {
         answer.addProperty(RESULT, RESULT_SUCCESS);
         answer.addProperty(PING_ID, messageId);
 
-        gcmHandler.sendDownstreamMessage(SmackCcsClient.createJsonMessage(
+        gcmHandler.sendDownstreamMessage(gcmHandler.createJsonMessage(
                         sender,
                         gcmHandler.nextMessageId(),
+                        RESULT_SUCCESS,
                         answer,
                         null,
                         null,

@@ -26,6 +26,22 @@ public class GCMHandler extends SmackCcsClient {
         connect(projectId, apiKey, gcmServer, gcmPort);
     }
 
+    public String createJsonMessage(
+            String to,
+            String messageId,
+            String action,
+            JsonObject data,
+            String collapseKey,
+            Long timeToLive,
+            Boolean delayWhileIdle,
+            String priority) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty(WoVProtocol.ACTION, action);
+        // SIC: GCM does not accept tree-ish json
+        payload.addProperty(WoVProtocol.DATA, data.toString());
+        return createJsonMessage(to, messageId, payload, collapseKey, timeToLive, delayWhileIdle, priority);
+    }
+
     @Override
     public boolean sendDownstreamMessage(String jsonRequest) {
         try {
@@ -41,9 +57,10 @@ public class GCMHandler extends SmackCcsClient {
         super.handleUpstreamMessage(message);
         JsonObject answer = server.processGCM(message);
         if (answer != null) {
-            sendDownstreamMessage(SmackCcsClient.createJsonMessage(
+            sendDownstreamMessage(createJsonMessage(
                     message.get("from").getAsString(),
                     nextMessageId(),
+                    WoVProtocol.RESULT,
                     answer,
                     null,
                     null,

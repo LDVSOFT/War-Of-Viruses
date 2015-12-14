@@ -84,7 +84,7 @@ public abstract class SmackCcsClient {
      * @param priority       GCM priority parameter (Optional).
      * @return JSON encoded GCM message.
      */
-    public static String createJsonMessage(
+    public String createJsonMessage(
             String to, String messageId,
             JsonObject payload, String collapseKey, Long timeToLive,
             Boolean delayWhileIdle, String priority) {
