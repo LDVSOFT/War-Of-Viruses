@@ -1,7 +1,6 @@
 package net.ldvsoft.warofviruses;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -61,6 +60,9 @@ public class ClientNetworkPlayer extends Player {
         Bundle data = new Bundle();
         data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
         String id = UUID.randomUUID().toString();
+        data.putInt(WoVProtocol.TURN_TYPE, event.getEventTypeAsInt());
+        data.putInt(WoVProtocol.TURN_X, event.getTurnX());
+        data.putInt(WoVProtocol.TURN_Y, event.getTurnY());
         try {
             gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
         } catch (IOException e) {
