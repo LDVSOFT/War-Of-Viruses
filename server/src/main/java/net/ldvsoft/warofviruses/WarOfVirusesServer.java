@@ -108,7 +108,7 @@ public final class WarOfVirusesServer {
         JsonObject data = (JsonObject) new JsonParser().parse(
                 message.get("data").getAsJsonObject().get("data").getAsString()
         );
-        if (runningGame.getCrossPlayer().getUser() == sender) {
+        if (runningGame.getCrossPlayer().getUser().getId() == sender.getId()) {
             ((ServerNetworkPlayer) runningGame.getCrossPlayer()).performMove(data);
         } else {
             ((ServerNetworkPlayer) runningGame.getZeroPlayer()).performMove(data);
