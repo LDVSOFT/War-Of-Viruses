@@ -140,7 +140,7 @@ public class GameActivity extends GameActivityBase {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    game.doTurn(game.getCurrentPlayer(), x, y);
+                    game.doTurn(humanPlayer, x, y);
                     return null;
                 }
             }.execute();
@@ -253,6 +253,7 @@ public class GameActivity extends GameActivityBase {
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
             game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                     playerCross, playerZero, GameLogic.deserialize(events));
+            initButtons();
             redrawGame(game.getGameLogic());
         }
     }
