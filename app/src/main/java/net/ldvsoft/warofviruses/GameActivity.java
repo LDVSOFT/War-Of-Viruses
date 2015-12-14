@@ -31,6 +31,8 @@ import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_NETWORK_PLAYER;
 import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
+    private static Gson gson = new Gson();
+
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
     private Game game;
@@ -228,9 +230,9 @@ public class GameActivity extends GameActivityBase {
             Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
             JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
-            User cross = new Gson().fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
-            User zero = new Gson().fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
-            GameLogic.PlayerFigure myFigure = new Gson().fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
+            User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
+            User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+            GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
                     GameLogic.PlayerFigure.class);
             Player playerCross, playerZero;
             //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
@@ -247,11 +249,11 @@ public class GameActivity extends GameActivityBase {
                 default:
                     throw new IllegalArgumentException("Illegal myFigure value!");
             }
-            ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(new Gson().fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
+            ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
                     int[].class));
 
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-            game = Game.deserializeGame(new Gson().fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
+            game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                     playerCross, playerZero, GameLogic.deserialize(events));
             initButtons();
             redrawGame(game.getGameLogic());

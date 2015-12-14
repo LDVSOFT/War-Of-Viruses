@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
  * Created by ldvsoft on 14.12.15.
  */
 public class ServerNetworkPlayer extends Player {
+    private static Gson gson = new Gson();
+
     private final User opponent;
     private WarOfVirusesServer server;
 
@@ -26,7 +28,7 @@ public class ServerNetworkPlayer extends Player {
     @Override
     public void onGameStateChanged(GameEvent event) {
         JsonObject message = new JsonObject();
-        message.add(WoVProtocol.EVENT, new Gson().toJsonTree(event));
+        message.add(WoVProtocol.EVENT, gson.toJsonTree(event));
         server.sendToUser(user, WoVProtocol.ACTION_TURN, message);
     }
 
@@ -35,16 +37,16 @@ public class ServerNetworkPlayer extends Player {
         super.setGame(game);
         //Send client that game has started
         JsonObject message = new JsonObject();
-        message.add(WoVProtocol.MY_FIGURE , new Gson().toJsonTree(ownFigure));
-        message.add(WoVProtocol.GAME_ID, new Gson().toJsonTree(game.getGameId()));
+        message.add(WoVProtocol.MY_FIGURE , gson.toJsonTree(ownFigure));
+        message.add(WoVProtocol.GAME_ID, gson.toJsonTree(game.getGameId()));
         switch (ownFigure) {
             case CROSS:
-                message.add(WoVProtocol.CROSS_USER, new Gson().toJsonTree(user));
-                message.add(WoVProtocol.ZERO_USER , new Gson().toJsonTree(opponent));
+                message.add(WoVProtocol.CROSS_USER, gson.toJsonTree(user));
+                message.add(WoVProtocol.ZERO_USER , gson.toJsonTree(opponent));
                 break;
             case ZERO:
-                message.add(WoVProtocol.ZERO_USER , new Gson().toJsonTree(user));
-                message.add(WoVProtocol.CROSS_USER, new Gson().toJsonTree(opponent));
+                message.add(WoVProtocol.ZERO_USER , gson.toJsonTree(user));
+                message.add(WoVProtocol.CROSS_USER, gson.toJsonTree(opponent));
                 break;
         }
         message.add(WoVProtocol.TURN_ARRAY, new JsonArray());
@@ -52,7 +54,7 @@ public class ServerNetworkPlayer extends Player {
     }
 
     public void performMove(JsonObject message) {
-        GameEvent event = new Gson().fromJson(message.get(WoVProtocol.EVENT), GameEvent.class);
+        GameEvent event = gson.fromJson(message.get(WoVProtocol.EVENT), GameEvent.class);
         switch (event.type) {
             case TURN_EVENT:
                 game.doTurn(this, event.getTurnX(), event.getTurnY());
