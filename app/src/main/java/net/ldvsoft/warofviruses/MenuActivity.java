@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
-    private final static String USER_ID = "3"; //todo REMOVE IT!!!
+    private final static String USER_TOKEN = "3"; //todo REMOVE IT!!!
     public final static String OPPONENT_TYPE = "net.ldvsoft.warofviruses.OPPONENT_TYPE";
     public final static int OPPONENT_BOT = 0;
     public final static int OPPONENT_LOCAL_PLAYER = 1;
@@ -51,9 +51,9 @@ public class MenuActivity extends AppCompatActivity {
 
         String id = UUID.randomUUID().toString();
         JsonObject jsonData = new JsonObject();
-        jsonData.addProperty(WoVProtocol.USER_ID, USER_ID);
+        jsonData.addProperty(WoVProtocol.USER_TOKEN, USER_TOKEN);
         data.putString(WoVProtocol.DATA, jsonData.toString());
-        
+
         try {
             gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
         } catch (IOException e) {

@@ -27,7 +27,7 @@ public class WoVProtocol {
     public static final String ZERO_USER = "zeroUser";
     public static final String MY_FIGURE = "myFigure";
     public static final String USER_READY = "userReady";
-    public static final String USER_ID = "userID";
+    public static final String USER_TOKEN = "userID";
 
     public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
         ArrayList<GameEvent> events = new ArrayList<>();
