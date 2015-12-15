@@ -1,5 +1,6 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -20,7 +21,7 @@ public class AIPlayer extends Player {
     public static final User AI_USER = new User(
             DBProvider.USER_AI_PLAYER,
             "uniqueGoogleTokenForAiPlayer",
-            1, //DBOpenHelper.playerClasses[1]
+//            1, //DBOpenHelper.playerClasses[1]
             "SkyNet", "1",
             0, 0,
             null);
@@ -28,9 +29,10 @@ public class AIPlayer extends Player {
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
         this.user = AI_USER;
+        this.type = 1;
     }
 
-    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         // There is only one AI user
         return new AIPlayer(ownFigure);
     }

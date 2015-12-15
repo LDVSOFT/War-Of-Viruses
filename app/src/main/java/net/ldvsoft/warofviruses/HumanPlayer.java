@@ -1,5 +1,7 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
+
 import java.util.Random;
 
 /**
@@ -17,20 +19,21 @@ public class HumanPlayer extends Player {
     }
 
     public static final User USER_ANONYMOUS = new User(
-            DBProvider.USER_ANNONYMOUS,
+            DBProvider.USER_ANONYMOUS,
             "uniqueGoogleTokenForAnonymousPlayer",
-            0, //DBOpenHelper.playerClasses[0]
+            //0, //DBOpenHelper.playerClasses[0]
             "Anonymous", "1",
             0, 0,
             null);
 
-    public static HumanPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+    public static HumanPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         return new HumanPlayer(user, ownFigure);
     }
 
     public HumanPlayer(User user, GameLogic.PlayerFigure ownFigure) {
         this.user = user;
         this.ownFigure = ownFigure;
+        this.type = 0;
     }
 
     public HumanPlayer(User user, GameLogic.PlayerFigure ownFigure, OnGameStateChangedListener onGameStateChangedListener) {

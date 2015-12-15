@@ -9,7 +9,7 @@ public abstract class Player implements Serializable {
     protected GameLogic.PlayerFigure ownFigure;
     protected User user;
     protected Game game;
-
+    protected int type;
     public abstract void makeTurn();
 
     public String getName() {
@@ -18,7 +18,7 @@ public abstract class Player implements Serializable {
 
     public abstract void onGameStateChanged(GameEvent event, Player whoChanged);
 
-    public void setGame(Game game) {
+    public void update(Game game) {
         this.game = game;
     }
 

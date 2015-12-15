@@ -11,18 +11,30 @@ public class Game {
     private OnGameFinishedListener onGameFinishedListener = null;
 
     private GameLogic gameLogic;
+    private int zeroType;
+    private int crossType;
+
+    public int getCrossType() {
+        return crossType;
+    }
+
+    public int getZeroType() {
+        return zeroType;
+    }
 
     public interface OnGameFinishedListener {
         void onGameFinished();
     }
-    public static Game deserializeGame(long id, Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
+    public static Game deserializeGame(long id, Player crossPlayer, int crossType, Player zeroPlayer, int zeroType, GameLogic gameLogic) {
         Game game = new Game();
         game.id = id;
         game.crossPlayer = crossPlayer;
         game.zeroPlayer = zeroPlayer;
         game.gameLogic = gameLogic;
-        game.crossPlayer.setGame(game);
-        game.zeroPlayer.setGame(game);
+        game.crossPlayer.update(game);
+        game.zeroPlayer.update(game);
+        game.crossType = crossType;
+        game.zeroType = zeroType;
         return game;
     }
 
@@ -55,10 +67,12 @@ public class Game {
         id = new SecureRandom().nextLong();
         crossPlayer = cross;
         zeroPlayer = zero;
+        crossType = cross.type;
+        zeroType = zero.type;
         gameLogic = new GameLogic();
         gameLogic.newGame();
-        crossPlayer.setGame(this);
-        zeroPlayer.setGame(this);
+        crossPlayer.update(this);
+        zeroPlayer.update(this);
     }
 
     public Player getCurrentPlayer() {
@@ -113,6 +127,10 @@ public class Game {
         return result;
     }
 
+    public void update() {
+        crossPlayer.update(this);
+        zeroPlayer.update(this);
+    }
     public boolean doTurn(Player sender, int x, int y) {
         if (!sender.equals(getCurrentPlayer())) {
             return false;

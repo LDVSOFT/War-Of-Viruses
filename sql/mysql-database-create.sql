@@ -23,7 +23,6 @@ USE `WarOfViruses` ;
 CREATE TABLE IF NOT EXISTS `WarOfViruses`.`User` (
   `id` INT UNSIGNED NOT NULL,
   `googleToken` VARCHAR(300) NOT NULL,
-  `userType` INT NOT NULL,
   `nicknameStr` VARCHAR(45) NOT NULL,
   `nicknameId` VARCHAR(45) NOT NULL,
   `colorCross` INT UNSIGNED NOT NULL,
@@ -83,7 +82,9 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `WarOfViruses`.`Game` (
   `id` INT UNSIGNED NOT NULL,
   `playerCrosses` INT UNSIGNED NOT NULL,
+  `playerCrossesType` INT UNSIGNED NOT NULL, 
   `playerZeroes` INT UNSIGNED NOT NULL,
+  `playerZeroesType` INT UNSIGNED NOT NULL,
   `status` INT NOT NULL,
   `gameDate` DATETIME NOT NULL,
   PRIMARY KEY (`id`),

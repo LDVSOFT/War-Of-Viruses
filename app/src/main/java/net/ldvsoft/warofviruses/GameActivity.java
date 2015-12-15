@@ -74,9 +74,11 @@ public class GameActivity extends GameActivityBase {
         switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
             case OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
+                initButtons();
                 break;
             case OPPONENT_LOCAL_PLAYER:
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
+                initButtons();
                 break;
             case OPPONENT_NETWORK_PLAYER:
                 game = null;
@@ -85,7 +87,6 @@ public class GameActivity extends GameActivityBase {
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
         }
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
-        initButtons();
         if (game != null) {
             redrawGame(game.getGameLogic());
         }
@@ -164,7 +165,9 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStop() {
         Log.d("GameActivityBase", "onStop");
-        saveCurrentGame();
+        if (game != null) {
+            saveCurrentGame();
+        }
         super.onStop();
     }
 
@@ -232,11 +235,14 @@ public class GameActivity extends GameActivityBase {
             JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
             User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
             User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+
+            DBOpenHelper.getInstance(GameActivity.this).addUser(cross);
+            DBOpenHelper.getInstance(GameActivity.this).addUser(zero);
+
             GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
                     GameLogic.PlayerFigure.class);
             Player playerCross, playerZero;
-            //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
-            //todo: network? Probably just don't store such game, who knows
+
             switch (myFigure) {
                 case CROSS:
                     playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
@@ -249,12 +255,16 @@ public class GameActivity extends GameActivityBase {
                 default:
                     throw new IllegalArgumentException("Illegal myFigure value!");
             }
+
             ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
-                    int[].class)); //todo:: replace with gson deserialization
+                    int[].class));
 
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+            int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
+            int zeroType = 2 - crossType; //fixme remove magic constants
             game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
-                    playerCross, playerZero, GameLogic.deserialize(events));
+                    playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
+            //todo: here is called NetworkPlayer.update, it send UPDATE_GAME message and everything goes bad. Fix it somehow!
             initButtons();
             redrawGame(game.getGameLogic());
         }
@@ -270,6 +280,7 @@ public class GameActivity extends GameActivityBase {
     }
 
     private void onGameLoaded(Game game) {
+        // TODO: what should I do in case when I'm waiting for game to be uploaded from server and updated?
         this.game = game;
         setCurrentGameListeners();
         initButtons();

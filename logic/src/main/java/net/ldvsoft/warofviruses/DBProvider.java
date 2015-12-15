@@ -21,24 +21,24 @@ public interface DBProvider {
     String TURN_Y = "y";
     String USER_TABLE = "User";
     String GOOGLE_TOKEN = "googleToken";
-    String USER_TYPE = "userType";
     String NICKNAME_STR = "nicknameStr";
     String NICKNAME_ID = "nicknameID";
     String COLOR_CROSS = "colorCross";
     String COLOR_ZERO = "colorZero";
     String INVITATION_TARGET = "invocationTarget";
-
+    String PLAYER_CROSSES_TYPE = "playerCrossesType";
+    String PLAYER_ZEROES_TYPE = "playerZeroesType";
     /**
      * Special user ids.
      */
-    int USER_AI_PLAYER = 0;
-    int USER_ANNONYMOUS = 1;
+    int USER_AI_PLAYER = 1;
+    int USER_ANONYMOUS = 0;
 
     enum GameStatus {RUNNING, FINISHED, DELETED}
 
     ; //probably not there, in some other class
 
-    String GET_ACTIVE_GAME = "SELECT " + ID + ", " + PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
+    String GET_ACTIVE_GAME = "SELECT * FROM " + GAME_TABLE +
             " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
 
     String GET_ACTIVE_GAME_TURNS = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
@@ -55,8 +55,7 @@ public interface DBProvider {
     String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_TABLE + " WHERE " +
             GAME_STATUS + " = 1 ORDER BY " + GAME_DATE + " DESC;";
 
-    String GET_GAME_BY_ID = "SELECT " + ID + ", "+ PLAYER_CROSSES + ", " + PLAYER_ZERO + " FROM " + GAME_TABLE +
-            " WHERE " + ID + " = ?;";
+    String GET_GAME_BY_ID = "SELECT * FROM " + GAME_TABLE + " WHERE " + ID + " = ?;";
 
     String GET_TURNS_BY_GAME_ID = "SELECT " + TURN_TYPE + ", " + TURN_X + ", " + TURN_Y +
             " FROM " + TURN_TABLE + " WHERE " + GAME_ID + " = ? ORDER BY " + TURN_NUMBER + " ASC;";

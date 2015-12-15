@@ -50,8 +50,8 @@ public class ServerNetworkPlayer extends Player {
     }
 
     @Override
-    public void setGame(Game game) {
-        super.setGame(game);
+    public void update(Game game) {
+        super.update(game);
         //Send client that game has started
         JsonObject message = new JsonObject();
         message.add(WoVProtocol.MY_FIGURE , gson.toJsonTree(ownFigure));

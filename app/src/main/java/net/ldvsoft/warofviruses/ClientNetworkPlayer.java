@@ -37,10 +37,15 @@ public class ClientNetworkPlayer extends Player {
         }
     });
 
+    public static ClientNetworkPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
+        return new ClientNetworkPlayer(user, ownFigure, context);
+    }
+
     public ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         this.user = user;
         this.ownFigure = ownFigure;
         this.context = context;
+        this.type = 0;
         receiver = new BroadcastReceiver() {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {
@@ -88,6 +93,19 @@ public class ClientNetworkPlayer extends Player {
         message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
         message.putString(WoVProtocol.DATA, data.toString());
         String id = UUID.randomUUID().toString();
+        try {
+            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Game game) {
+        super.update(game);
+        String id = UUID.randomUUID().toString();
+        Bundle message = new Bundle();
+        message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_UPDATE_LOCAL_GAME);
         try {
             gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
         } catch (IOException e) {
