@@ -42,7 +42,7 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    public void onGameStateChanged(GameEvent event, Player whoChaned) {
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
