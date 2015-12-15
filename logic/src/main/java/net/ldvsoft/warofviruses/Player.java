@@ -32,6 +32,12 @@ public abstract class Player implements Serializable {
     }
 
     /*
+    Is called when player should finish its work because of destroying of game
+     */
+    public void onStop() {
+
+    }
+    /*
     Method that is called when game needs to be updated (by server, for example)
      */
     public void updateGameInfo(Game game) {

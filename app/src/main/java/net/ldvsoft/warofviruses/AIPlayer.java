@@ -25,6 +25,7 @@ public class AIPlayer extends Player {
             "SkyNet", "1",
             0, 0,
             null);
+    private AsyncTask<Void, CoordinatePair, Void> runningStrategy;
 
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
@@ -40,11 +41,26 @@ public class AIPlayer extends Player {
     @Override
     public void makeTurn() {
         Log.d("AIPlayer", "Turn passed to AI player");
-        new BruteforceStrategy(game).execute();
+        runningStrategy = new BruteforceStrategy(game);
+        runningStrategy.execute();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        runningStrategy.cancel(true);
     }
 
     @Override
     public void onGameStateChanged(GameEvent event, Player whoChanged) {
+    }
+
+    @Override
+    public void setGame(Game game) {
+        super.setGame(game);
+        if (game.getCurrentPlayer().equals(this)) {
+            makeTurn();
+        }
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
@@ -154,8 +170,11 @@ public class AIPlayer extends Player {
 
         private void runStrategy(GameLogic gameLogic) {
             ArrayList<CoordinatePair> optMoves = bruteforceMoves(gameLogic);
-            for (CoordinatePair move : optMoves) {
+            if (isCancelled() || optMoves == null) {
+                return;
+            }
 
+            for (CoordinatePair move : optMoves) {
                 publishProgress(move);
                 try {
                     sleep(750);
@@ -166,6 +185,10 @@ public class AIPlayer extends Player {
         }
 
         private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
+            if (isCancelled()) {
+                return null;
+            }
+
             ArrayList<CoordinatePair> result = new ArrayList<>();
 
             if (gameLogic.getCurrentPlayerFigure() != ownFigure) {

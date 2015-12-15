@@ -169,7 +169,9 @@ public class GameActivity extends GameActivityBase {
         Log.d("GameActivityBase", "onStop");
         if (game != null) {
             saveCurrentGame();
+            game.onStop();
         }
+        unregisterReceiver(gameLoadedFromServerReceiver);
         super.onStop();
     }
 

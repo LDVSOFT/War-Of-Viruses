@@ -24,7 +24,7 @@ public class ClientNetworkPlayer extends Player {
 
     private Context context;
     private GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-    private BroadcastReceiver receiver;
+    private BroadcastReceiver turnMessageReceiver;
 
     private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
         @Override
@@ -46,7 +46,7 @@ public class ClientNetworkPlayer extends Player {
         this.ownFigure = ownFigure;
         this.context = context;
         this.type = 0;
-        receiver = new BroadcastReceiver() {
+        turnMessageReceiver = new BroadcastReceiver() {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE).getString(WoVProtocol.DATA);
@@ -73,7 +73,7 @@ public class ClientNetworkPlayer extends Player {
                 }
             }
         };
-        context.registerReceiver(receiver, new IntentFilter(WoVPreferences.TURN_BROADCAST));
+        context.registerReceiver(turnMessageReceiver, new IntentFilter(WoVPreferences.TURN_BROADCAST));
     }
 
     @Override
@@ -98,6 +98,12 @@ public class ClientNetworkPlayer extends Player {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        context.unregisterReceiver(turnMessageReceiver);
     }
 
     @Override

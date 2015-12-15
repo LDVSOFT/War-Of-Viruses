@@ -55,6 +55,13 @@ public class Game {
         return crossPlayer;
     }
 
+    /*
+    Is called when owner of this game (activity or server) is destroying to properly finish player work and close their resources
+     */
+    public void onStop() {
+        crossPlayer.onStop();
+        zeroPlayer.onStop();
+    }
     public long getGameId() {
         return id;
     }
