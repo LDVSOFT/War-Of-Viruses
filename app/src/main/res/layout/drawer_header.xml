@@ -3,15 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="172dp"
-    android:background="#ffca79">
+    android:background="#e8e8e8">
 
-    <ImageView
+    <net.ldvsoft.warofviruses.BoardCellButton
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:id="@+id/avatar"
+        android:id="@+id/avatar_cross"
         android:elevation="4dp"
         android:layout_margin="@dimen/spacing_large"
-        android:src="#7288ff" />
+        android:background="@mipmap/ic_launcher" />
+
+    <net.ldvsoft.warofviruses.BoardCellButton
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/avatar_zero"
+        android:elevation="4dp"
+        android:layout_alignTop="@id/avatar_cross"
+        android:layout_toRightOf="@id/avatar_cross"
+        android:layout_toEndOf="@id/avatar_cross"
+        android:background="@mipmap/ic_launcher" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,4 +33,5 @@
         android:id="@+id/username"
         android:text="New Text"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
 </RelativeLayout>

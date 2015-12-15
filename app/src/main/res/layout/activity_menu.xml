@@ -21,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             android:elevation="4dp"
             app:theme="@style/ThemeOverlay.AppCompat.Dark"
-            android:background="#ffec38" />
+            android:background="@color/primary" />
 
         <Button
             android:layout_width="match_parent"

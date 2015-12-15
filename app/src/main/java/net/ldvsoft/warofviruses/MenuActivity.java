@@ -1,6 +1,7 @@
 package net.ldvsoft.warofviruses;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -44,6 +45,20 @@ public class MenuActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                ((BoardCellButton) findViewById(R.id.avatar_cross)).setImageDrawable(BoardCellButton.cellCross);
+                ((BoardCellButton) findViewById(R.id.avatar_zero )).setImageDrawable(BoardCellButton.cellZero );
+            }
+        }.execute();
     }
 
     @Override
