@@ -1,104 +1,49 @@
 package net.ldvsoft.warofviruses;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.security.SecureRandom;
 
 /**
  * Created by Сева on 19.10.2015.
  */
-public class Game implements Serializable {
+public class Game {
+    private long id;
     private Player crossPlayer, zeroPlayer;
+    private OnGameFinishedListener onGameFinishedListener = null;
 
     private GameLogic gameLogic;
 
-    private boolean isReplaying = false;
-    private transient OnGameStateChangedListener onGameStateChangedListener = null;
-    private transient OnGameFinishedListener onGameFinishedListener = null;
-    private ArrayList<AbstractGameEvent> gameEventHistory = null;
-    private int currentEventNumber;
-
-    public byte[] toBytes() {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutput out = new ObjectOutputStream(bos)) {
-            out.writeObject(this);
-            return bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace(); // at least for now
-            return null;
-        }
+    public interface OnGameFinishedListener {
+        void onGameFinished();
+    }
+    public static Game deserializeGame(long id, Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
+        Game game = new Game();
+        game.id = id;
+        game.crossPlayer = crossPlayer;
+        game.zeroPlayer = zeroPlayer;
+        game.gameLogic = gameLogic;
+        game.crossPlayer.setGame(game);
+        game.zeroPlayer.setGame(game);
+        return game;
     }
 
     public boolean isFinished() {
         return gameLogic.isFinished();
     }
 
-    public static Game fromBytes(byte[] data) {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(data)) {
-            try (ObjectInput in = new ObjectInputStream(bis)) {
-                return (Game) in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Player getZeroPlayer() {
+        return zeroPlayer;
     }
 
-    public void setReplayMode() {
-        isReplaying = true;
-        toBeginOfGame();
+    public Player getCrossPlayer() {
+        return crossPlayer;
     }
 
-    public void toBeginOfGame() {
-        gameLogic.newGame();
-        currentEventNumber = 0;
+    public long getGameId() {
+        return id;
     }
 
-    public void toEndOfGame() {
-        for (int i = currentEventNumber; i < gameEventHistory.size(); i++) {
-            gameEventHistory.get(i).applyEvent(this);
-        }
-        currentEventNumber = gameEventHistory.size();
-    }
-
-    public void nextEvent() {
-        if (currentEventNumber < gameEventHistory.size()) {
-            gameEventHistory.get(currentEventNumber++).applyEvent(this);
-        }
-    }
-
-    public void prevEvent() {
-        int lastStep = currentEventNumber;
-        toBeginOfGame();
-        for (int i = 0; i < lastStep; i++) {
-            gameEventHistory.get(i).applyEvent(this);
-        }
-        currentEventNumber = lastStep == 0 ? 0 : lastStep - 1;
-    }
-
-    public int getEventCount() {
-        return gameEventHistory.size();
-    }
-
-    public int getCurrentEventNumber() {
-        return currentEventNumber;
-    }
-
-
-    public interface OnGameStateChangedListener {
-        void onGameStateChanged();
-    }
-
-    public interface OnGameFinishedListener {
-        void onGameFinished();
+    public int getAwaitingEventNumber() {
+        return gameLogic.getEventHistory().size();
     }
 
     //returns COPY of gameLogic instance to prevent corrupting it
@@ -106,25 +51,14 @@ public class Game implements Serializable {
         return new GameLogic(gameLogic);
     }
 
-    public void setOnGameStateChangedListener(OnGameStateChangedListener onGameStateChangedListener) {
-        this.onGameStateChangedListener = onGameStateChangedListener;
-    }
-
-    public void setOnGameFinishedListener(OnGameFinishedListener onGameFinishedListener) {
-        this.onGameFinishedListener = onGameFinishedListener;
-    }
-
     public void startNewGame(Player cross, Player zero) {
-        if (gameEventHistory != null) {
-            if (onGameFinishedListener != null) {
-                onGameFinishedListener.onGameFinished();
-            }
-        }
+        id = new SecureRandom().nextLong();
         crossPlayer = cross;
         zeroPlayer = zero;
         gameLogic = new GameLogic();
         gameLogic.newGame();
-        gameEventHistory = new ArrayList<>();
+        crossPlayer.setGame(this);
+        zeroPlayer.setGame(this);
     }
 
     public Player getCurrentPlayer() {
@@ -141,26 +75,28 @@ public class Game implements Serializable {
     private void notifyPlayer() {
         Player currentPlayer = getCurrentPlayer();
         if (currentPlayer != null) {
-            currentPlayer.makeTurn(this);
+            currentPlayer.makeTurn();
         }
     }
 
+    public void setOnGameFinishedListener(OnGameFinishedListener onGameFinishedListener) {
+        this.onGameFinishedListener = onGameFinishedListener;
+    }
+
     public boolean giveUp(Player sender) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            if (!isReplaying) {
-                gameEventHistory.add(new GameGiveUpEvent(sender));
-            }
-            onGameStateChangedListener.onGameStateChanged();
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
 
     public boolean skipTurn(Player sender) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
 
@@ -168,19 +104,17 @@ public class Game implements Serializable {
         boolean result = gameLogic.skipTurn();
         if (result) {
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
-            if (oldPlayer != currentPlayer) {
+            if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            if (!isReplaying) {
-                gameEventHistory.add(new GameSkipTurnEvent(sender));
-            }
-            onGameStateChangedListener.onGameStateChanged();
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
 
     public boolean doTurn(Player sender, int x, int y) {
-        if (sender != getCurrentPlayer()) {
+        if (!sender.equals(getCurrentPlayer())) {
             return false;
         }
 
@@ -188,15 +122,12 @@ public class Game implements Serializable {
         boolean result = gameLogic.doTurn(x, y);
         if (result) {
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
-            if (oldPlayer != currentPlayer) {
+            if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            if (!isReplaying) {
-                gameEventHistory.add(new GameTurnEvent(x, y, sender));
-            }
-            onGameStateChangedListener.onGameStateChanged();
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
-
 }

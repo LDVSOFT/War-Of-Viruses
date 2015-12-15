@@ -24,8 +24,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
     protected BoardCellButton[][] boardButtons;
     protected TextView gameStateText;
 
-    protected Game game;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,15 +36,14 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
     }
 
-    protected void redrawGame() {
-        if (game == null) {
+    protected void redrawGame(GameLogic gameLogic) {
+        if (gameLogic == null) {
             return;
         }
 
-        GameLogic gameLogic = game.getGameLogic();
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), game.getGameLogic().getCurrentPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure());
             }
         }
 
@@ -162,6 +159,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
 
         boardRoot.invalidate();
-        redrawGame();
+        redrawGame(null);
     }
 }

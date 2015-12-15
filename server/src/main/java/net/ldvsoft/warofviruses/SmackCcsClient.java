@@ -1,7 +1,8 @@
 package net.ldvsoft.warofviruses;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ConnectionListener;
@@ -83,26 +84,26 @@ public abstract class SmackCcsClient {
      * @param priority       GCM priority parameter (Optional).
      * @return JSON encoded GCM message.
      */
-    public static String createJsonMessage(
+    public String createJsonMessage(
             String to, String messageId,
-            JSONObject payload, String collapseKey, Long timeToLive,
+            JsonObject payload, String collapseKey, Long timeToLive,
             Boolean delayWhileIdle, String priority) {
-        JSONObject message = new JSONObject();
-        message.put("to", to);
+        JsonObject message = new JsonObject();
+        message.addProperty("to", to);
         if (collapseKey != null) {
-            message.put("collapse_key", collapseKey);
+            message.addProperty("collapse_key", collapseKey);
         }
         if (timeToLive != null) {
-            message.put("time_to_live", timeToLive);
+            message.addProperty("time_to_live", timeToLive);
         }
         if (delayWhileIdle != null && delayWhileIdle) {
-            message.put("delay_while_idle", true);
+            message.addProperty("delay_while_idle", true);
         }
         if (priority != null) {
-            message.put("priority", priority);
+            message.addProperty("priority", priority);
         }
-        message.put("message_id", messageId);
-        message.put("data", payload);
+        message.addProperty("message_id", messageId);
+        message.add("data", payload);
         return message.toString();
     }
 
@@ -115,10 +116,10 @@ public abstract class SmackCcsClient {
      * @return JSON encoded ack.
      */
     protected static String createJsonAck(String to, String messageId) {
-        JSONObject message = new JSONObject();
-        message.put("message_type", "ack");
-        message.put("to", to);
-        message.put("message_id", messageId);
+        JsonObject message = new JsonObject();
+        message.addProperty("message_type", "ack");
+        message.addProperty("to", to);
+        message.addProperty("message_id", messageId);
         return message.toString();
     }
 
@@ -161,9 +162,9 @@ public abstract class SmackCcsClient {
      * <p>This sample echo server sends an echo message back to the device.
      * Subclasses should override this method to properly process upstream messages.
      */
-    protected void handleUpstreamMessage(JSONObject jsonObject) {
-        String messageId = jsonObject.getString("message_id");
-        String from = jsonObject.getString("from");
+    protected void handleUpstreamMessage(JsonObject JsonObject) {
+        String messageId = JsonObject.get("message_id").getAsString();
+        String from = JsonObject.get("from").getAsString();
         logger.log(Level.INFO, "handleUpstreamMessage() from: " + from + ",messageId: " + messageId);
     }
 
@@ -173,9 +174,9 @@ public abstract class SmackCcsClient {
      * <p>Logs a INFO message, but subclasses could override it to
      * properly handle ACKs.
      */
-    protected void handleAckReceipt(JSONObject jsonObject) {
-        String messageId = jsonObject.getString("message_id");
-        String from = jsonObject.getString("from");
+    protected void handleAckReceipt(JsonObject JsonObject) {
+        String messageId = JsonObject.get("message_id").getAsString();
+        String from = JsonObject.get("from").getAsString();
         logger.log(Level.INFO, "handleAckReceipt() from: " + from + ",messageId: " + messageId);
     }
 
@@ -185,15 +186,15 @@ public abstract class SmackCcsClient {
      * <p>Logs a INFO message, but subclasses could override it to
      * properly handle NACKs.
      */
-    protected void handleNackReceipt(JSONObject jsonObject) {
-        String messageId = jsonObject.getString("message_id");
-        String from = jsonObject.getString("from");
+    protected void handleNackReceipt(JsonObject JsonObject) {
+        String messageId = JsonObject.get("message_id").getAsString();
+        String from = JsonObject.get("from").getAsString();
         logger.log(Level.INFO, "handleNackReceipt() from: " + from + ",messageId: " + messageId);
     }
 
-    protected void handleControlMessage(JSONObject jsonObject) {
-        logger.log(Level.INFO, "handleControlMessage(): " + jsonObject);
-        String controlType = jsonObject.getString("control_type");
+    protected void handleControlMessage(JsonObject JsonObject) {
+        logger.log(Level.INFO, "handleControlMessage(): " + JsonObject);
+        String controlType = JsonObject.get("control_type").getAsString();
         if ("CONNECTION_DRAINING".equals(controlType)) {
             connectionDraining = true;
         } else {
@@ -340,7 +341,8 @@ public abstract class SmackCcsClient {
                             getExtension(GCM_NAMESPACE);
             String json = gcmPacket.getJson();
             try {
-                JSONObject jsonObject = new JSONObject(json);
+                JsonObject jsonObject = (JsonObject) new JsonParser().parse(json);
+
 
                 // present for "ack"/"nack", null otherwise
                 Object messageType = null;
@@ -353,8 +355,8 @@ public abstract class SmackCcsClient {
                     handleUpstreamMessage(jsonObject);
 
                     // Send ACK to CCS
-                    String messageId = (String) jsonObject.get("message_id");
-                    String from = (String) jsonObject.get("from");
+                    String messageId = jsonObject.get("message_id").getAsString();
+                    String from = jsonObject.get("from").getAsString();
                     String ack = createJsonAck(from, messageId);
                     send(ack);
                 } else if ("ack".equals(messageType.toString())) {
@@ -371,7 +373,7 @@ public abstract class SmackCcsClient {
                             "Unrecognized message type (%s)",
                             messageType.toString());
                 }
-            } catch (JSONException e) {
+            } catch (JsonParseException e) {
                 logger.log(Level.SEVERE, "Error parsing JSON " + json, e);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Failed to process packet", e);

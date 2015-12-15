@@ -4,23 +4,45 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import static java.lang.Thread.sleep;
-import static net.ldvsoft.warofviruses.GameLogic.*;
+import static net.ldvsoft.warofviruses.GameLogic.ADJACENT_DIRECTIONS;
+import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.CoordinatePair;
+import static net.ldvsoft.warofviruses.GameLogic.GameState;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
+import static net.ldvsoft.warofviruses.GameLogic.isInside;
 
 /**
  * Created by Сева on 20.10.2015.
  */
 public class AIPlayer extends Player {
+    public static final User AI_USER = new User(
+            DBProvider.USER_AI_PLAYER,
+            "uniqueGoogleTokenForAiPlayer",
+            1, //DBOpenHelper.playerClasses[1]
+            "SkyNet", "1",
+            0, 0,
+            null);
+
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
+        this.user = AI_USER;
+    }
+
+    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+        // There is only one AI user
+        return new AIPlayer(ownFigure);
     }
 
     @Override
-    public void makeTurn(Game game) {
+    public void makeTurn() {
         Log.d("AIPlayer", "Turn passed to AI player");
         new BruteforceStrategy(game).execute();
+    }
+
+    @Override
+    public void onGameStateChanged(GameEvent event, Player whoChaned) {
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
@@ -177,7 +199,6 @@ public class AIPlayer extends Player {
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("AIPlayer", "AIPlayer::run");
-            Random randomGenerator = new Random();
             GameLogic gameLogic = game.getGameLogic();
             if (!gameLogic.canMove()) {
                 publishProgress(new CoordinatePair(-1, -1));

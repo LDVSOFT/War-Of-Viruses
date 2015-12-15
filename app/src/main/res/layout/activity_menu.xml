@@ -44,6 +44,21 @@
             android:text="View game history"
             android:onClick="viewGameHistory"
             android:id="@+id/button" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="I wanna play online!"
+            android:onClick="playOnline"
+            android:id="@+id/button_play_online" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear local DB (for debug only!)"
+            android:id="@+id/button_clear_db"
+            android:onClick="clearDB"
+            android:layout_gravity="center_horizontal" />
     </LinearLayout>
 
     <android.support.design.widget.NavigationView

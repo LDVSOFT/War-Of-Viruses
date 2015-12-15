@@ -6,14 +6,20 @@ import java.util.ArrayList;
 /**
  * Created by Сева on 21.10.2015.
  */
-public class GameLogic implements Serializable{
+public class GameLogic {
+    private ArrayList<GameEvent> events;
+
     public static final int BOARD_SIZE = 10;
+
+    public ArrayList<GameEvent> getEventHistory() {
+        return events;
+    }
 
     public enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY}
     public enum PlayerFigure {CROSS, ZERO, NONE}
     public enum GameState {NOT_RUNNING, RUNNING, DRAW, CROSS_WON, ZERO_WON}
 
-    public static class Cell implements Serializable {
+    public static class Cell {
         private CellType cellType = CellType.EMPTY;
         private boolean canMakeTurn = false;
         private boolean isActive = false;
@@ -96,6 +102,15 @@ public class GameLogic implements Serializable{
         return currentPlayerFigure;
     }
 
+    public static GameLogic deserialize(ArrayList<GameEvent> events) {
+        GameLogic logic = new GameLogic();
+        logic.newGame();
+        for (GameEvent event : events) {
+            event.applyEvent(logic);
+        }
+        return logic;
+    }
+
     public GameLogic() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
@@ -115,9 +130,11 @@ public class GameLogic implements Serializable{
         previousTurnSkipped = logic.previousTurnSkipped;
         currentGameState = logic.currentGameState;
         currentPlayerFigure = logic.currentPlayerFigure;
+        events = (ArrayList<GameEvent>) logic.events.clone();
     }
 
     public void newGame() {
+        events = new ArrayList<>();
         currentTurn = 0;
         currentMiniturn = 0;
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -145,6 +162,10 @@ public class GameLogic implements Serializable{
 
     public int getCurrentMiniturn() {
         return currentMiniturn;
+    }
+
+    public int getGameStateAsInt() {
+        return currentGameState.ordinal();
     }
 
     private void updateAdjacentCells(int x, int y) {
@@ -249,6 +270,8 @@ public class GameLogic implements Serializable{
             return false;
         }
 
+        events.add(GameEvent.newSkipTurnEvent(events.size()));
+
         if (previousTurnSkipped) {
             draw();
             return true;
@@ -265,7 +288,7 @@ public class GameLogic implements Serializable{
         if (!board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
             return false;
         }
-
+        events.add(GameEvent.newTurnEvent(x, y, events.size()));
         previousTurnSkipped = false;
 
         if (board[x][y].cellType != CellType.EMPTY) {
@@ -282,9 +305,11 @@ public class GameLogic implements Serializable{
         switch (currentPlayerFigure) {
             case CROSS:
                 zeroWon();
+                events.add(GameEvent.newGiveUpEvent(events.size()));
                 return true;
             case ZERO:
                 crossWon();
+                events.add(GameEvent.newGiveUpEvent(events.size()));
                 return true;
             default:
                 return false;
