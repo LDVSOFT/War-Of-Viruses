@@ -38,17 +38,14 @@ public class WoVProtocol {
 
     public static int[] getIntsFromEventArray(List<GameEvent> events) {
         ArrayList<Integer> tmp = new ArrayList<>();
+        int[] result = new int[events.size() * 3];
+        for (int i = 0; i < events.size(); i++)
         for (GameEvent event : events) {
-            tmp.add(event.getEventTypeAsInt());
-            tmp.add(event.getTurnX());
-            tmp.add(event.getTurnY());
+            result[3 * i] = event.getEventTypeAsInt();
+            result[3 * i + 1] = event.getTurnX();
+            result[3 * i + 2] = event.getTurnY();
         }
 
-        Integer[] integerResult = (Integer[]) tmp.toArray();
-        int[] result = new int[integerResult.length];
-        for (int i = 0; i < integerResult.length; i++) {
-            result[i] = integerResult[i].intValue();
-        }
         return result;
     }
 }
