@@ -48,7 +48,9 @@ public class AIPlayer extends Player {
     @Override
     public void onStop() {
         super.onStop();
-        runningStrategy.cancel(true);
+        if (runningStrategy != null) {
+            runningStrategy.cancel(true);
+        }
     }
 
     @Override
