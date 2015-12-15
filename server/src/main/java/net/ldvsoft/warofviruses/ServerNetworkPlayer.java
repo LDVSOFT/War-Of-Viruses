@@ -70,7 +70,7 @@ public class ServerNetworkPlayer extends Player {
                 message.add(WoVProtocol.CROSS_USER, gson.toJsonTree(opponent));
                 break;
         }
-        message.add(WoVProtocol.TURN_ARRAY, gson.toJsonTree(game.getGameLogic().getEventHistory().toArray()));
+        message.add(WoVProtocol.TURN_ARRAY, gson.toJsonTree(WoVProtocol.getIntsFromEventArray(game.getGameLogic().getEventHistory())));
         server.sendToUser(user, WoVProtocol.GAME_LOADED, message);
     }
 
