@@ -96,6 +96,13 @@ public class GameActivity extends GameActivityBase {
 
     @Override
     protected void onPause() {
+        Log.d("GameActivityBase", "onPause");
+        if (game != null) {
+            saveCurrentGame();
+            game.onStop();
+        }
+        unregisterReceiver(gameLoadedFromServerReceiver);
+
         LocalBroadcastManager
                 .getInstance(this)
                 .unregisterReceiver(tokenSentReceiver);
@@ -166,17 +173,15 @@ public class GameActivity extends GameActivityBase {
 
     @Override
     protected void onStop() {
-        Log.d("GameActivityBase", "onStop");
-        if (game != null) {
-            saveCurrentGame();
-            game.onStop();
-        }
-        unregisterReceiver(gameLoadedFromServerReceiver);
         super.onStop();
     }
 
     protected void onResume() {
         super.onResume();
+        new StoredGameLoader().execute();
+        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
+        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
+
         LocalBroadcastManager
                 .getInstance(this)
                 .registerReceiver(tokenSentReceiver, new IntentFilter(WoVPreferences.GCM_REGISTRATION_COMPLETE));
@@ -275,10 +280,6 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStart() {
         super.onStart();
-        new StoredGameLoader().execute();
-        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
-        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
-
     }
 
     private void onGameLoaded(Game game) {
