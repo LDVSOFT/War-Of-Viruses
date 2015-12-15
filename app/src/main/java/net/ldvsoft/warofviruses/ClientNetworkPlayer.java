@@ -12,6 +12,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.TreeSet;
 import java.util.UUID;
 
 /**
@@ -24,26 +26,41 @@ public class ClientNetworkPlayer extends Player {
     private GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
     private BroadcastReceiver receiver;
 
+    private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
+        @Override
+        public int compare(GameEvent x, GameEvent y) {
+            int xNum = x.getNumber(), yNum = y.getNumber();
+            if (xNum < yNum) {
+                return -1;
+            }
+            return xNum == yNum ? 0 : 1;
+        }
+    });
+
     public ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         this.user = user;
         this.ownFigure = ownFigure;
         this.context = context;
         receiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public synchronized void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE).getString(WoVProtocol.DATA);
                 JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
                 GameEvent event = gson.fromJson(jsonData.get(WoVProtocol.EVENT), GameEvent.class);
-                switch (event.type) {
-                    case TURN_EVENT:
-                        game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
-                        break;
-                    case GIVE_UP_EVENT:
-                        game.giveUp(ClientNetworkPlayer.this);
-                        break;
-                    case SKIP_TURN_EVENT:
-                        game.skipTurn(ClientNetworkPlayer.this);
-                        break;
+                pendingEvents.add(event);
+                while (!pendingEvents.isEmpty() && pendingEvents.first().getNumber() == game.getAwaitingEventNumber()) {
+                    event = pendingEvents.pollFirst();
+                    switch (event.type) {
+                        case TURN_EVENT:
+                            game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
+                            break;
+                        case GIVE_UP_EVENT:
+                            game.giveUp(ClientNetworkPlayer.this);
+                            break;
+                        case SKIP_TURN_EVENT:
+                            game.skipTurn(ClientNetworkPlayer.this);
+                            break;
+                    }
                 }
             }
         };
@@ -56,7 +73,11 @@ public class ClientNetworkPlayer extends Player {
     }
 
     @Override
-    public void onGameStateChanged(GameEvent event) {
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
+        if (equals(whoChanged)) {
+            return;
+        }
+
         JsonObject data = new JsonObject();
         data.add(WoVProtocol.EVENT, gson.toJsonTree(event));
         Bundle message = new Bundle();

@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import java.util.Comparator;
+import java.util.TreeSet;
+
 /**
  * Created by ldvsoft on 14.12.15.
  */
@@ -12,6 +15,17 @@ public class ServerNetworkPlayer extends Player {
 
     private final User opponent;
     private WarOfVirusesServer server;
+
+    private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
+        @Override
+        public int compare(GameEvent x, GameEvent y) {
+            int xNum = x.getNumber(), yNum = y.getNumber();
+            if (xNum < yNum) {
+                return -1;
+            }
+            return xNum == yNum ? 0 : 1;
+        }
+    });
 
     public ServerNetworkPlayer(User user, User opponent, WarOfVirusesServer server, GameLogic.PlayerFigure figure) {
         this.user = user;
@@ -26,7 +40,10 @@ public class ServerNetworkPlayer extends Player {
     }
 
     @Override
-    public void onGameStateChanged(GameEvent event) {
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
+        if (equals(whoChanged)) {
+            return;
+        }
         JsonObject message = new JsonObject();
         message.add(WoVProtocol.EVENT, gson.toJsonTree(event));
         server.sendToUser(user, WoVProtocol.ACTION_TURN, message);
@@ -53,18 +70,22 @@ public class ServerNetworkPlayer extends Player {
         server.sendToUser(user, WoVProtocol.GAME_LOADED, message);
     }
 
-    public void performMove(JsonObject message) {
+    public synchronized void performMove(JsonObject message) {
         GameEvent event = gson.fromJson(message.get(WoVProtocol.EVENT), GameEvent.class);
-        switch (event.type) {
-            case TURN_EVENT:
-                game.doTurn(this, event.getTurnX(), event.getTurnY());
-                break;
-            case GIVE_UP_EVENT:
-                game.giveUp(this);
-                break;
-            case SKIP_TURN_EVENT:
-                game.skipTurn(this);
-                break;
+        pendingEvents.add(event);
+        while (!pendingEvents.isEmpty() && pendingEvents.first().getNumber() == game.getAwaitingEventNumber()) {
+            event = pendingEvents.pollFirst();
+            switch (event.type) {
+                case TURN_EVENT:
+                    game.doTurn(this, event.getTurnX(), event.getTurnY());
+                    break;
+                case GIVE_UP_EVENT:
+                    game.giveUp(this);
+                    break;
+                case SKIP_TURN_EVENT:
+                    game.skipTurn(this);
+                    break;
+            }
         }
     }
 }

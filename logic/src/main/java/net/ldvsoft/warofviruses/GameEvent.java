@@ -6,18 +6,25 @@ import java.io.Serializable;
  * Created by Сева on 05.12.2015.
  */
 public class GameEvent implements Serializable {
+
     public enum GameEventType {TURN_EVENT, SKIP_TURN_EVENT, GIVE_UP_EVENT};
 
     private int turnX, turnY;
+    private int number;
     GameEventType type;
-    public GameEvent(int turnX, int turnY, GameEventType type) {
+    public GameEvent(int turnX, int turnY, int number, GameEventType type) {
         this.turnX = turnX;
         this.turnY = turnY;
+        this.number = number;
         this.type = type;
     }
 
-    public static GameEvent deserialize(int type, int turnX, int turnY) {
-        return new GameEvent(turnX, turnY, GameEventType.values()[type]);
+    public static GameEvent deserialize(int type, int turnX, int turnY, int number) {
+        return new GameEvent(turnX, turnY, number, GameEventType.values()[type]);
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     int getTurnX() {
@@ -32,16 +39,16 @@ public class GameEvent implements Serializable {
         return type.ordinal();
     }
 
-    static GameEvent newGiveUpEvent() {
-        return new GameEvent(-1, -1, GameEventType.GIVE_UP_EVENT);
+    static GameEvent newGiveUpEvent(int number) {
+        return new GameEvent(-1, -1, number, GameEventType.GIVE_UP_EVENT);
     }
 
-    static GameEvent newSkipTurnEvent() {
-        return new GameEvent(-1, -1, GameEventType.SKIP_TURN_EVENT);
+    static GameEvent newSkipTurnEvent(int number) {
+        return new GameEvent(-1, -1, number, GameEventType.SKIP_TURN_EVENT);
     }
 
-    static GameEvent newTurnEvent(int turnX, int turnY) {
-        return new GameEvent(turnX, turnY, GameEventType.TURN_EVENT);
+    static GameEvent newTurnEvent(int turnX, int turnY, int number) {
+        return new GameEvent(turnX, turnY, number, GameEventType.TURN_EVENT);
     }
 
     public void applyEvent(GameLogic logic) {

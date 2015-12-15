@@ -250,7 +250,7 @@ public class GameActivity extends GameActivityBase {
                     throw new IllegalArgumentException("Illegal myFigure value!");
             }
             ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
-                    int[].class));
+                    int[].class)); //todo:: replace with gson deserialization
 
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
             game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),

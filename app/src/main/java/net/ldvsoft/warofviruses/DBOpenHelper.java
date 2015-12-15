@@ -20,7 +20,7 @@ import java.util.Locale;
 public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     private static final String TAG = "DBHelper";
 
-    private static final int VERSION = 16;
+    private static final int VERSION = 17;
     private static final String DB_NAME = "gameHistoryDB";
 
     private static final String CREATE_GAME_TABLE = "CREATE TABLE " + GAME_TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -154,7 +154,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
 
         ArrayList<GameEvent> turns = new ArrayList<>();
         while (!turnsCursor.isAfterLast()) {
-            turns.add(GameEvent.deserialize(turnsCursor.getInt(0), turnsCursor.getInt(1), turnsCursor.getInt(2)));
+            turns.add(GameEvent.deserialize(turnsCursor.getInt(0), turnsCursor.getInt(1), turnsCursor.getInt(2), turns.size()));
             turnsCursor.moveToNext();
         }
 

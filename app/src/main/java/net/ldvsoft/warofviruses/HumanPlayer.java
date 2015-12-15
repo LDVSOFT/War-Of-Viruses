@@ -45,7 +45,7 @@ public class HumanPlayer extends Player {
     }
 
     @Override
-    public void onGameStateChanged(GameEvent event) {
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
         if (onGameStateChangedListener != null) {
             onGameStateChangedListener.onGameStateChanged(game.getGameLogic());
         }

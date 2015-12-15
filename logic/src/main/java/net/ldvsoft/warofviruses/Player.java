@@ -16,7 +16,7 @@ public abstract class Player implements Serializable {
         return user.getFullNickname();
     }
 
-    public abstract void onGameStateChanged(GameEvent event);
+    public abstract void onGameStateChanged(GameEvent event, Player whoChanged);
 
     public void setGame(Game game) {
         this.game = game;

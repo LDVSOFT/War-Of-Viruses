@@ -99,7 +99,7 @@ public class DatabaseHandler implements DBProvider {
             events.beforeFirst();
             ArrayList<GameEvent> eventList = new ArrayList<>();
             while (!events.isAfterLast()) {
-                eventList.add(GameEvent.deserialize(events.getInt(1), events.getInt(2), events.getInt(3)));
+                eventList.add(GameEvent.deserialize(events.getInt(1), events.getInt(2), events.getInt(3), eventList.size()));
                 events.next();
             }
 

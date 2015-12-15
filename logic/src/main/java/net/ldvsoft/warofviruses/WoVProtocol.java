@@ -18,7 +18,6 @@ public class WoVProtocol {
     public static final String EVENT = "event";
 
     public static final String GAME_LOADED = "gameLoaded";
-    public static final String GAME_BUNDLE = "gameBundle";
     public static final String TURN_ARRAY = "turnArray";
     public static final String GAME_ID = "gameID";
     public static final String DATA = "data";
@@ -30,7 +29,7 @@ public class WoVProtocol {
     public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
         ArrayList<GameEvent> events = new ArrayList<>();
         for (int i = 0; i < turnArray.length; i += 3) {
-            events.add(GameEvent.deserialize(turnArray[i], turnArray[i + 1], turnArray[i + 2]));
+            events.add(GameEvent.deserialize(turnArray[i], turnArray[i + 1], turnArray[i + 2], i));
         }
         return events;
     }

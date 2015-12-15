@@ -270,7 +270,7 @@ public class GameLogic {
             return false;
         }
 
-        events.add(GameEvent.newSkipTurnEvent());
+        events.add(GameEvent.newSkipTurnEvent(events.size()));
 
         if (previousTurnSkipped) {
             draw();
@@ -288,7 +288,7 @@ public class GameLogic {
         if (!board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
             return false;
         }
-        events.add(GameEvent.newTurnEvent(x, y));
+        events.add(GameEvent.newTurnEvent(x, y, events.size()));
         previousTurnSkipped = false;
 
         if (board[x][y].cellType != CellType.EMPTY) {
@@ -305,11 +305,11 @@ public class GameLogic {
         switch (currentPlayerFigure) {
             case CROSS:
                 zeroWon();
-                events.add(GameEvent.newGiveUpEvent());
+                events.add(GameEvent.newGiveUpEvent(events.size()));
                 return true;
             case ZERO:
                 crossWon();
-                events.add(GameEvent.newGiveUpEvent());
+                events.add(GameEvent.newGiveUpEvent(events.size()));
                 return true;
             default:
                 return false;

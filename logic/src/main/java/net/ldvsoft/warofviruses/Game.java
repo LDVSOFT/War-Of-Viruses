@@ -42,7 +42,9 @@ public class Game {
         return id;
     }
 
-
+    public int getAwaitingEventNumber() {
+        return gameLogic.getEventHistory().size();
+    }
 
     //returns COPY of gameLogic instance to prevent corrupting it
     public GameLogic getGameLogic() {
@@ -87,8 +89,8 @@ public class Game {
         }
         boolean result = gameLogic.giveUp();
         if (result) {
-            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
@@ -105,8 +107,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
@@ -123,8 +125,8 @@ public class Game {
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
             }
-            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
-            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1));
+            crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
+            zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
     }
