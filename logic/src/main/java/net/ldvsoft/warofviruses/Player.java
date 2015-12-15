@@ -18,7 +18,7 @@ public abstract class Player implements Serializable {
 
     public abstract void onGameStateChanged(GameEvent event, Player whoChanged);
 
-    public void update(Game game) {
+    public void setGame(Game game) {
         this.game = game;
     }
 
@@ -29,5 +29,12 @@ public abstract class Player implements Serializable {
 
     public User getUser() {
         return user;
+    }
+
+    /*
+    Method that is called when game needs to be updated (by server, for example)
+     */
+    public void updateGameInfo(Game game) {
+
     }
 }

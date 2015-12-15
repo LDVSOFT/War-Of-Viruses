@@ -1,6 +1,7 @@
 package net.ldvsoft.warofviruses;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -17,7 +18,7 @@ public class GameReplay {
      * Constructor for gameReplay
      * @param gameEventHistory history of events from GameLogic class that should be reproduced
      */
-    GameReplay(ArrayList<GameEvent> gameEventHistory) {
+    GameReplay(List<GameEvent> gameEventHistory) {
         GameLogic gameLogic = new GameLogic();
         gameLogic.newGame();
 

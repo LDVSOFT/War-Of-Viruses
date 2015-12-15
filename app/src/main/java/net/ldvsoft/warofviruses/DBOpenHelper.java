@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -92,7 +93,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         cv.put(GAME_DATE, formattedDate);
         getWritableDatabase().insert(GAME_TABLE, null, cv);
 
-        ArrayList<GameEvent> eventHistory = game.getGameLogic().getEventHistory();
+        List<GameEvent> eventHistory = game.getGameLogic().getEventHistory();
         for (int i = 0; i < eventHistory.size(); i++) {
             cv = new ContentValues();
             cv.put(GAME_ID, gameId);

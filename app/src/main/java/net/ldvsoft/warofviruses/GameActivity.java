@@ -22,6 +22,8 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -256,15 +258,14 @@ public class GameActivity extends GameActivityBase {
                     throw new IllegalArgumentException("Illegal myFigure value!");
             }
 
-            ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
-                    int[].class));
+            List<GameEvent> events = Arrays.asList(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), GameEvent[].class));
 
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
             int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
             int zeroType = 2 - crossType; //fixme remove magic constants
             game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                     playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
-            //todo: here is called NetworkPlayer.update, it send UPDATE_GAME message and everything goes bad. Fix it somehow!
+            //todo: here is called NetworkPlayer.setGame, it send UPDATE_GAME message and everything goes bad. Fix it somehow!
             initButtons();
             redrawGame(game.getGameLogic());
         }
@@ -280,8 +281,8 @@ public class GameActivity extends GameActivityBase {
     }
 
     private void onGameLoaded(Game game) {
-        // TODO: what should I do in case when I'm waiting for game to be uploaded from server and updated?
         this.game = game;
+        game.updateGameInfo();
         setCurrentGameListeners();
         initButtons();
         redrawGame(game.getGameLogic());

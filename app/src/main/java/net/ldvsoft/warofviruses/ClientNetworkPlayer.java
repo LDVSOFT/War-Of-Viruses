@@ -101,8 +101,7 @@ public class ClientNetworkPlayer extends Player {
     }
 
     @Override
-    public void update(Game game) {
-        super.update(game);
+    public void updateGameInfo(Game game) {
         String id = UUID.randomUUID().toString();
         Bundle message = new Bundle();
         message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_UPDATE_LOCAL_GAME);

@@ -26,12 +26,4 @@ public class WoVProtocol {
     public static final String MY_FIGURE = "myFigure";
     public static final String ACTION_USER_READY = "userReady";
     public static final String ACTION_UPDATE_LOCAL_GAME = "updateLocalGame";
-
-    public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
-        ArrayList<GameEvent> events = new ArrayList<>();
-        for (int i = 0; i < turnArray.length; i += 3) {
-            events.add(GameEvent.deserialize(turnArray[i], turnArray[i + 1], turnArray[i + 2], i));
-        }
-        return events;
-    }
 }

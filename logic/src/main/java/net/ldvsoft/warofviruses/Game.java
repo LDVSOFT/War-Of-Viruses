@@ -31,11 +31,16 @@ public class Game {
         game.crossPlayer = crossPlayer;
         game.zeroPlayer = zeroPlayer;
         game.gameLogic = gameLogic;
-        game.crossPlayer.update(game);
-        game.zeroPlayer.update(game);
+        game.crossPlayer.setGame(game);
+        game.zeroPlayer.setGame(game);
         game.crossType = crossType;
         game.zeroType = zeroType;
         return game;
+    }
+
+    public void updateGameInfo() {
+        crossPlayer.updateGameInfo(this);
+        zeroPlayer.updateGameInfo(this);
     }
 
     public boolean isFinished() {
@@ -71,8 +76,8 @@ public class Game {
         zeroType = zero.type;
         gameLogic = new GameLogic();
         gameLogic.newGame();
-        crossPlayer.update(this);
-        zeroPlayer.update(this);
+        crossPlayer.setGame(this);
+        zeroPlayer.setGame(this);
     }
 
     public Player getCurrentPlayer() {
@@ -128,8 +133,8 @@ public class Game {
     }
 
     public void update() {
-        crossPlayer.update(this);
-        zeroPlayer.update(this);
+        crossPlayer.setGame(this);
+        zeroPlayer.setGame(this);
     }
     public boolean doTurn(Player sender, int x, int y) {
         if (!sender.equals(getCurrentPlayer())) {

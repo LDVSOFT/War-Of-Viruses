@@ -70,7 +70,13 @@ public final class WarOfVirusesServer {
     }
 
     private JsonObject processUpdateLocalGame(JsonObject message) {
-
+        User sender = databaseHandler.getUserByToken(message.get("from").getAsString());
+        if (sender.getId() == runningGame.getCrossPlayer().getUser().getId()) {
+            ((ServerNetworkPlayer) runningGame.getCrossPlayer()).sendGameInfo(); //how about more elegant solution?
+        } else {
+            ((ServerNetworkPlayer) runningGame.getZeroPlayer()).sendGameInfo();
+        }
+        return null;
     }
 
     private JsonObject processPing(JsonObject message) {
