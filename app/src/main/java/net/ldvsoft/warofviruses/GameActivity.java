@@ -260,14 +260,13 @@ public class GameActivity extends GameActivityBase {
                     throw new IllegalArgumentException("Illegal myFigure value!");
             }
 
-            List<GameEvent> events = Arrays.asList(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), GameEvent[].class));
+            List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
 
             humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
             int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
             int zeroType = 2 - crossType; //fixme remove magic constants
             game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                     playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
-            //todo: here is called NetworkPlayer.setGame, it send UPDATE_GAME message and everything goes bad. Fix it somehow!
             initButtons();
             redrawGame(game.getGameLogic());
         }
