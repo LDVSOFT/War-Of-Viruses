@@ -18,7 +18,7 @@ import java.util.UUID;
  * Created by Сева on 13.12.2015.
  */
 public class ClientNetworkPlayer extends Player {
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     private Context context;
     private GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);

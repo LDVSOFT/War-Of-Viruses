@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
  * Created by ldvsoft on 14.12.15.
  */
 public class ServerNetworkPlayer extends Player {
-    private static Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     private final User opponent;
     private WarOfVirusesServer server;
