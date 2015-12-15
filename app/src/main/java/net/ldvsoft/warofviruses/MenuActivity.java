@@ -56,4 +56,9 @@ public class MenuActivity extends AppCompatActivity {
         }
         startActivity(intent);
     }
+
+    public void clearDB(View view) {
+        DBOpenHelper instance = DBOpenHelper.getInstance(this);
+        instance.onUpgrade(instance.getReadableDatabase(), 0, 0);
+    }
 }
