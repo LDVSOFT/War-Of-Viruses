@@ -92,38 +92,56 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:id="@+id/game_bar_play">
 
         <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Give Up"
+            android:layout_height="match_parent"
+            android:text="@string/give_up"
             android:id="@+id/game_button_giveup"
             android:layout_weight="1"
             android:layout_gravity="center_vertical" />
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
-            android:layout_gravity="center_vertical">
+            android:layout_weight="1.7"
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="UNKNOWN"
-                android:id="@+id/game_text_game_status"
-                android:layout_weight="1"
-                android:layout_gravity="center"
-                android:password="false"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UNKNOWN"
+                    android:id="@+id/game_text_game_status_1"
+                    android:layout_gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UNKNOWN"
+                    android:id="@+id/game_text_game_status_2"
+                    android:layout_gravity="center"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+            </FrameLayout>
+        </LinearLayout>
 
         <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Skip Turn"
+            android:layout_height="match_parent"
+            android:text="@string/skip_turn"
             android:id="@+id/game_button_passturn"
             android:layout_weight="1"
             android:layout_gravity="center_vertical" />
@@ -131,60 +149,85 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_gravity="center"
         android:id="@+id/game_bar_replay">
 
         <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="&lt;&lt;"
+            android:layout_height="match_parent"
+            android:text="@string/first_turn"
             android:id="@+id/game_button_first"
-            android:layout_weight="1"
+            android:layout_weight="0.5"
             android:layout_gravity="center_vertical" />
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="&lt;"
-            android:id="@+id/game_button_prev"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
-
-        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
-            android:id="@+id/game_text_progress"
-            android:layout_gravity="center_vertical">
+            android:text="@string/prev_turn"
+            android:id="@+id/game_button_prev"
+            android:layout_weight="0.5"
+            android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="0/0"
-                android:id="@+id/game_text_game_position"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="1.5"
-                android:textAlignment="center"
-                android:layout_gravity="center" />
-        </FrameLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.7">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="0/0"
+                    android:id="@+id/game_text_game_position_1"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1.5"
+                    android:textAlignment="center"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="0/0"
+                    android:id="@+id/game_text_game_position_2"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1.5"
+                    android:textAlignment="center"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+        </LinearLayout>
 
         <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text=">"
+            android:layout_height="match_parent"
+            android:text="@string/next_turn"
             android:id="@+id/game_button_next"
-            android:layout_weight="1"
+            android:layout_weight="0.5"
             android:layout_gravity="center_vertical" />
 
         <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text=">>"
+            android:layout_height="match_parent"
+            android:text="@string/last_turn"
             android:id="@+id/game_button_last"
-            android:layout_weight="1"
+            android:layout_weight="0.5"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
 

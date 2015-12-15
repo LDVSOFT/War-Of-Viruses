@@ -1,6 +1,7 @@
 package net.ldvsoft.warofviruses;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,15 @@ public class GameActivityReplay extends GameActivityBase {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        switch (getResources().getConfiguration().orientation) {
+            case Configuration.ORIENTATION_PORTRAIT:
+                findViewById(R.id.game_bar_play).setVisibility(View.GONE);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                findViewById(R.id.game_bar_play_left ).setVisibility(View.GONE);
+                findViewById(R.id.game_bar_play_right).setVisibility(View.GONE);
+                break;
+        }
 
         Intent intent = getIntent();
         if (bundle == null) {
@@ -27,7 +37,6 @@ public class GameActivityReplay extends GameActivityBase {
             id = bundle.getLong(WoVPreferences.REPLAY_GAME_ID);
             turnToStartReplay = bundle.getInt(WoVPreferences.REPLAY_GAME_TURN);
         }
-        findViewById(R.id.game_bar_play).setVisibility(View.GONE);
     }
 
     @Override
@@ -83,7 +92,7 @@ public class GameActivityReplay extends GameActivityBase {
     protected void redrawGame(GameLogic gameLogic) {
         super.redrawGame(gameLogic);
         if (gameReplay != null) {
-            ((TextView) findViewById(R.id.game_text_game_position)).setText(String.format("%d/%d",
+            ((TextView) findViewById(R.id.game_text_game_position_1)).setText(String.format("%d/%d",
                     gameReplay.getCurrentEventNumber(), gameReplay.getEventCount()));
         }
     }

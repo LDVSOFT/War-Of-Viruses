@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -55,6 +56,16 @@ public class GameActivity extends GameActivityBase {
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        switch (getResources().getConfiguration().orientation) {
+            case Configuration.ORIENTATION_PORTRAIT:
+                findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                findViewById(R.id.game_bar_replay_left ).setVisibility(View.GONE);
+                findViewById(R.id.game_bar_replay_right).setVisibility(View.GONE);
+                break;
+        }
+
         game = new Game();
         tokenSentReceiver = new BroadcastReceiver() {
             @Override
@@ -84,7 +95,6 @@ public class GameActivity extends GameActivityBase {
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
         }
-        findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
         initButtons();
         if (game != null) {
             redrawGame(game.getGameLogic());

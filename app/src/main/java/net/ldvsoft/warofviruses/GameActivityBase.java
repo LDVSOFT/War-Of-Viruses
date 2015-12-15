@@ -30,7 +30,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         setContentView(R.layout.activity_game_base);
 
-        gameStateText = (TextView) findViewById(R.id.game_text_game_status);
+        gameStateText = (TextView) findViewById(R.id.game_text_game_status_1);
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
