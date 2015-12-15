@@ -23,7 +23,7 @@ public class ClientNetworkPlayer extends Player {
     private static final Gson gson = new Gson();
 
     private Context context;
-    private GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+    private GoogleCloudMessaging gcm;
     private BroadcastReceiver turnMessageReceiver;
 
     private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
@@ -46,6 +46,7 @@ public class ClientNetworkPlayer extends Player {
         this.ownFigure = ownFigure;
         this.context = context;
         this.type = 0;
+        gcm = GoogleCloudMessaging.getInstance(context);
         turnMessageReceiver = new BroadcastReceiver() {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {

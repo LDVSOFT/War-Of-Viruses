@@ -31,10 +31,10 @@ public class Game {
         game.crossPlayer = crossPlayer;
         game.zeroPlayer = zeroPlayer;
         game.gameLogic = gameLogic;
-        game.crossPlayer.setGame(game);
-        game.zeroPlayer.setGame(game);
         game.crossType = crossType;
         game.zeroType = zeroType;
+        game.crossPlayer.setGame(game);
+        game.zeroPlayer.setGame(game);
         return game;
     }
 
