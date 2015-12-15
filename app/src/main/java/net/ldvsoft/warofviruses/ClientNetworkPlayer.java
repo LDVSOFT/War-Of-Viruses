@@ -61,6 +61,10 @@ public class ClientNetworkPlayer extends Player {
                             game.skipTurn(ClientNetworkPlayer.this);
                             break;
                     }
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }
         };
