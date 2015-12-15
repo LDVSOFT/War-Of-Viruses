@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -48,9 +47,15 @@ public class MenuActivity extends AppCompatActivity {
         view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-                Toast.makeText(MenuActivity.this, menuItem.getTitle() + " pressed", Toast.LENGTH_LONG).show();
-                drawerLayout.closeDrawers();
-                return true;
+                switch (menuItem.getItemId()) {
+                    case R.id.drawer_clear_db:
+                        clearDB();
+                        return true;
+                    default:
+                        Toast.makeText(MenuActivity.this, menuItem.getTitle() + " pressed", Toast.LENGTH_LONG).show();
+                        drawerLayout.closeDrawers();
+                        return true;
+                }
             }
         });
 
@@ -112,7 +117,7 @@ public class MenuActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void clearDB(View view) {
+    public void clearDB() {
         DBOpenHelper instance = DBOpenHelper.getInstance(this);
         instance.onUpgrade(instance.getReadableDatabase(), 0, 0);
     }
