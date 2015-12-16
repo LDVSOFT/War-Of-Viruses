@@ -17,4 +17,10 @@
     <string name="GAME_DRAW">Draw</string>
     <string name="GAME_ZERO_WON">Zeroes won</string>
     <string name="GAME_CROSS_WON">Crosses won</string>
+    <string name="GAME_OVER">Game over</string>
+    <string name="GAME_MINITURNS_LEFT">%d moves left</string>
+    <string name="GAME_CROSS_TURN">Crosses\' turn</string>
+    <string name="GAME_ZERO_TURN">Zeroes\' turn</string>
+    <string name="GAME_USER_TURN">Your turn</string>
+    <string name="GAME_OPPONENT_TURN">Opponent\'s turn</string>
 </resources>

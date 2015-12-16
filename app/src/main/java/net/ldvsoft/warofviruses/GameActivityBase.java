@@ -8,7 +8,6 @@ import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -22,7 +21,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
     protected LinearLayout boardRoot;
     protected BoardCellButton[][] boardButtons;
-    protected TextView gameStateText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +28,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         setContentView(R.layout.activity_game_base);
 
-        gameStateText = (TextView) findViewById(R.id.game_text_game_status_1);
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
 
@@ -59,8 +56,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
         } else {
             avatar.setImageDrawable(BoardCellButton.cellZero);
         }
-
-        gameStateText.setText(gameLogic.getCurrentGameState().toString());
     }
 
     @Override

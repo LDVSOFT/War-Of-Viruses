@@ -167,4 +167,17 @@ public class Game {
         }
         return result;
     }
+
+    public GameLogic.PlayerFigure getMineFigure(long userId) {
+        if (crossPlayer.getUser().getId() == zeroPlayer.getUser().getId()) {
+            //Just a local game
+            return GameLogic.PlayerFigure.NONE;
+        }
+        if (crossPlayer.getUser().getId() == userId) {
+            return GameLogic.PlayerFigure.CROSS;
+        } else {
+            return GameLogic.PlayerFigure.ZERO;
+        }
+
+    }
 }

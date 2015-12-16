@@ -155,11 +155,12 @@
                 android:layout_height="wrap_content"
                 android:text="Playing Zeros"
                 android:id="@+id/game_zero_nick"
-                android:layout_gravity="center_vertical|right"
+                android:layout_gravity="center_vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:gravity="end" />
 
             <net.ldvsoft.warofviruses.BoardCellButton
                 android:layout_width="32dp"

@@ -122,50 +122,54 @@ class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Game game = data.get(position);
-        if (game.getCrossPlayer().getUser().getId() == game.getZeroPlayer().getUser().getId()) {
-            holder.opponent.setText(context.getString(R.string.GAME_LOCAL));
-            holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
-            switch (game.getGameState()) {
-                case CROSS_WON:
-                    holder.result.setText(context.getString(R.string.GAME_CROSS_WON));
-                    break;
-                case ZERO_WON:
-                    holder.result.setText(context.getString(R.string.GAME_ZERO_WON));
-                    break;
-                case DRAW:
-                    holder.result.setText(context.getString(R.string.GAME_DRAW));
-                    break;
-            }
-        } else if (game.getCrossPlayer().getUser().getId() == userId){
-            holder.opponent.setText(game.getZeroPlayer().getName());
-            switch (game.getGameState()) {
-                case CROSS_WON:
-                    holder.figure.setImageDrawable(BoardCellButton.cellCross);
-                    holder.result.setText(context.getString(R.string.GAME_WON));
-                    break;
-                case ZERO_WON:
-                    holder.figure.setImageDrawable(BoardCellButton.cellCrossDead);
-                    holder.result.setText(context.getString(R.string.GAME_LOST));
-                    break;
-                case DRAW:
-                    holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
-                    holder.result.setText(context.getString(R.string.GAME_DRAW));
-            }
-        } else {
-            holder.opponent.setText(game.getCrossPlayer().getName());
-            switch (game.getGameState()) {
-                case CROSS_WON:
-                    holder.figure.setImageDrawable(BoardCellButton.cellZeroDead);
-                    holder.result.setText(context.getString(R.string.GAME_LOST));
-                    break;
-                case ZERO_WON:
-                    holder.figure.setImageDrawable(BoardCellButton.cellZero);
-                    holder.result.setText(context.getString(R.string.GAME_WON));
-                    break;
-                case DRAW:
-                    holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
-                    holder.result.setText(context.getString(R.string.GAME_DRAW));
-            }
+        switch (game.getMineFigure(userId)) {
+            case NONE:
+                holder.opponent.setText(context.getString(R.string.GAME_LOCAL));
+                holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                switch (game.getGameState()) {
+                    case CROSS_WON:
+                        holder.result.setText(context.getString(R.string.GAME_CROSS_WON));
+                        break;
+                    case ZERO_WON:
+                        holder.result.setText(context.getString(R.string.GAME_ZERO_WON));
+                        break;
+                    case DRAW:
+                        holder.result.setText(context.getString(R.string.GAME_DRAW));
+                        break;
+                }
+                break;
+            case CROSS:
+                holder.opponent.setText(game.getZeroPlayer().getName());
+                switch (game.getGameState()) {
+                    case CROSS_WON:
+                        holder.figure.setImageDrawable(BoardCellButton.cellCross);
+                        holder.result.setText(context.getString(R.string.GAME_WON));
+                        break;
+                    case ZERO_WON:
+                        holder.figure.setImageDrawable(BoardCellButton.cellCrossDead);
+                        holder.result.setText(context.getString(R.string.GAME_LOST));
+                        break;
+                    case DRAW:
+                        holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                        holder.result.setText(context.getString(R.string.GAME_DRAW));
+                }
+                break;
+            case ZERO:
+                holder.opponent.setText(game.getCrossPlayer().getName());
+                switch (game.getGameState()) {
+                    case CROSS_WON:
+                        holder.figure.setImageDrawable(BoardCellButton.cellZeroDead);
+                        holder.result.setText(context.getString(R.string.GAME_LOST));
+                        break;
+                    case ZERO_WON:
+                        holder.figure.setImageDrawable(BoardCellButton.cellZero);
+                        holder.result.setText(context.getString(R.string.GAME_WON));
+                        break;
+                    case DRAW:
+                        holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                        holder.result.setText(context.getString(R.string.GAME_DRAW));
+                }
+                break;
         }
         Date date = new GregorianCalendar(2016, 9, 1, 15, 35).getTime();
         holder.date.setText(DateFormat.getDateFormat(context).format(date));
