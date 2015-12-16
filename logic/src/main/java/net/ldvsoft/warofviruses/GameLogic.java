@@ -302,15 +302,15 @@ public class GameLogic {
         return true;
     }
 
-    public boolean giveUp() {
-        switch (currentPlayerFigure) {
+    public boolean giveUp(PlayerFigure whoGivesUp) {
+        switch (whoGivesUp) {
             case CROSS:
                 zeroWon();
-                events.add(GameEvent.newGiveUpEvent(events.size()));
+                events.add(GameEvent.newGiveUpEvent(PlayerFigure.CROSS, events.size()));
                 return true;
             case ZERO:
                 crossWon();
-                events.add(GameEvent.newGiveUpEvent(events.size()));
+                events.add(GameEvent.newGiveUpEvent(PlayerFigure.ZERO, events.size()));
                 return true;
             default:
                 return false;
