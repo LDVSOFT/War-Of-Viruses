@@ -84,32 +84,32 @@ public class AIPlayer extends Player {
         }
 
         //always returns score for ai player.
-        private double getConnectivityScore(GameLogic game) {
+        private double getConnectivityScore(GameLogic gameLogic) {
             final double CONTROL_FACTOR = 1.0, CONNECTIVITY_FACTOR = 0.2;
             final int ADJACENT_SAFE_CNT = 3;
 
-            if (game.getCurrentGameState() != GameState.RUNNING) {
-                return getEndGameScore(game);
+            if (gameLogic.getCurrentGameState() != GameState.RUNNING) {
+                return getEndGameScore(gameLogic);
             }
 
             double result = 0;
 
             boolean currentPlayerChanged = false;
-            if (game.getCurrentPlayerFigure() != ownFigure) {
-                game.setCurrentPlayerToOpponent();
+            if (gameLogic.getCurrentPlayerFigure() != ownFigure) {
+                gameLogic.setCurrentPlayerToOpponent();
                 currentPlayerChanged = true;
             }
 
             for (int i = 0; i < BOARD_SIZE; i++) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
-                    if (game.getCellAt(i, j).isActive()) {
+                    if (gameLogic.getCellAt(i, j).isActive()) {
                         result += CONTROL_FACTOR;
                     }
-                    if (game.getCellAt(i, j).getOwner() == ownFigure) {
+                    if (gameLogic.getCellAt(i, j).getOwner() == ownFigure) {
                         int adjacentCnt = 0;
                         for (int [] dir : ADJACENT_DIRECTIONS) {
                             int dx = i + dir[0], dy = j + dir[1];
-                            if (isInside(dx) && isInside(dy) && game.getCellAt(dx, dy).getOwner() == ownFigure) {
+                            if (isInside(dx) && isInside(dy) && gameLogic.getCellAt(dx, dy).getOwner() == ownFigure) {
                                 adjacentCnt++;
                             }
                         }
@@ -123,25 +123,25 @@ public class AIPlayer extends Player {
 
             //we've probably just damaged current game state
             if (currentPlayerChanged) {
-                game.setCurrentPlayerToOpponent();
+                gameLogic.setCurrentPlayerToOpponent();
             }
 
             return result;
         }
 
         //always returns score for ai player.
-        private double getControlledCellsScore(GameLogic game) {
+        private double getControlledCellsScore(GameLogic gameLogic) {
             final double DANGER_FACTOR = 1.25, CONTROL_FACTOR = 1.0;
 
-            if (game.getCurrentGameState() != GameState.RUNNING) {
-                return getEndGameScore(game);
+            if (gameLogic.getCurrentGameState() != GameState.RUNNING) {
+                return getEndGameScore(gameLogic);
             }
 
             double result = 0;
 
             boolean currentPlayerChanged = false;
-            if (game.getCurrentPlayerFigure() != ownFigure) {
-                game.setCurrentPlayerToOpponent();
+            if (gameLogic.getCurrentPlayerFigure() != ownFigure) {
+                gameLogic.setCurrentPlayerToOpponent();
                 currentPlayerChanged = true;
             }
 
@@ -149,22 +149,22 @@ public class AIPlayer extends Player {
 
                 for (int i = 0; i < BOARD_SIZE; i++) {
                     for (int j = 0; j < BOARD_SIZE; j++) {
-                        if (game.getCellAt(i, j).isActive()) {
+                        if (gameLogic.getCellAt(i, j).isActive()) {
                             result += sign * CONTROL_FACTOR;
-                            }
-                        if (game.getCellAt(i, j).canMakeTurn() &&
-                                game.getCellAt(i, j).getOwner() == game.getOpponent(game.getCurrentPlayerFigure())) {
+                        }
+                        if (gameLogic.getCellAt(i, j).canMakeTurn() &&
+                                gameLogic.getCellAt(i, j).getOwner() == gameLogic.getOpponent(gameLogic.getCurrentPlayerFigure())) {
                             result += sign * DANGER_FACTOR;
                         }
                     }
                 }
 
-                game.setCurrentPlayerToOpponent();
+                gameLogic.setCurrentPlayerToOpponent();
             }
 
             //we've probably just damaged current game state
             if (currentPlayerChanged) {
-                game.setCurrentPlayerToOpponent();
+                gameLogic.setCurrentPlayerToOpponent();
             }
 
             return result;
@@ -177,12 +177,12 @@ public class AIPlayer extends Player {
             }
 
             for (CoordinatePair move : optMoves) {
-                publishProgress(move);
                 try {
                     sleep(750);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                publishProgress(move);
             }
         }
 
@@ -228,6 +228,11 @@ public class AIPlayer extends Player {
             Log.d("AIPlayer", "AIPlayer::run");
             GameLogic gameLogic = game.getGameLogic();
             if (!gameLogic.canMove()) {
+                try {
+                    sleep(750);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 publishProgress(new CoordinatePair(-1, -1));
             }
             runStrategy(gameLogic);
