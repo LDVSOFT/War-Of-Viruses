@@ -131,7 +131,7 @@ public class GameLogic {
         previousTurnSkipped = logic.previousTurnSkipped;
         currentGameState = logic.currentGameState;
         currentPlayerFigure = logic.currentPlayerFigure;
-        events = logic.events;
+        events = new ArrayList<>(logic.events);
     }
 
     public void newGame() {
