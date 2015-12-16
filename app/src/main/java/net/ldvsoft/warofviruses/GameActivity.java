@@ -1,7 +1,9 @@
 package net.ldvsoft.warofviruses;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -21,8 +23,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,6 +53,30 @@ public class GameActivity extends GameActivityBase {
             };
     private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
+
+    private class OnExitActivityListener implements DialogInterface.OnClickListener {
+        private boolean saveGame;
+
+        public OnExitActivityListener(boolean saveGame) {
+            this.saveGame = saveGame;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (!saveGame)
+                game = null;
+            GameActivity.super.onBackPressed();
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setMessage("Do you want to save current game?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new OnExitActivityListener(true))
+                .setNegativeButton("No", new OnExitActivityListener(false))
+                .show();
+    }
 
     @Override
     public void onCreate(Bundle bundle) {
