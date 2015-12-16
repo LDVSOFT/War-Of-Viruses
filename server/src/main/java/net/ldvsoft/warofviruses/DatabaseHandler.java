@@ -40,7 +40,24 @@ public class DatabaseHandler implements DBProvider {
                 connection.setAutoCommit(false);
                 long id = game.getGameId();
                 {
-                    GameStatus status = game.isFinished() ? GameStatus.FINISHED : GameStatus.RUNNING;
+                    GameStatus status;
+                    switch (game.getGameState()) {
+                        case RUNNING:
+                            status = GameStatus.RUNNING;
+                            break;
+                        case DRAW:
+                            status = GameStatus.FINISHED_DRAW;
+                            break;
+                        case CROSS_WON:
+                            status = GameStatus.FINISHED_CROSS_WON;
+                            break;
+                        case ZERO_WON:
+                            status = GameStatus.FINISHED_ZERO_WON;
+                            break;
+                        default:
+                            status = GameStatus.DELETED;
+                            break;
+                    }
 
                     PreparedStatement addGameStatement = connection.prepareStatement(ADD_GAME);
                     addGameStatement.setLong(1, id);
@@ -81,7 +98,7 @@ public class DatabaseHandler implements DBProvider {
     }
 
     @Override
-    public ArrayList<String> getGameHistory() {
+    public ArrayList<Game> getGameHistory() {
         throw new UnsupportedOperationException("getGameHistory");
     }
 
