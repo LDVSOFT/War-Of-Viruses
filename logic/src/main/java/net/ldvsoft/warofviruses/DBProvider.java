@@ -34,7 +34,7 @@ public interface DBProvider {
     int USER_AI_PLAYER = 1;
     int USER_ANONYMOUS = 0;
 
-    enum GameStatus {RUNNING, FINISHED, DELETED}
+    enum GameStatus {RUNNING, DELETED, FINISHED_DRAW, FINISHED_ZERO_WON, FINISHED_CROSS_WON}
 
     ; //probably not there, in some other class
 
@@ -52,8 +52,8 @@ public interface DBProvider {
     String DELETE_ACTIVE_GAME = "DELETE FROM " + GAME_TABLE + " WHERE " + GAME_STATUS +
             " =" + GameStatus.RUNNING.ordinal() + ";";
 
-    String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + " FROM " + GAME_TABLE + " WHERE " +
-            GAME_STATUS + " = 1 ORDER BY " + GAME_DATE + " DESC;";
+    String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + ", " + GAME_STATUS + " FROM " + GAME_TABLE + " WHERE " +
+            GAME_STATUS + " >= 1 ORDER BY " + GAME_DATE + " DESC;";
 
     String GET_GAME_BY_ID = "SELECT * FROM " + GAME_TABLE + " WHERE " + ID + " = ?;";
 

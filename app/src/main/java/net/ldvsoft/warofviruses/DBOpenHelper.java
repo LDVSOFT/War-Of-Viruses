@@ -80,7 +80,22 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     public void addGame(Game game) {
         ContentValues cv = new ContentValues();
         long gameId = new SecureRandom().nextLong();
-        cv.put(GAME_STATUS, game.isFinished() ? GameStatus.FINISHED.ordinal() : GameStatus.RUNNING.ordinal());
+        switch (game.getGameState()) {
+            case NOT_RUNNING:
+            case RUNNING:
+                cv.put(GAME_STATUS, GameStatus.RUNNING.ordinal());
+                break;
+            case DRAW:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_DRAW.ordinal());
+                break;
+            case CROSS_WON:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_CROSS_WON.ordinal());
+                break;
+            case ZERO_WON:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_ZERO_WON.ordinal());
+                break;
+        }
+        //cv.put(GAME_STATUS, game.isFinished() ? GameStatus.FINISHED.ordinal() : GameStatus.RUNNING.ordinal());
         cv.put(PLAYER_CROSSES, game.getCrossPlayer().getUser().getId());
         cv.put(PLAYER_ZERO, game.getZeroPlayer().getUser().getId());
         cv.put(ID, gameId);
@@ -132,7 +147,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         }
         ArrayList<String> history = new ArrayList<>();
         while (!cursor.isAfterLast()) {
-            history.add(cursor.getLong(0) + ";" + cursor.getString(1));
+            history.add(cursor.getLong(0) + ";" + cursor.getString(1) + ";" + GameStatus.values()[cursor.getInt(2)].toString());
             cursor.moveToNext();
         }
         cursor.close();

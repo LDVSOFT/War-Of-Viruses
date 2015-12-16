@@ -22,6 +22,10 @@ public class Game {
         return zeroType;
     }
 
+    public GameLogic.GameState getGameState() {
+        return gameLogic.getCurrentGameState();
+    }
+
     public interface OnGameFinishedListener {
         void onGameFinished();
     }
