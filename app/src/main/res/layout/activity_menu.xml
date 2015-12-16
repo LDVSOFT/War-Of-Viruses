@@ -43,4 +43,12 @@
         android:id="@+id/button_clear_db"
         android:onClick="clearDB"
         android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Restore saved game"
+        android:id="@+id/button_restore_game"
+        android:onClick="restoreSavedGame"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>

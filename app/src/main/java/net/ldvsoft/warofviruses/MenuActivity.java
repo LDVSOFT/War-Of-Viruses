@@ -1,7 +1,10 @@
 package net.ldvsoft.warofviruses;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -10,17 +13,11 @@ import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
-    private final static String USER_TOKEN = "3"; //todo REMOVE IT!!!
-    public final static String OPPONENT_TYPE = "net.ldvsoft.warofviruses.OPPONENT_TYPE";
-    public final static int OPPONENT_BOT = 0;
-    public final static int OPPONENT_LOCAL_PLAYER = 1;
-    public static final int OPPONENT_NETWORK_PLAYER = 2;
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
 
     @Override
@@ -30,16 +27,70 @@ public class MenuActivity extends AppCompatActivity {
 
     }
 
+    private class RestoreGameDialog {
+        private final Runnable loadGame;
+
+        RestoreGameDialog(Runnable loadGame) {
+            this.loadGame = loadGame;
+        }
+
+        public void execute() {
+            new AlertDialog.Builder(MenuActivity.this)
+                    .setMessage("Found saved game. Do you want to restore it?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes", new RestoreGame())
+                    .setNegativeButton("No", new NewGame())
+                    .show();
+        }
+
+        private class RestoreGame implements Dialog.OnClickListener {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                restoreSavedGame(null);
+            }
+        }
+
+        private class NewGame implements Dialog.OnClickListener {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DBOpenHelper.getInstance(MenuActivity.this).deleteActiveGame();
+                loadGame.run();
+            }
+        }
+    }
+
+    private class PlayAgainstBot implements Runnable{
+        @Override
+        public void run() {
+            Intent intent = new Intent(MenuActivity.this, GameActivity.class);
+            intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_BOT);
+            startActivity(intent);
+        }
+    }
+
     public void playAgainstBot(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
-        intent.putExtra(OPPONENT_TYPE, OPPONENT_BOT);
-        startActivity(intent);
+        if (DBOpenHelper.getInstance(this).hasActiveGame()) {
+            new RestoreGameDialog(new PlayAgainstBot()).execute();
+            return;
+        }
+        new PlayAgainstBot().run();
+    }
+
+    private class PlayAgainstLocalPlayer implements Runnable{
+        @Override
+        public void run() {
+            Intent intent = new Intent(MenuActivity.this, GameActivity.class);
+            intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_LOCAL_PLAYER);
+            startActivity(intent);
+        }
     }
 
     public void playAgainstLocalPlayer(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
-        intent.putExtra(OPPONENT_TYPE, OPPONENT_LOCAL_PLAYER);
-        startActivity(intent);
+        if (DBOpenHelper.getInstance(this).hasActiveGame()) {
+            new RestoreGameDialog(new PlayAgainstLocalPlayer()).execute();
+            return;
+        }
+        new PlayAgainstLocalPlayer().run();
     }
 
     public void viewGameHistory(View view) {
@@ -54,7 +105,7 @@ public class MenuActivity extends AppCompatActivity {
             Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
             intent = new Intent(MenuActivity.this, GameActivity.class);
-            intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
+            intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_NETWORK_PLAYER);
             intent.putExtra(WoVPreferences.GAME_JSON_DATA, data);
             unregisterReceiver(gameLoadedFromServerReceiver);
             gameLoadedFromServerReceiver = null;
@@ -62,18 +113,29 @@ public class MenuActivity extends AppCompatActivity {
         }
     }
 
-    public void playOnline(View view) {
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        Bundle data = new Bundle();
-        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
-        String id = UUID.randomUUID().toString();
-        try {
-            gcm.send(this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private class PlayOnline implements Runnable {
+        @Override
+        public void run() {
+            GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(MenuActivity.this);
+            Bundle data = new Bundle();
+            data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
+            String id = UUID.randomUUID().toString();
+            try {
+                gcm.send(MenuActivity.this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
+            registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
         }
-        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
-        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
+    }
+
+    public void playOnline(View view) {
+        if (DBOpenHelper.getInstance(this).hasActiveGame()) {
+            new RestoreGameDialog(new PlayOnline()).execute();
+            return;
+        }
+        new PlayOnline().run();
     }
 
     @Override
@@ -87,5 +149,11 @@ public class MenuActivity extends AppCompatActivity {
     public void clearDB(View view) {
         DBOpenHelper instance = DBOpenHelper.getInstance(this);
         instance.onUpgrade(instance.getReadableDatabase(), 0, 0);
+    }
+
+    public void restoreSavedGame(View view) {
+        Intent intent = new Intent(this, GameActivity.class);
+        intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_RESTORED_GAME);
+        startActivity(intent);
     }
 }
