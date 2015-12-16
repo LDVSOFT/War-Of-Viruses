@@ -5,7 +5,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
+import static java.lang.Math.abs;
 import static java.lang.Thread.sleep;
 import static net.ldvsoft.warofviruses.GameLogic.ADJACENT_DIRECTIONS;
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -82,56 +86,9 @@ public class AIPlayer extends Player {
                     return 0;
             }
         }
-
-        //always returns score for ai player.
-        private double getConnectivityScore(GameLogic game) {
-            final double CONTROL_FACTOR = 1.0, CONNECTIVITY_FACTOR = 0.2;
-            final int ADJACENT_SAFE_CNT = 3;
-
-            if (game.getCurrentGameState() != GameState.RUNNING) {
-                return getEndGameScore(game);
-            }
-
-            double result = 0;
-
-            boolean currentPlayerChanged = false;
-            if (game.getCurrentPlayerFigure() != ownFigure) {
-                game.setCurrentPlayerToOpponent();
-                currentPlayerChanged = true;
-            }
-
-            for (int i = 0; i < BOARD_SIZE; i++) {
-                for (int j = 0; j < BOARD_SIZE; j++) {
-                    if (game.getCellAt(i, j).isActive()) {
-                        result += CONTROL_FACTOR;
-                    }
-                    if (game.getCellAt(i, j).getOwner() == ownFigure) {
-                        int adjacentCnt = 0;
-                        for (int [] dir : ADJACENT_DIRECTIONS) {
-                            int dx = i + dir[0], dy = j + dir[1];
-                            if (isInside(dx) && isInside(dy) && game.getCellAt(dx, dy).getOwner() == ownFigure) {
-                                adjacentCnt++;
-                            }
-                        }
-                        if (adjacentCnt < ADJACENT_SAFE_CNT) {
-                            result -= CONNECTIVITY_FACTOR;
-                        }
-                    }
-
-                }
-            }
-
-            //we've probably just damaged current game state
-            if (currentPlayerChanged) {
-                game.setCurrentPlayerToOpponent();
-            }
-
-            return result;
-        }
-
         //always returns score for ai player.
         private double getControlledCellsScore(GameLogic game) {
-            final double DANGER_FACTOR = 1.25, CONTROL_FACTOR = 1.0;
+            final double DANGER_FACTOR = 1.25, CONTROL_FACTOR = 1.0, TURN_COUNT_FACTOR = 0.05;
 
             if (game.getCurrentGameState() != GameState.RUNNING) {
                 return getEndGameScore(game);
@@ -151,10 +108,13 @@ public class AIPlayer extends Player {
                     for (int j = 0; j < BOARD_SIZE; j++) {
                         if (game.getCellAt(i, j).isActive()) {
                             result += sign * CONTROL_FACTOR;
-                            }
+                        }
                         if (game.getCellAt(i, j).canMakeTurn() &&
                                 game.getCellAt(i, j).getOwner() == game.getOpponent(game.getCurrentPlayerFigure())) {
                             result += sign * DANGER_FACTOR;
+                        }
+                        if (game.getCellAt(i, j).canMakeTurn()) {
+                            result += sign * TURN_COUNT_FACTOR;
                         }
                     }
                 }
@@ -166,7 +126,7 @@ public class AIPlayer extends Player {
             if (currentPlayerChanged) {
                 game.setCurrentPlayerToOpponent();
             }
-
+           // System.err.println("Total score=" + result);
             return result;
         }
 
@@ -186,6 +146,39 @@ public class AIPlayer extends Player {
             }
         }
 
+        private void orderMovesByCost(ArrayList<CoordinatePair> moves, GameLogic curGameLogic) {
+            class Pair {
+                CoordinatePair move;
+                double cost;
+                Pair(CoordinatePair move, double cost) {
+                    this.move = move;
+                    this.cost = cost;
+                }
+            }
+
+            ArrayList<Pair> movesWithCosts = new ArrayList<>();
+            for (CoordinatePair move : moves) {
+                GameLogic logic = new GameLogic(curGameLogic);
+                logic.doTurn(move.x, move.y);
+                movesWithCosts.add(new Pair(move, getControlledCellsScore(logic)));
+            }
+
+            Collections.sort(movesWithCosts, new Comparator<Pair>() {
+                @Override
+                public int compare(Pair lhs, Pair rhs) {
+                    if (abs(lhs.cost - rhs.cost) < 1e-4) {
+                        return 0;
+                    }
+                    return lhs.cost < rhs.cost ? -1 : 1;
+                }
+            });
+
+            moves.clear();
+            for (Pair pair : movesWithCosts) {
+                moves.add(pair.move);
+            }
+        }
+
         private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
             if (isCancelled()) {
                 return null;
@@ -202,6 +195,12 @@ public class AIPlayer extends Player {
                 return result;
             }
 
+            orderMovesByCost(moves, gameLogic);
+            Collections.reverse(moves); //take into account only moves that give us highest scores
+            while (moves.size() > 5) {
+                moves.remove(moves.size() - 1);
+            }
+
             double optScore = -10000;
 
             for (CoordinatePair move: moves) {
@@ -216,9 +215,16 @@ public class AIPlayer extends Player {
                 for (CoordinatePair optMove : optMoves) {
                     tmpGameLogic.doTurn(optMove.x, optMove.y);
                 }
+                for (int i = 0; i < 1; i++) { //to check for immediate danger
+                    ArrayList<CoordinatePair> enemyMoves = tmpGameLogic.getMoves();
+                    orderMovesByCost(enemyMoves, tmpGameLogic);
+                    if (enemyMoves.size() == 0) {
+                        break;
+                    }
+                    tmpGameLogic.doTurn(enemyMoves.get(0).x, enemyMoves.get(0).y); //greedy minimize AI score
+                }
 
-                double newScore = gameLogic.getCurrentTurn() < 8 ? getConnectivityScore(tmpGameLogic) :
-                        getControlledCellsScore(tmpGameLogic);
+                double newScore = getControlledCellsScore(tmpGameLogic);
                 if (newScore > optScore) {
                     optScore = newScore;
                     result = optMoves;
@@ -242,6 +248,10 @@ public class AIPlayer extends Player {
 
         @Override
         protected void onProgressUpdate(CoordinatePair... cells) {
+            if (isCancelled()) {
+                return;
+            }
+
             Log.d("AIPlayer", "Update progress: do move to " + cells[0].x + " " + cells[0].y);
             if (cells[0].x < 0) {
                 game.skipTurn(AIPlayer.this);
