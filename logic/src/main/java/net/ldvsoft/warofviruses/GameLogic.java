@@ -96,8 +96,8 @@ public class GameLogic {
     private PlayerFigure currentPlayerFigure = PlayerFigure.CROSS;
 
     private boolean previousTurnSkipped = false;
-    int currentTurn = 0;
-    int currentMiniturn = 0;
+    private int currentTurn = 0;
+    private int currentMiniturn = 0;
 
     public PlayerFigure getCurrentPlayerFigure() {
         return currentPlayerFigure;

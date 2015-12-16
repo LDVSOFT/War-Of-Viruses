@@ -100,7 +100,7 @@ public class GameActivity extends GameActivityBase {
                 } else {
                     gameStatus1.setText(getString(R.string.GAME_OPPONENT_TURN));
                 }
-                int miniturnsLeft = 3 - game.getGameLogic().currentMiniturn;
+                int miniturnsLeft = 3 - game.getGameLogic().getCurrentMiniturn();
                 gameStatus2.setText(String.format(getString(R.string.GAME_MINITURNS_LEFT), miniturnsLeft));
                 break;
             case DRAW:
