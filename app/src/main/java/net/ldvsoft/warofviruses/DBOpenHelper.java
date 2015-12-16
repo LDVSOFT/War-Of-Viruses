@@ -77,7 +77,8 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         onCreate(db);
     }
 
-    public void addGame(Game game) {
+    @Override
+    public long addGame(Game game) {
         ContentValues cv = new ContentValues();
         long gameId = new SecureRandom().nextLong();
         switch (game.getGameState()) {
@@ -119,6 +120,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             cv.put(TURN_TYPE, event.getEventTypeAsInt());
             getWritableDatabase().insert(TURN_TABLE, null, cv);
         }
+        return gameId;
     }
 
     public Game getActiveGame() {

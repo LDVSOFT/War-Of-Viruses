@@ -70,7 +70,8 @@ public interface DBProvider {
 
     String ADD_USER = "INSERT INTO " + USER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    void addGame(Game game);
+    //adds game to database and returns its ID
+    long addGame(Game game);
     void deleteActiveGame();
     ArrayList<Game> getGameHistory();
     Game getGameById(long id);

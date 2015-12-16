@@ -35,6 +35,7 @@ public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
     private Game game = null;
+    private long lastSavedGameID = -1;
 
     private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
             new HumanPlayer.OnGameStateChangedListener() {
@@ -238,7 +239,7 @@ public class GameActivity extends GameActivityBase {
             @Override
             protected Void doInBackground(Game... params) {
                 for (Game game : params) { //actually, there is only one game
-                    DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    lastSavedGameID = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
                 }
                 return null;
             }
@@ -249,7 +250,10 @@ public class GameActivity extends GameActivityBase {
         @Override
         protected Void doInBackground(Void... params) {
             Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getAndRemoveActiveGame();
-
+            if (loadedGame == null) {
+                loadedGame = DBOpenHelper.getInstance(GameActivity.this).getGameById(lastSavedGameID);
+                lastSavedGameID = -1;
+            }
             if (loadedGame == null) {
                 Log.d("GameActivity", "FAIL: Null game loaded");
             } else {
