@@ -130,7 +130,6 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         Game game = getGameFromCursors(gameCursor, turnsCursor);
         gameCursor.close();
         turnsCursor.close();
-        deleteActiveGame();
         return game;
     }
 
@@ -154,6 +153,12 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         return history;
     }
 
+    public Game getAndRemoveActiveGame() {
+        Game game = getActiveGame();
+        deleteActiveGame();
+        return game;
+    }
+
     private Game getGameFromCursors(Cursor gameCursor, Cursor turnsCursor) {
         if (!gameCursor.moveToFirst()) {
             return null;
@@ -170,7 +175,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
                     invoke(null, userCross, GameLogic.PlayerFigure.CROSS, context);
             zero = (Player) playerClasses[zeroType].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class, Context.class).
                     invoke(null, userZero, GameLogic.PlayerFigure.ZERO, context);
-        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -181,6 +186,10 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         }
 
         return Game.deserializeGame(id, cross, crossType, zero, zeroType, GameLogic.deserialize(turns));
+    }
+
+    public boolean hasActiveGame() {
+        return getActiveGame() != null;
     }
 
     public Game getGameById(long id) {

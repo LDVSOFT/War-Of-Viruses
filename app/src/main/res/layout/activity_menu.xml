@@ -68,6 +68,17 @@
             android:layout_marginTop="@dimen/spacing_medium"
             style="@style/button" />
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Restore saved game"
+            android:onClick="restoreSavedGame"
+            android:id="@+id/button_restore_game"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
+
     </LinearLayout>
 
     <android.support.design.widget.NavigationView
