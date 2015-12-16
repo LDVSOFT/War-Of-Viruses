@@ -100,19 +100,18 @@ public class GameActivity extends GameActivityBase {
         switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
             case OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
-                initButtons();
                 break;
             case OPPONENT_LOCAL_PLAYER:
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
-                initButtons();
                 break;
             case OPPONENT_NETWORK_PLAYER:
-                game = null;
+                loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
                 break;
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
         }
         findViewById(R.id.game_bar_replay).setVisibility(View.GONE);
+        initButtons();
         if (game != null) {
             redrawGame(game.getGameLogic());
         }
@@ -259,46 +258,50 @@ public class GameActivity extends GameActivityBase {
         }
     }
 
-    private class GameLoadedFromServerReceiver extends  BroadcastReceiver {
+    private class GameLoadedFromServerReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("GameActivity", "networkLoadGame broadcast recieved!");
             Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
-            JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
-            User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
-            User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
-
-            DBOpenHelper.getInstance(GameActivity.this).addUser(cross);
-            DBOpenHelper.getInstance(GameActivity.this).addUser(zero);
-
-            GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
-                    GameLogic.PlayerFigure.class);
-            Player playerCross, playerZero;
-
-            switch (myFigure) {
-                case CROSS:
-                    playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                    playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
-                    break;
-                case ZERO:
-                    playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                    playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Illegal myFigure value!");
-            }
-
-            List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
-
-            humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-            int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
-            int zeroType = 2 - crossType; //fixme remove magic constants
-            game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
-                    playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
-            initButtons();
-            redrawGame(game.getGameLogic());
+            loadGameFromJson(data);
         }
+    }
+
+    private void loadGameFromJson(String data) {
+        JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+        User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
+        User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+
+        DBOpenHelper.getInstance(GameActivity.this).addUser(cross);
+        DBOpenHelper.getInstance(GameActivity.this).addUser(zero);
+
+        GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
+                GameLogic.PlayerFigure.class);
+        Player playerCross, playerZero;
+
+        switch (myFigure) {
+            case CROSS:
+                playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
+                playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                break;
+            case ZERO:
+                playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
+                playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal myFigure value!");
+        }
+
+        List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
+
+        humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+        int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
+        int zeroType = 2 - crossType; //fixme remove magic constants
+        game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
+                playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
+        initButtons();
+        redrawGame(game.getGameLogic());
     }
 
     @Override

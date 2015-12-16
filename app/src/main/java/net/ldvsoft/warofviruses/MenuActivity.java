@@ -1,8 +1,12 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -17,6 +21,7 @@ public class MenuActivity extends AppCompatActivity {
     public final static int OPPONENT_BOT = 0;
     public final static int OPPONENT_LOCAL_PLAYER = 1;
     public static final int OPPONENT_NETWORK_PLAYER = 2;
+    private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +47,22 @@ public class MenuActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private class GameLoadedFromServerReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("GameActivity", "networkLoadGame broadcast recieved!");
+            Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
+            String data = tmp.getString(WoVProtocol.DATA);
+            intent = new Intent(MenuActivity.this, GameActivity.class);
+            intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
+            intent.putExtra(WoVPreferences.GAME_JSON_DATA, data);
+            unregisterReceiver(gameLoadedFromServerReceiver);
+            gameLoadedFromServerReceiver = null;
+            startActivity(intent);
+        }
+    }
+
     public void playOnline(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
-        intent.putExtra(OPPONENT_TYPE, OPPONENT_NETWORK_PLAYER);
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         Bundle data = new Bundle();
         data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
@@ -54,7 +72,16 @@ public class MenuActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        startActivity(intent);
+        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
+        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
+    }
+
+    @Override
+    protected void onStop() {
+        if (gameLoadedFromServerReceiver != null) {
+            unregisterReceiver(gameLoadedFromServerReceiver);
+        }
+        super.onStop();
     }
 
     public void clearDB(View view) {
