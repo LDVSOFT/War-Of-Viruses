@@ -2,7 +2,8 @@ package net.ldvsoft.warofviruses;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
-import org.json.JSONObject;
+
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -18,11 +19,27 @@ public class GCMHandler extends SmackCcsClient {
     public GCMHandler(WarOfVirusesServer server) throws XMPPException, IOException, SmackException {
         this.server = server;
 
-        String projectId = server.getSetting("google.projectId", "");
-        String apiKey = server.getSetting("google.apiKey", "");
-        String gcmServer = server.getSetting("gcm.server", "");
-        int gcmPort = Integer.parseInt(server.getSetting("gcm.port", ""));
+        String projectId = server.getSetting("google.projectId");
+        String apiKey = server.getSetting("google.apiKey");
+        String gcmServer = server.getSetting("gcm.server");
+        int gcmPort = Integer.parseInt(server.getSetting("gcm.port"));
         connect(projectId, apiKey, gcmServer, gcmPort);
+    }
+
+    public String createJsonMessage(
+            String to,
+            String messageId,
+            String action,
+            JsonObject data,
+            String collapseKey,
+            Long timeToLive,
+            Boolean delayWhileIdle,
+            String priority) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty(WoVProtocol.ACTION, action);
+        // SIC: GCM does not accept tree-ish json
+        payload.addProperty(WoVProtocol.DATA, data.toString());
+        return createJsonMessage(to, messageId, payload, collapseKey, timeToLive, delayWhileIdle, priority);
     }
 
     @Override
@@ -36,13 +53,14 @@ public class GCMHandler extends SmackCcsClient {
     }
 
     @Override
-    protected void handleUpstreamMessage(JSONObject message) {
+    protected void handleUpstreamMessage(JsonObject message) {
         super.handleUpstreamMessage(message);
-        JSONObject answer = server.processGCM(message);
+        JsonObject answer = server.processGCM(message);
         if (answer != null) {
-            sendDownstreamMessage(SmackCcsClient.createJsonMessage(
-                    message.getString("from"),
+            sendDownstreamMessage(createJsonMessage(
+                    message.get("from").getAsString(),
                     nextMessageId(),
+                    WoVProtocol.RESULT,
                     answer,
                     null,
                     null,
@@ -50,16 +68,6 @@ public class GCMHandler extends SmackCcsClient {
                     "high"
             ));
         }
-    }
-
-    @Override
-    protected void handleAckReceipt(JSONObject jsonObject) {
-        super.handleAckReceipt(jsonObject);
-    }
-
-    @Override
-    protected void handleNackReceipt(JSONObject jsonObject) {
-        super.handleNackReceipt(jsonObject);
     }
 
     public void stop() {

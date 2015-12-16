@@ -11,12 +11,12 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.NoBar" >
+        android:theme="@style/AppTheme" >
 
         <activity
             android:name=".GameActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoBar" >
+            android:theme="@style/AppTheme" >
         </activity>
 
         <activity
@@ -39,7 +39,7 @@
         <activity
             android:name=".GameActivityReplay"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoBar">
+            android:theme="@style/AppTheme">
         </activity>
 
         <!-- Google Cloud Messaging setup -->
@@ -77,12 +77,6 @@
         <service
             android:name="net.ldvsoft.warofviruses.WoVRegistrationIntentService"
             android:exported="false">
-        </service>
-
-        <!-- Local database setup -->
-        <service
-            android:name=".GameHistoryDBService"
-            android:exported="false" >
         </service>
     </application>
 

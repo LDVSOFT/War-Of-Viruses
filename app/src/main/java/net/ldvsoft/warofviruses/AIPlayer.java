@@ -1,26 +1,68 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import static java.lang.Thread.sleep;
-import static net.ldvsoft.warofviruses.GameLogic.*;
+import static net.ldvsoft.warofviruses.GameLogic.ADJACENT_DIRECTIONS;
+import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.CoordinatePair;
+import static net.ldvsoft.warofviruses.GameLogic.GameState;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
+import static net.ldvsoft.warofviruses.GameLogic.isInside;
 
 /**
  * Created by Сева on 20.10.2015.
  */
 public class AIPlayer extends Player {
+    public static final User AI_USER = new User(
+            DBProvider.USER_AI_PLAYER,
+            "uniqueGoogleTokenForAiPlayer",
+//            1, //DBOpenHelper.playerClasses[1]
+            "SkyNet", "1",
+            0, 0,
+            null);
+    private AsyncTask<Void, CoordinatePair, Void> runningStrategy;
+
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
+        this.user = AI_USER;
+        this.type = 1;
+    }
+
+    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
+        // There is only one AI user
+        return new AIPlayer(ownFigure);
     }
 
     @Override
-    public void makeTurn(Game game) {
+    public void makeTurn() {
         Log.d("AIPlayer", "Turn passed to AI player");
-        new BruteforceStrategy(game).execute();
+        runningStrategy = new BruteforceStrategy(game);
+        runningStrategy.execute();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (runningStrategy != null) {
+            runningStrategy.cancel(true);
+        }
+    }
+
+    @Override
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
+    }
+
+    @Override
+    public void setGame(Game game) {
+        super.setGame(game);
+        if (!game.isFinished() && game.getCurrentPlayer().equals(this)) {
+            makeTurn();
+        }
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
@@ -130,8 +172,11 @@ public class AIPlayer extends Player {
 
         private void runStrategy(GameLogic gameLogic) {
             ArrayList<CoordinatePair> optMoves = bruteforceMoves(gameLogic);
-            for (CoordinatePair move : optMoves) {
+            if (isCancelled() || optMoves == null) {
+                return;
+            }
 
+            for (CoordinatePair move : optMoves) {
                 publishProgress(move);
                 try {
                     sleep(750);
@@ -142,6 +187,10 @@ public class AIPlayer extends Player {
         }
 
         private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
+            if (isCancelled()) {
+                return null;
+            }
+
             ArrayList<CoordinatePair> result = new ArrayList<>();
 
             if (gameLogic.getCurrentPlayerFigure() != ownFigure) {
@@ -177,7 +226,6 @@ public class AIPlayer extends Player {
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("AIPlayer", "AIPlayer::run");
-            Random randomGenerator = new Random();
             GameLogic gameLogic = game.getGameLogic();
             if (!gameLogic.canMove()) {
                 publishProgress(new CoordinatePair(-1, -1));
