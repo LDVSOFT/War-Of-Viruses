@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -28,9 +29,17 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.CROSS;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.NONE;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.ZERO;
 
 public class GameActivity extends GameActivityBase {
     private static Gson gson = new Gson();
+
+    private TextView crossNick;
+    private TextView zeroNick;
+    private TextView gameStatus1;
+    private TextView gameStatus2;
 
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
@@ -44,12 +53,12 @@ public class GameActivity extends GameActivityBase {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            redrawGame(gameLogic);
+                            redrawGame(game);
                         }
                     });
                 }
             };
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS,
+    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
 
     private class OnExitActivityListener implements DialogInterface.OnClickListener {
@@ -66,6 +75,62 @@ public class GameActivity extends GameActivityBase {
             GameActivity.super.onBackPressed();
         }
     }
+
+    protected void redrawGame(Game game) {
+        super.redrawGame(game.getGameLogic());
+
+        crossNick.setText(game.getCrossPlayer().getName());
+        zeroNick .setText(game.getZeroPlayer().getName());
+
+        GameLogic.PlayerFigure mineFigure = game.getMineFigure(humanPlayer.getUser().getId());
+        GameLogic.GameState gameState = game.getGameState();
+        switch (gameState) {
+            case RUNNING:
+                GameLogic.PlayerFigure currentFigure = game.getCurrentPlayer().ownFigure;
+                if (mineFigure == NONE) {
+                    switch (currentFigure) {
+                        case CROSS:
+                            gameStatus1.setText(getString(R.string.GAME_CROSS_TURN));
+                            break;
+                        case ZERO:
+                            gameStatus1.setText(getString(R.string.GAME_ZERO_TURN));
+                            break;
+                    }
+                } else if (currentFigure == mineFigure) {
+                    gameStatus1.setText(getString(R.string.GAME_USER_TURN));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_OPPONENT_TURN));
+                }
+                int miniturnsLeft = 3 - game.getGameLogic().currentMiniturn;
+                gameStatus2.setText(String.format(getString(R.string.GAME_MINITURNS_LEFT), miniturnsLeft));
+                break;
+            case DRAW:
+                gameStatus1.setText(getString(R.string.GAME_DRAW));
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+            case CROSS_WON:
+                if (mineFigure == NONE) {
+                    gameStatus1.setText(getString(R.string.GAME_CROSS_WON));
+                } else if (mineFigure == CROSS) {
+                    gameStatus1.setText(getString(R.string.GAME_WON));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_LOST));
+                }
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+            case ZERO_WON:
+                if (mineFigure == NONE) {
+                    gameStatus1.setText(getString(R.string.GAME_ZERO_WON));
+                } else if (mineFigure == ZERO) {
+                    gameStatus1.setText(getString(R.string.GAME_WON));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_LOST));
+                }
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (game == null || game.isFinished()) {
@@ -94,6 +159,11 @@ public class GameActivity extends GameActivityBase {
                 break;
         }
 
+        crossNick   = (TextView) findViewById(R.id.game_cross_nick);
+        zeroNick    = (TextView) findViewById(R.id.game_zero_nick);
+        gameStatus1 = (TextView) findViewById(R.id.game_text_game_status_1);
+        gameStatus2 = (TextView) findViewById(R.id.game_text_game_status_2);
+
         game = new Game();
         tokenSentReceiver = new BroadcastReceiver() {
             @Override
@@ -115,10 +185,10 @@ public class GameActivity extends GameActivityBase {
                 game = null; //will be loaded during onStart()
                 break;
             case WoVPreferences.OPPONENT_BOT:
-                game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
+                game.startNewGame(humanPlayer, new AIPlayer(ZERO));
                 break;
             case WoVPreferences.OPPONENT_LOCAL_PLAYER:
-                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
+                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), ZERO));
                 break;
             case WoVPreferences.OPPONENT_NETWORK_PLAYER:
                 loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
@@ -128,7 +198,7 @@ public class GameActivity extends GameActivityBase {
         }
         initButtons();
         if (game != null) {
-            redrawGame(game.getGameLogic());
+            redrawGame(game);
         }
     }
 
@@ -300,12 +370,12 @@ public class GameActivity extends GameActivityBase {
 
         switch (myFigure) {
             case CROSS:
-                playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                playerZero = new ClientNetworkPlayer(cross, ZERO, GameActivity.this);
+                playerCross = humanPlayer = new HumanPlayer(zero, CROSS);
                 break;
             case ZERO:
-                playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                playerCross = new ClientNetworkPlayer(cross, CROSS, GameActivity.this);
+                playerZero = humanPlayer = new HumanPlayer(zero, ZERO);
                 break;
             default:
                 throw new IllegalArgumentException("Illegal myFigure value!");
@@ -314,12 +384,12 @@ public class GameActivity extends GameActivityBase {
         List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
 
         humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-        int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
+        int crossType = myFigure == CROSS ? 0 : 2;
         int zeroType = 2 - crossType; //fixme remove magic constants
         game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                 playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
         initButtons();
-        redrawGame(game.getGameLogic());
+        redrawGame(game);
     }
 
     @Override
@@ -332,7 +402,7 @@ public class GameActivity extends GameActivityBase {
         game.updateGameInfo();
         setCurrentGameListeners();
         initButtons();
-        redrawGame(game.getGameLogic());
+        redrawGame(game);
     }
 
     @Override

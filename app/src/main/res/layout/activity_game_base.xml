@@ -61,7 +61,8 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:textColor="@color/primary_text" />
+                android:textColor="@color/primary_text"
+                android:gravity="end" />
 
             <net.ldvsoft.warofviruses.BoardCellButton
                 android:layout_width="32dp"
