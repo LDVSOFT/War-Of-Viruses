@@ -20,37 +20,53 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:elevation="@dimen/elevation_small"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark"
+            app:theme="@style/AppTheme"
             android:background="@color/primary" />
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="play against bot"
             android:id="@+id/button_play_against_bot"
             android:layout_gravity="center_horizontal"
-            android:onClick="playAgainstBot" />
+            android:onClick="playAgainstBot"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="play against player"
             android:id="@+id/button_play_against_player"
             android:layout_gravity="center_horizontal"
-            android:onClick="playAgainstLocalPlayer" />
+            android:onClick="playAgainstLocalPlayer"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="View game history"
             android:onClick="viewGameHistory"
-            android:id="@+id/button" />
+            android:id="@+id/button_view_history"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="I wanna play online!"
             android:onClick="playOnline"
-            android:id="@+id/button_play_online" />
+            android:id="@+id/button_play_online"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
 
     </LinearLayout>
 

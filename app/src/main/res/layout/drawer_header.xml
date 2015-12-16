@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="172dp"
-    android:background="#e8e8e8">
+    android:background="@color/primary">
 
     <net.ldvsoft.warofviruses.BoardCellButton
         android:layout_width="64dp"
@@ -32,6 +32,7 @@
         android:layout_marginBottom="@dimen/spacing_large"
         android:id="@+id/username"
         android:text="New Text"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+        android:textColor="@color/primary_light" />
 
 </RelativeLayout>

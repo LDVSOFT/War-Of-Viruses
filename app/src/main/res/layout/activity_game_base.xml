@@ -41,7 +41,8 @@
                 android:layout_gravity="left|center_vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/primary_text" />
         </LinearLayout>
 
         <LinearLayout
@@ -59,7 +60,8 @@
                 android:layout_gravity="center_vertical|right"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small" />
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/primary_text" />
 
             <net.ldvsoft.warofviruses.BoardCellButton
                 android:layout_width="32dp"
@@ -74,8 +76,8 @@
         android:layout_height="0dp"
         android:layout_gravity="center"
         android:layout_weight="1"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp">
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginBottom="@dimen/spacing_small">
 
         <net.ldvsoft.warofviruses.SquareLayout
             android:orientation="vertical"
@@ -101,7 +103,8 @@
             android:text="@string/give_up"
             android:id="@+id/game_button_giveup"
             android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -120,7 +123,8 @@
                     android:text="UNKNOWN"
                     android:id="@+id/game_text_game_status_1"
                     android:layout_gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/primary_text" />
             </FrameLayout>
 
             <FrameLayout
@@ -134,7 +138,8 @@
                     android:text="UNKNOWN"
                     android:id="@+id/game_text_game_status_2"
                     android:layout_gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/secondary_text" />
             </FrameLayout>
         </LinearLayout>
 
@@ -144,7 +149,8 @@
             android:text="@string/skip_turn"
             android:id="@+id/game_button_passturn"
             android:layout_weight="1"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
     </LinearLayout>
 
     <LinearLayout
@@ -159,7 +165,8 @@
             android:text="@string/first_turn"
             android:id="@+id/game_button_first"
             android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
 
         <Button
             android:layout_width="0dp"
@@ -167,7 +174,8 @@
             android:text="@string/prev_turn"
             android:id="@+id/game_button_prev"
             android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
 
         <LinearLayout
             android:orientation="vertical"
@@ -184,14 +192,15 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="0/0"
                     android:id="@+id/game_text_game_position_1"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:layout_weight="1.5"
                     android:textAlignment="center"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    android:textColor="@color/primary_text" />
             </FrameLayout>
 
             <FrameLayout
@@ -209,7 +218,8 @@
                     android:layout_marginRight="10dp"
                     android:layout_weight="1.5"
                     android:textAlignment="center"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    android:textColor="@color/secondary_text" />
             </FrameLayout>
 
         </LinearLayout>
@@ -220,7 +230,8 @@
             android:text="@string/next_turn"
             android:id="@+id/game_button_next"
             android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
 
         <Button
             android:layout_width="0dp"
@@ -228,7 +239,8 @@
             android:text="@string/last_turn"
             android:id="@+id/game_button_last"
             android:layout_weight="0.5"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/spacing_small" />
     </LinearLayout>
 
 </LinearLayout>

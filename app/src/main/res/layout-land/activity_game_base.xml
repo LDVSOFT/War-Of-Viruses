@@ -18,7 +18,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="110dp"
+        android:layout_width="120dp"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -69,7 +69,8 @@
                 android:layout_height="64dp"
                 android:text="@string/give_up"
                 android:id="@+id/game_button_giveup"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/spacing_small" />
         </LinearLayout>
 
         <LinearLayout
@@ -101,7 +102,8 @@
                     android:text="@string/first_turn"
                     android:id="@+id/game_button_first"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="@dimen/spacing_small" />
 
                 <Button
                     android:layout_width="0dp"
@@ -109,7 +111,8 @@
                     android:text="@string/prev_turn"
                     android:id="@+id/game_button_prev"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="@dimen/spacing_small" />
             </LinearLayout>
 
         </LinearLayout>
@@ -138,7 +141,7 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="110dp"
+        android:layout_width="120dp"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -191,7 +194,8 @@
                 android:text="@string/skip_turn"
                 android:id="@+id/game_button_passturn"
                 android:layout_weight="1"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/spacing_small" />
         </LinearLayout>
 
         <LinearLayout
@@ -224,7 +228,8 @@
                     android:text="@string/next_turn"
                     android:id="@+id/game_button_next"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="@dimen/spacing_small" />
 
                 <Button
                     android:layout_width="0dp"
@@ -232,7 +237,8 @@
                     android:text="@string/last_turn"
                     android:id="@+id/game_button_last"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="@dimen/spacing_small" />
             </LinearLayout>
 
         </LinearLayout>

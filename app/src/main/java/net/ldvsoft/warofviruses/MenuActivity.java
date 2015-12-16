@@ -62,6 +62,7 @@ public class MenuActivity extends AppCompatActivity {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
+                //noinspection ResourceType
                 BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
                 return null;
             }
