@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +53,7 @@ public class DatabaseHandler implements DBProvider {
                     addGameStatement.execute();
                 }
                 {
-                    ArrayList<GameEvent> events = game.getGameLogic().getEventHistory();
+                    List<GameEvent> events = game.getGameLogic().getEventHistory();
 
                     PreparedStatement addGameTurnStatement = connection.prepareStatement(ADD_GAME_TURNS);
                     addGameTurnStatement.setLong(1, id);
@@ -106,7 +107,7 @@ public class DatabaseHandler implements DBProvider {
                 events.next();
             }
 
-            return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
+            return null;//Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Failed to load game.", e);
             return null;
