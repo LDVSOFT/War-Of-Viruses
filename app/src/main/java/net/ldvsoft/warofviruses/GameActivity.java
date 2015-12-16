@@ -27,17 +27,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
-import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_BOT;
-import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_LOCAL_PLAYER;
-import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_NETWORK_PLAYER;
-import static net.ldvsoft.warofviruses.MenuActivity.OPPONENT_TYPE;
 
 public class GameActivity extends GameActivityBase {
     private static Gson gson = new Gson();
 
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
-    private Game game;
+    private Game game = null;
 
     private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
             new HumanPlayer.OnGameStateChangedListener() {
@@ -70,6 +66,11 @@ public class GameActivity extends GameActivityBase {
     }
     @Override
     public void onBackPressed() {
+        if (game == null || game.isFinished()) {
+            super.onBackPressed();
+            return;
+        }
+        
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
@@ -97,14 +98,17 @@ public class GameActivity extends GameActivityBase {
 
         Intent intent = getIntent();
         setCurrentGameListeners();
-        switch (intent.getIntExtra(OPPONENT_TYPE, -1)) {
-            case OPPONENT_BOT:
+        switch (intent.getIntExtra(WoVPreferences.OPPONENT_TYPE, -1)) {
+            case WoVPreferences.OPPONENT_RESTORED_GAME:
+                game = null; //will be loaded during onStart()
+                break;
+            case WoVPreferences.OPPONENT_BOT:
                 game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
                 break;
-            case OPPONENT_LOCAL_PLAYER:
+            case WoVPreferences.OPPONENT_LOCAL_PLAYER:
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
                 break;
-            case OPPONENT_NETWORK_PLAYER:
+            case WoVPreferences.OPPONENT_NETWORK_PLAYER:
                 loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
                 break;
             default:
@@ -234,7 +238,7 @@ public class GameActivity extends GameActivityBase {
     private final class StoredGameLoader extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
-            Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getActiveGame();
+            Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getAndRemoveActiveGame();
 
             if (loadedGame == null) {
                 Log.d("GameActivity", "FAIL: Null game loaded");
