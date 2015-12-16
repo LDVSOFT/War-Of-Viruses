@@ -15,7 +15,7 @@
         android:layout_height="?attr/actionBarSize"
         android:elevation="@dimen/elevation_small"
         app:theme="@style/ThemeOverlay.AppCompat.Dark"
-        android:background="@color/primary" />
+        style="@style/AppTheme.Toolbar" />
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="wrap_content"

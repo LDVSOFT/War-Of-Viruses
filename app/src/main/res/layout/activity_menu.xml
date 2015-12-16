@@ -21,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             android:elevation="@dimen/elevation_small"
             app:theme="@style/AppTheme"
-            android:background="@color/primary" />
+            style="@style/AppTheme.Toolbar" />
 
         <Button
             android:layout_width="match_parent"

@@ -60,7 +60,7 @@ public class AIPlayer extends Player {
     @Override
     public void setGame(Game game) {
         super.setGame(game);
-        if (game.getCurrentPlayer().equals(this)) {
+        if (!game.isFinished() && game.getCurrentPlayer().equals(this)) {
             makeTurn();
         }
     }

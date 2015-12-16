@@ -43,6 +43,9 @@ public class Game {
     }
 
     public void updateGameInfo() {
+        if (isFinished()) {
+            return;
+        }
         crossPlayer.updateGameInfo(this);
         zeroPlayer.updateGameInfo(this);
     }

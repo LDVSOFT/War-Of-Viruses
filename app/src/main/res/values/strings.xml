@@ -11,4 +11,10 @@
     <string name="prev_turn"><![CDATA[<]]></string>
     <string name="next_turn"><![CDATA[>]]></string>
     <string name="last_turn"><![CDATA[>>]]></string>
+    <string name="GAME_LOST">Lost</string>
+    <string name="GAME_WON">Won</string>
+    <string name="GAME_LOCAL">Local game</string>
+    <string name="GAME_DRAW">Draw</string>
+    <string name="GAME_ZERO_WON">Zeroes won</string>
+    <string name="GAME_CROSS_WON">Crosses won</string>
 </resources>

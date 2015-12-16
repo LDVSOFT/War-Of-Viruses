@@ -52,7 +52,7 @@ public interface DBProvider {
     String DELETE_ACTIVE_GAME = "DELETE FROM " + GAME_TABLE + " WHERE " + GAME_STATUS +
             " =" + GameStatus.RUNNING.ordinal() + ";";
 
-    String GET_GAME_HISTORY = "SELECT " + ID + ", " + GAME_DATE + ", " + GAME_STATUS + " FROM " + GAME_TABLE + " WHERE " +
+    String GET_GAME_HISTORY = "SELECT " + ID + " FROM " + GAME_TABLE + " WHERE " +
             GAME_STATUS + " >= 1 ORDER BY " + GAME_DATE + " DESC;";
 
     String GET_GAME_BY_ID = "SELECT * FROM " + GAME_TABLE + " WHERE " + ID + " = ?;";
@@ -72,7 +72,7 @@ public interface DBProvider {
 
     void addGame(Game game);
     void deleteActiveGame();
-    ArrayList<String> getGameHistory();
+    ArrayList<Game> getGameHistory();
     Game getGameById(long id);
 
     void addUser(User user);

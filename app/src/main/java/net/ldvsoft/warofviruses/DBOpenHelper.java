@@ -139,15 +139,15 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         getWritableDatabase().execSQL(DELETE_ACTIVE_GAME);
     }
 
-    public ArrayList<String> getGameHistory() {
+    public ArrayList<Game> getGameHistory() {
         Cursor cursor = getReadableDatabase().rawQuery(GET_GAME_HISTORY, null);
         Log.d(TAG, "Loading game history: found " + cursor.getCount() + " games");
         if (!cursor.moveToFirst()) {
             return null;
         }
-        ArrayList<String> history = new ArrayList<>();
+        ArrayList<Game> history = new ArrayList<>();
         while (!cursor.isAfterLast()) {
-            history.add(cursor.getLong(0) + ";" + cursor.getString(1) + ";" + GameStatus.values()[cursor.getInt(2)].toString());
+            history.add(getGameById(cursor.getLong(0)));
             cursor.moveToNext();
         }
         cursor.close();
