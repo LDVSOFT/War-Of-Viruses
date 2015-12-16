@@ -9,7 +9,7 @@ public abstract class Player implements Serializable {
     protected GameLogic.PlayerFigure ownFigure;
     protected User user;
     protected Game game;
-
+    protected int type;
     public abstract void makeTurn();
 
     public String getName() {
@@ -29,5 +29,18 @@ public abstract class Player implements Serializable {
 
     public User getUser() {
         return user;
+    }
+
+    /*
+    Is called when player should finish its work because of destroying of game
+     */
+    public void onStop() {
+
+    }
+    /*
+    Method that is called when game needs to be updated (by server, for example)
+     */
+    public void updateGameInfo(Game game) {
+
     }
 }

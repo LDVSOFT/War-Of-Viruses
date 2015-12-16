@@ -78,12 +78,6 @@
             android:name="net.ldvsoft.warofviruses.WoVRegistrationIntentService"
             android:exported="false">
         </service>
-
-        <!-- Local database setup -->
-        <service
-            android:name=".GameHistoryDBService"
-            android:exported="false" >
-        </service>
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package net.ldvsoft.warofviruses;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Сева on 21.10.2015.
@@ -11,7 +12,7 @@ public class GameLogic {
 
     public static final int BOARD_SIZE = 10;
 
-    public ArrayList<GameEvent> getEventHistory() {
+    public List<GameEvent> getEventHistory() {
         return events;
     }
 
@@ -102,7 +103,7 @@ public class GameLogic {
         return currentPlayerFigure;
     }
 
-    public static GameLogic deserialize(ArrayList<GameEvent> events) {
+    public static GameLogic deserialize(List<GameEvent> events) {
         GameLogic logic = new GameLogic();
         logic.newGame();
         for (GameEvent event : events) {

@@ -9,7 +9,6 @@
 CREATE TABLE IF NOT EXISTS `User` (
   `id` INTEGER,
   `googleToken` TEXT NOT NULL UNIQUE,
-  `userType` INT NOT NULL,
   `nicknameStr` TEXT NOT NULL,
   `nicknameId` TEXT NOT NULL,
   `colorCross` INT UNSIGNED NOT NULL,
@@ -42,7 +41,9 @@ CREATE TABLE IF NOT EXISTS `Contacts` (
 CREATE TABLE IF NOT EXISTS `Game` (
   `id` INTEGER,
   `playerCrosses` INTEGER NOT NULL,
+  `playerCrossesType` INT UNSIGNED NOT NULL, 
   `playerZeroes` INTEGER NOT NULL,
+  `playerZeroesType` INT UNSIGNED NOT NULL, 
   `status` INT NOT NULL,
   `gameDate` TEXT NOT NULL,
   PRIMARY KEY (`id`),

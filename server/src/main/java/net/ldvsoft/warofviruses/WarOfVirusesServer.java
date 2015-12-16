@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_PING;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_TURN;
+import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_UPDATE_LOCAL_GAME;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_USER_READY;
 import static net.ldvsoft.warofviruses.WoVProtocol.PING_ID;
 import static net.ldvsoft.warofviruses.WoVProtocol.RESULT;
@@ -61,9 +62,21 @@ public final class WarOfVirusesServer {
                 return processUserReady(message);
             case ACTION_TURN:
                 return processTurn(message);
+            case ACTION_UPDATE_LOCAL_GAME:
+                return processUpdateLocalGame(message);
             default:
                 return null;
         }
+    }
+
+    private JsonObject processUpdateLocalGame(JsonObject message) {
+        User sender = databaseHandler.getUserByToken(message.get("from").getAsString());
+        if (sender.getId() == runningGame.getCrossPlayer().getUser().getId()) {
+            ((ServerNetworkPlayer) runningGame.getCrossPlayer()).sendGameInfo(); //how about more elegant solution?
+        } else {
+            ((ServerNetworkPlayer) runningGame.getZeroPlayer()).sendGameInfo();
+        }
+        return null;
     }
 
     private JsonObject processPing(JsonObject message) {

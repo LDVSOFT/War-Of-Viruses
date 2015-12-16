@@ -11,19 +11,40 @@ public class Game {
     private OnGameFinishedListener onGameFinishedListener = null;
 
     private GameLogic gameLogic;
+    private int zeroType;
+    private int crossType;
+
+    public int getCrossType() {
+        return crossType;
+    }
+
+    public int getZeroType() {
+        return zeroType;
+    }
+
+    public GameLogic.GameState getGameState() {
+        return gameLogic.getCurrentGameState();
+    }
 
     public interface OnGameFinishedListener {
         void onGameFinished();
     }
-    public static Game deserializeGame(long id, Player crossPlayer, Player zeroPlayer, GameLogic gameLogic) {
+    public static Game deserializeGame(long id, Player crossPlayer, int crossType, Player zeroPlayer, int zeroType, GameLogic gameLogic) {
         Game game = new Game();
         game.id = id;
         game.crossPlayer = crossPlayer;
         game.zeroPlayer = zeroPlayer;
         game.gameLogic = gameLogic;
+        game.crossType = crossType;
+        game.zeroType = zeroType;
         game.crossPlayer.setGame(game);
         game.zeroPlayer.setGame(game);
         return game;
+    }
+
+    public void updateGameInfo() {
+        crossPlayer.updateGameInfo(this);
+        zeroPlayer.updateGameInfo(this);
     }
 
     public boolean isFinished() {
@@ -38,6 +59,13 @@ public class Game {
         return crossPlayer;
     }
 
+    /*
+    Is called when owner of this game (activity or server) is destroying to properly finish player work and close their resources
+     */
+    public void onStop() {
+        crossPlayer.onStop();
+        zeroPlayer.onStop();
+    }
     public long getGameId() {
         return id;
     }
@@ -55,6 +83,8 @@ public class Game {
         id = new SecureRandom().nextLong();
         crossPlayer = cross;
         zeroPlayer = zero;
+        crossType = cross.type;
+        zeroType = zero.type;
         gameLogic = new GameLogic();
         gameLogic.newGame();
         crossPlayer.setGame(this);
@@ -113,6 +143,10 @@ public class Game {
         return result;
     }
 
+    public void update() {
+        crossPlayer.setGame(this);
+        zeroPlayer.setGame(this);
+    }
     public boolean doTurn(Player sender, int x, int y) {
         if (!sender.equals(getCurrentPlayer())) {
             return false;

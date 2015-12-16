@@ -1,7 +1,9 @@
 package net.ldvsoft.warofviruses;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -22,7 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
@@ -52,6 +54,30 @@ public class GameActivity extends GameActivityBase {
             };
     private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
+
+    private class OnExitActivityListener implements DialogInterface.OnClickListener {
+        private boolean saveGame;
+
+        public OnExitActivityListener(boolean saveGame) {
+            this.saveGame = saveGame;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (!saveGame)
+                game = null;
+            GameActivity.super.onBackPressed();
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setMessage("Do you want to save current game?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new OnExitActivityListener(true))
+                .setNegativeButton("No", new OnExitActivityListener(false))
+                .show();
+    }
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -90,7 +116,7 @@ public class GameActivity extends GameActivityBase {
                 game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
                 break;
             case OPPONENT_NETWORK_PLAYER:
-                game = null;
+                loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
                 break;
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
@@ -103,6 +129,13 @@ public class GameActivity extends GameActivityBase {
 
     @Override
     protected void onPause() {
+        Log.d("GameActivityBase", "onPause");
+        if (game != null) {
+            saveCurrentGame();
+            game.onStop();
+        }
+        unregisterReceiver(gameLoadedFromServerReceiver);
+
         LocalBroadcastManager
                 .getInstance(this)
                 .unregisterReceiver(tokenSentReceiver);
@@ -173,13 +206,15 @@ public class GameActivity extends GameActivityBase {
 
     @Override
     protected void onStop() {
-        Log.d("GameActivityBase", "onStop");
-        saveCurrentGame();
         super.onStop();
     }
 
     protected void onResume() {
         super.onResume();
+        new StoredGameLoader().execute();
+        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
+        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
+
         LocalBroadcastManager
                 .getInstance(this)
                 .registerReceiver(tokenSentReceiver, new IntentFilter(WoVPreferences.GCM_REGISTRATION_COMPLETE));
@@ -233,54 +268,60 @@ public class GameActivity extends GameActivityBase {
         }
     }
 
-    private class GameLoadedFromServerReceiver extends  BroadcastReceiver {
+    private class GameLoadedFromServerReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("GameActivity", "networkLoadGame broadcast recieved!");
             Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
-            JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
-            User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
-            User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
-            GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
-                    GameLogic.PlayerFigure.class);
-            Player playerCross, playerZero;
-            //todo: add users to DB, think about possible stored game (what should I do when my activity stops and I play by
-            //todo: network? Probably just don't store such game, who knows
-            switch (myFigure) {
-                case CROSS:
-                    playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                    playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
-                    break;
-                case ZERO:
-                    playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                    playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Illegal myFigure value!");
-            }
-            ArrayList<GameEvent> events = WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY),
-                    int[].class)); //todo:: replace with gson deserialization
-
-            humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-            game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
-                    playerCross, playerZero, GameLogic.deserialize(events));
-            initButtons();
-            redrawGame(game.getGameLogic());
+            loadGameFromJson(data);
         }
+    }
+
+    private void loadGameFromJson(String data) {
+        JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+        User cross = gson.fromJson(jsonData.get(WoVProtocol.CROSS_USER), User.class);
+        User zero = gson.fromJson(jsonData.get(WoVProtocol.ZERO_USER), User.class);
+
+        DBOpenHelper.getInstance(GameActivity.this).addUser(cross);
+        DBOpenHelper.getInstance(GameActivity.this).addUser(zero);
+
+        GameLogic.PlayerFigure myFigure = gson.fromJson(jsonData.get(WoVProtocol.MY_FIGURE),
+                GameLogic.PlayerFigure.class);
+        Player playerCross, playerZero;
+
+        switch (myFigure) {
+            case CROSS:
+                playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
+                playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                break;
+            case ZERO:
+                playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
+                playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal myFigure value!");
+        }
+
+        List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
+
+        humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+        int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
+        int zeroType = 2 - crossType; //fixme remove magic constants
+        game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
+                playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
+        initButtons();
+        redrawGame(game.getGameLogic());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        new StoredGameLoader().execute();
-        gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
-        registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
-
     }
 
     private void onGameLoaded(Game game) {
         this.game = game;
+        game.updateGameInfo();
         setCurrentGameListeners();
         initButtons();
         redrawGame(game.getGameLogic());

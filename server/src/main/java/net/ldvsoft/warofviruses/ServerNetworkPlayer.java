@@ -53,6 +53,10 @@ public class ServerNetworkPlayer extends Player {
     public void setGame(Game game) {
         super.setGame(game);
         //Send client that game has started
+        sendGameInfo();
+    }
+
+    public void sendGameInfo() {
         JsonObject message = new JsonObject();
         message.add(WoVProtocol.MY_FIGURE , gson.toJsonTree(ownFigure));
         message.add(WoVProtocol.GAME_ID, gson.toJsonTree(game.getGameId()));
@@ -66,7 +70,7 @@ public class ServerNetworkPlayer extends Player {
                 message.add(WoVProtocol.CROSS_USER, gson.toJsonTree(opponent));
                 break;
         }
-        message.add(WoVProtocol.TURN_ARRAY, new JsonArray());
+        message.add(WoVProtocol.TURN_ARRAY, gson.toJsonTree(WoVProtocol.getIntsFromEventArray(game.getGameLogic().getEventHistory())));
         server.sendToUser(user, WoVProtocol.GAME_LOADED, message);
     }
 

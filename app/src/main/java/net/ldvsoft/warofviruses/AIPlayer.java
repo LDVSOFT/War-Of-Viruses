@@ -1,5 +1,6 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -20,17 +21,19 @@ public class AIPlayer extends Player {
     public static final User AI_USER = new User(
             DBProvider.USER_AI_PLAYER,
             "uniqueGoogleTokenForAiPlayer",
-            1, //DBOpenHelper.playerClasses[1]
+//            1, //DBOpenHelper.playerClasses[1]
             "SkyNet", "1",
             0, 0,
             null);
+    private AsyncTask<Void, CoordinatePair, Void> runningStrategy;
 
     public AIPlayer(GameLogic.PlayerFigure ownFigure) {
         this.ownFigure = ownFigure;
         this.user = AI_USER;
+        this.type = 1;
     }
 
-    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure) {
+    public static AIPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         // There is only one AI user
         return new AIPlayer(ownFigure);
     }
@@ -38,11 +41,28 @@ public class AIPlayer extends Player {
     @Override
     public void makeTurn() {
         Log.d("AIPlayer", "Turn passed to AI player");
-        new BruteforceStrategy(game).execute();
+        runningStrategy = new BruteforceStrategy(game);
+        runningStrategy.execute();
     }
 
     @Override
-    public void onGameStateChanged(GameEvent event, Player whoChaned) {
+    public void onStop() {
+        super.onStop();
+        if (runningStrategy != null) {
+            runningStrategy.cancel(true);
+        }
+    }
+
+    @Override
+    public void onGameStateChanged(GameEvent event, Player whoChanged) {
+    }
+
+    @Override
+    public void setGame(Game game) {
+        super.setGame(game);
+        if (game.getCurrentPlayer().equals(this)) {
+            makeTurn();
+        }
     }
 
     private class BruteforceStrategy extends AsyncTask<Void, CoordinatePair, Void> {
@@ -152,8 +172,11 @@ public class AIPlayer extends Player {
 
         private void runStrategy(GameLogic gameLogic) {
             ArrayList<CoordinatePair> optMoves = bruteforceMoves(gameLogic);
-            for (CoordinatePair move : optMoves) {
+            if (isCancelled() || optMoves == null) {
+                return;
+            }
 
+            for (CoordinatePair move : optMoves) {
                 publishProgress(move);
                 try {
                     sleep(750);
@@ -164,6 +187,10 @@ public class AIPlayer extends Player {
         }
 
         private ArrayList<CoordinatePair> bruteforceMoves(GameLogic gameLogic) {
+            if (isCancelled()) {
+                return null;
+            }
+
             ArrayList<CoordinatePair> result = new ArrayList<>();
 
             if (gameLogic.getCurrentPlayerFigure() != ownFigure) {

@@ -23,8 +23,8 @@ public class ClientNetworkPlayer extends Player {
     private static final Gson gson = new Gson();
 
     private Context context;
-    private GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-    private BroadcastReceiver receiver;
+    private GoogleCloudMessaging gcm;
+    private BroadcastReceiver turnMessageReceiver;
 
     private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
         @Override
@@ -37,11 +37,17 @@ public class ClientNetworkPlayer extends Player {
         }
     });
 
+    public static ClientNetworkPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
+        return new ClientNetworkPlayer(user, ownFigure, context);
+    }
+
     public ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         this.user = user;
         this.ownFigure = ownFigure;
         this.context = context;
-        receiver = new BroadcastReceiver() {
+        this.type = 0;
+        gcm = GoogleCloudMessaging.getInstance(context);
+        turnMessageReceiver = new BroadcastReceiver() {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE).getString(WoVProtocol.DATA);
@@ -61,10 +67,14 @@ public class ClientNetworkPlayer extends Player {
                             game.skipTurn(ClientNetworkPlayer.this);
                             break;
                     }
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }
         };
-        context.registerReceiver(receiver, new IntentFilter(WoVPreferences.TURN_BROADCAST));
+        context.registerReceiver(turnMessageReceiver, new IntentFilter(WoVPreferences.TURN_BROADCAST));
     }
 
     @Override
@@ -84,6 +94,24 @@ public class ClientNetworkPlayer extends Player {
         message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
         message.putString(WoVProtocol.DATA, data.toString());
         String id = UUID.randomUUID().toString();
+        try {
+            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        context.unregisterReceiver(turnMessageReceiver);
+    }
+
+    @Override
+    public void updateGameInfo(Game game) {
+        String id = UUID.randomUUID().toString();
+        Bundle message = new Bundle();
+        message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_UPDATE_LOCAL_GAME);
         try {
             gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
         } catch (IOException e) {

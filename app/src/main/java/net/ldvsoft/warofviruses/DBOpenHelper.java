@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -20,11 +21,12 @@ import java.util.Locale;
 public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     private static final String TAG = "DBHelper";
 
-    private static final int VERSION = 17;
+    private static final int VERSION = 18;
     private static final String DB_NAME = "gameHistoryDB";
 
     private static final String CREATE_GAME_TABLE = "CREATE TABLE " + GAME_TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            PLAYER_CROSSES + " INTEGER UNSIGNED NOT NULL, " + PLAYER_ZERO + " INTEGER  UNSIGNED NOT NULL, " + GAME_STATUS +
+            PLAYER_CROSSES + " INTEGER UNSIGNED NOT NULL, " + PLAYER_CROSSES_TYPE + " INT UNSIGNED NOT NULL, " +
+            PLAYER_ZERO + " INTEGER UNSIGNED NOT NULL, " + PLAYER_ZEROES_TYPE + " INT UNSIGNED NOT NULL, " + GAME_STATUS +
             " INT NOT NULL, " + GAME_DATE + " TEXT NOT NULL, FOREIGN KEY (" + PLAYER_CROSSES + ", " + PLAYER_ZERO +
             ") REFERENCES " + USER_TABLE + " (" + ID + ", " + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
 
@@ -34,21 +36,22 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             "ON DELETE CASCADE ON UPDATE CASCADE);";
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGER, " + GOOGLE_TOKEN +
-            " TEXT NOT NULL UNIQUE, " + USER_TYPE + " INT NOT NULL, " + NICKNAME_STR + " TEXT NOT NULL, " + NICKNAME_ID +
+            " TEXT NOT NULL UNIQUE, " + NICKNAME_STR + " TEXT NOT NULL, " + NICKNAME_ID +
             " TEXT NOT NULL, " + COLOR_CROSS + " INT UNSIGNED NOT NULL, " + COLOR_ZERO + " INT UNSIGNED NOT NULL, " +
             INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID + "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " +
             USER_TABLE + " (" + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
     private static DBOpenHelper instance;
-
+    private Context context;
     private static final String DROP_GAME_TABLE = "DROP TABLE IF EXISTS " + GAME_TABLE + ";";
     private static final String DROP_TURN_TABLE = "DROP TABLE IF EXISTS " + TURN_TABLE + ";";
     private static final String DROP_USER_TABLE = "DROP TABLE IF EXISTS " + USER_TABLE + ";";
 
-    private static final Class<?>[] playerClasses = {HumanPlayer.class, AIPlayer.class};
+    private static final Class<?>[] playerClasses = {HumanPlayer.class, AIPlayer.class, ClientNetworkPlayer.class};
 
     public synchronized static DBOpenHelper getInstance(Context context) {
         if (instance == null) {
             instance = new DBOpenHelper(context);
+            instance.context = context;
         }
         return instance;
     }
@@ -77,10 +80,27 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     public void addGame(Game game) {
         ContentValues cv = new ContentValues();
         long gameId = new SecureRandom().nextLong();
-        cv.put(GAME_STATUS, game.isFinished() ? GameStatus.FINISHED.ordinal() : GameStatus.RUNNING.ordinal());
+        switch (game.getGameState()) {
+            case NOT_RUNNING:
+            case RUNNING:
+                cv.put(GAME_STATUS, GameStatus.RUNNING.ordinal());
+                break;
+            case DRAW:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_DRAW.ordinal());
+                break;
+            case CROSS_WON:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_CROSS_WON.ordinal());
+                break;
+            case ZERO_WON:
+                cv.put(GAME_STATUS, GameStatus.FINISHED_ZERO_WON.ordinal());
+                break;
+        }
+        //cv.put(GAME_STATUS, game.isFinished() ? GameStatus.FINISHED.ordinal() : GameStatus.RUNNING.ordinal());
         cv.put(PLAYER_CROSSES, game.getCrossPlayer().getUser().getId());
         cv.put(PLAYER_ZERO, game.getZeroPlayer().getUser().getId());
         cv.put(ID, gameId);
+        cv.put(PLAYER_CROSSES_TYPE, game.getCrossType());
+        cv.put(PLAYER_ZEROES_TYPE, game.getZeroType());
 
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
@@ -88,7 +108,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         cv.put(GAME_DATE, formattedDate);
         getWritableDatabase().insert(GAME_TABLE, null, cv);
 
-        ArrayList<GameEvent> eventHistory = game.getGameLogic().getEventHistory();
+        List<GameEvent> eventHistory = game.getGameLogic().getEventHistory();
         for (int i = 0; i < eventHistory.size(); i++) {
             cv = new ContentValues();
             cv.put(GAME_ID, gameId);
@@ -127,7 +147,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         }
         ArrayList<String> history = new ArrayList<>();
         while (!cursor.isAfterLast()) {
-            history.add(cursor.getLong(0) + ";" + cursor.getString(1));
+            history.add(cursor.getLong(0) + ";" + cursor.getString(1) + ";" + GameStatus.values()[cursor.getInt(2)].toString());
             cursor.moveToNext();
         }
         cursor.close();
@@ -141,13 +161,15 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         turnsCursor.moveToFirst(); //no need to check it since game may have 0 turns
         Player cross = null, zero = null;
         User userCross = getUserById(gameCursor.getLong(1));
-        User userZero  = getUserById(gameCursor.getLong(2));
+        int crossType = gameCursor.getInt(2);
+        User userZero  = getUserById(gameCursor.getLong(3));
+        int zeroType = gameCursor.getInt(4);
         long id = gameCursor.getLong(0);
         try {
-            cross = (Player) playerClasses[userCross.getType()].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
-                    invoke(null, userCross, GameLogic.PlayerFigure.CROSS);
-            zero = (Player) playerClasses[userZero.getType()].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class).
-                    invoke(null, userZero , GameLogic.PlayerFigure.ZERO);
+            cross = (Player) playerClasses[crossType].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class, Context.class).
+                    invoke(null, userCross, GameLogic.PlayerFigure.CROSS, context);
+            zero = (Player) playerClasses[zeroType].getMethod("deserialize", User.class, GameLogic.PlayerFigure.class, Context.class).
+                    invoke(null, userZero, GameLogic.PlayerFigure.ZERO, context);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -158,7 +180,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             turnsCursor.moveToNext();
         }
 
-        return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(turns));
+        return Game.deserializeGame(id, cross, crossType, zero, zeroType, GameLogic.deserialize(turns));
     }
 
     public Game getGameById(long id) {
@@ -176,12 +198,11 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         ContentValues cv = new ContentValues();
         cv.put(ID, user.getId());
         cv.put(GOOGLE_TOKEN, user.getGoogleToken());
-        cv.put(USER_TYPE, user.getType());
         cv.put(NICKNAME_STR, user.getNickNameStr());
         cv.put(NICKNAME_ID, user.getNickNameId());
         cv.put(COLOR_CROSS, user.getColorCross());
         cv.put(COLOR_ZERO, user.getColorZero());
-        db.insert(USER_TABLE, null, cv);
+        db.replace(USER_TABLE, null, cv);
     }
     @Override
     public void addUser(User user) {
@@ -201,7 +222,6 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         User user = new User(
                 userCursor.getLong(0),
                 userCursor.getString(1),
-                userCursor.getInt(2),
                 userCursor.getString(3),
                 userCursor.getString(4),
                 userCursor.getInt(5),

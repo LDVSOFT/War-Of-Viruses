@@ -64,7 +64,7 @@ public class GameHistoryActivity extends AppCompatActivity {
             for (String game : gameHistory) {
                 String[] data = game.split(";");
                 Button button = new Button(GameHistoryActivity.this);
-                button.setText(data[1]);
+                button.setText(data[1] + " " + data[2]);
                 final long id = Long.parseLong(data[0]);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override

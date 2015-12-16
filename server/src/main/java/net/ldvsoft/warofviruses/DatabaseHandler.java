@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,13 +45,15 @@ public class DatabaseHandler implements DBProvider {
                     PreparedStatement addGameStatement = connection.prepareStatement(ADD_GAME);
                     addGameStatement.setLong(1, id);
                     addGameStatement.setLong(2, game.getCrossPlayer().getUser().getId());
-                    addGameStatement.setLong(3, game.getZeroPlayer().getUser().getId());
-                    addGameStatement.setInt(4, status.ordinal());
+                    addGameStatement.setInt(3, game.getCrossType());
+                    addGameStatement.setLong(4, game.getZeroPlayer().getUser().getId());
+                    addGameStatement.setInt(5, game.getZeroType());
+                    addGameStatement.setInt(6, status.ordinal());
 
                     addGameStatement.execute();
                 }
                 {
-                    ArrayList<GameEvent> events = game.getGameLogic().getEventHistory();
+                    List<GameEvent> events = game.getGameLogic().getEventHistory();
 
                     PreparedStatement addGameTurnStatement = connection.prepareStatement(ADD_GAME_TURNS);
                     addGameTurnStatement.setLong(1, id);
@@ -91,6 +94,7 @@ public class DatabaseHandler implements DBProvider {
             if (!game.first())
                 return null;
             //TODO
+            //TODO also do not forget about players types, blah, blah, blah
             Player cross = null, zero = null;
 
             PreparedStatement getGameTurnsStatement = connection.prepareStatement(GET_TURNS_BY_GAME_ID);
@@ -103,7 +107,7 @@ public class DatabaseHandler implements DBProvider {
                 events.next();
             }
 
-            return Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
+            return null;//Game.deserializeGame(id, cross, zero, GameLogic.deserialize(eventList));
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Failed to load game.", e);
             return null;
@@ -127,7 +131,6 @@ public class DatabaseHandler implements DBProvider {
             return new User(
                     users.getLong(1),
                     users.getString(2),
-                    users.getInt(3),
                     users.getString(4),
                     users.getString(5),
                     users.getInt(6),
@@ -151,7 +154,6 @@ public class DatabaseHandler implements DBProvider {
             return new User(
                     users.getLong(1),
                     users.getString(2),
-                    users.getInt(3),
                     users.getString(4),
                     users.getString(5),
                     users.getInt(6),
