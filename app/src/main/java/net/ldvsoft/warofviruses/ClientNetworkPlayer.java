@@ -51,6 +51,9 @@ public class ClientNetworkPlayer extends Player {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE).getString(WoVProtocol.DATA);
+                if (data == null) {
+                    throw new IllegalArgumentException("Missing data field in TURN_BUNDLE!");
+                }
                 JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
                 GameEvent event = gson.fromJson(jsonData.get(WoVProtocol.EVENT), GameEvent.class);
                 pendingEvents.add(event);

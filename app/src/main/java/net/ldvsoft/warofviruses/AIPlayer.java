@@ -208,6 +208,11 @@ public class AIPlayer extends Player {
                 GameLogic tmpGameLogic = new GameLogic(gameLogic);
                 tmpGameLogic.doTurn(move.x, move.y);
                 ArrayList<CoordinatePair> optMoves = bruteforceMoves(tmpGameLogic);
+
+                if (optMoves == null) {
+                    return null;
+                }
+
                 for (CoordinatePair optMove : optMoves) {
                     tmpGameLogic.doTurn(optMove.x, optMove.y);
                 }
