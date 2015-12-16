@@ -36,8 +36,8 @@ import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.ZERO;
 public class GameActivity extends GameActivityBase {
     private static Gson gson = new Gson();
 
-    TextView crossNick;
-    TextView zeroNick;
+    private TextView crossNick;
+    private TextView zeroNick;
     private TextView gameStatus1;
     private TextView gameStatus2;
 
@@ -85,9 +85,9 @@ public class GameActivity extends GameActivityBase {
         GameLogic.GameState gameState = game.getGameState();
         switch (gameState) {
             case RUNNING:
-                GameLogic.PlayerFigure currectFigure = game.getCurrentPlayer().ownFigure;
+                GameLogic.PlayerFigure currentFigure = game.getCurrentPlayer().ownFigure;
                 if (mineFigure == NONE) {
-                    switch (currectFigure) {
+                    switch (currentFigure) {
                         case CROSS:
                             gameStatus1.setText(getString(R.string.GAME_CROSS_TURN));
                             break;
@@ -95,13 +95,14 @@ public class GameActivity extends GameActivityBase {
                             gameStatus1.setText(getString(R.string.GAME_ZERO_TURN));
                             break;
                     }
-                } else if (currectFigure == mineFigure) {
+                } else if (currentFigure == mineFigure) {
                     gameStatus1.setText(getString(R.string.GAME_USER_TURN));
                 } else {
                     gameStatus1.setText(getString(R.string.GAME_OPPONENT_TURN));
                 }
                 int miniturnsLeft = 3 - game.getGameLogic().currentMiniturn;
                 gameStatus2.setText(String.format(getString(R.string.GAME_MINITURNS_LEFT), miniturnsLeft));
+                break;
             case DRAW:
                 gameStatus1.setText(getString(R.string.GAME_DRAW));
                 gameStatus2.setText(getString(R.string.GAME_OVER));
