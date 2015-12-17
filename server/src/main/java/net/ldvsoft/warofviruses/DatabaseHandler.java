@@ -17,7 +17,11 @@ import java.util.logging.Logger;
 public class DatabaseHandler implements DBProvider {
     protected MysqlDataSource dataSource;
     protected WarOfVirusesServer server;
-    private String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + " WHERE " + GOOGLE_TOKEN + " = ?;";
+
+    private final static String DEVICE_USER = "user";
+    private final static String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + "u INNER JOIN " + DEVICE_TABLE +
+            "d ON d." + DEVICE_USER + " = u." + ID + " WHERE " + GOOGLE_TOKEN + " = ?;";
+
     private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
     public DatabaseHandler(WarOfVirusesServer server) throws SQLException {

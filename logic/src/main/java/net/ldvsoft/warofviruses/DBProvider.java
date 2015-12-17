@@ -13,6 +13,7 @@ public interface DBProvider {
     String PLAYER_ZERO = "playerZero";
     String PLAYER_CROSSES = "playerCrosses";
 
+    String DEVICE_TABLE = "Device";
     String TURN_TABLE = "Turn";
     String GAME_ID = "game";
     String TURN_NUMBER = "turnNo";
@@ -28,6 +29,7 @@ public interface DBProvider {
     String INVITATION_TARGET = "invocationTarget";
     String PLAYER_CROSSES_TYPE = "playerCrossesType";
     String PLAYER_ZEROES_TYPE = "playerZeroesType";
+
     /**
      * Special user ids.
      */
