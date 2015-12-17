@@ -64,17 +64,22 @@ public class GameActivity extends GameActivityBase {
             ON_GAME_STATE_CHANGED_LISTENER);
 
     private class OnExitActivityListener implements DialogInterface.OnClickListener {
-        private boolean saveGame;
+        private boolean saveGameAndGiveUp;
+        private boolean exitActivity;
 
-        public OnExitActivityListener(boolean saveGame) {
-            this.saveGame = saveGame;
+        public OnExitActivityListener(boolean saveGameAndGiveUp, boolean exitActivity) {
+            this.saveGameAndGiveUp = saveGameAndGiveUp;
+            this.exitActivity= exitActivity;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (!saveGame)
-                game = null;
-            GameActivity.super.onBackPressed();
+            if (saveGameAndGiveUp) {
+                game.giveUp(humanPlayer);
+            }
+            if (exitActivity) {
+                GameActivity.super.onBackPressed();
+            }
         }
     }
 
@@ -144,8 +149,10 @@ public class GameActivity extends GameActivityBase {
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new OnExitActivityListener(true))
-                .setNegativeButton("No", new OnExitActivityListener(false))
+                .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(true, true))
+                .setNeutralButton("Cancel: I don't want to quit", new OnExitActivityListener(false, false))
+                .setNegativeButton("I want to give up and quit", new OnExitActivityListener(false, true))
+                //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
                 .show();
     }
 

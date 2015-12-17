@@ -98,10 +98,11 @@ public class MenuActivity extends AppCompatActivity {
 
         public void execute() {
             new AlertDialog.Builder(MenuActivity.this)
-                    .setMessage("Found saved game. Do you want to restore it?")
+                    .setMessage("Found saved game. What should I do with it?") //todo: more understandable options
                     .setCancelable(false)
-                    .setPositiveButton("Yes", new RestoreGame())
-                    .setNegativeButton("No", new NewGame())
+                    .setPositiveButton("Load it", new RestoreGame())
+                    .setNeutralButton("Do nothing", null)
+                    .setNegativeButton("Give up and start new game", new NewGame())
                     .show();
         }
 
@@ -115,7 +116,9 @@ public class MenuActivity extends AppCompatActivity {
         private class NewGame implements Dialog.OnClickListener {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                DBOpenHelper.getInstance(MenuActivity.this).deleteActiveGame();
+                Game game = DBOpenHelper.getInstance(MenuActivity.this).getAndRemoveActiveGame();
+                game.giveUp(game.getCurrentPlayer()); //todo: give up for me, not for current player!
+                DBOpenHelper.getInstance(MenuActivity.this).addGame(game);
                 loadGame.run();
             }
         }
