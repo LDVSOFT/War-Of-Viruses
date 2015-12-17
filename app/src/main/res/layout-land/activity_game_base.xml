@@ -62,7 +62,8 @@
                 android:text="UNKNOWN"
                 android:id="@+id/game_text_game_status_1"
                 android:layout_gravity="center"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/primary_text" />
 
             <Button
                 android:layout_width="match_parent"
@@ -70,7 +71,8 @@
                 android:text="@string/give_up"
                 android:id="@+id/game_button_giveup"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/spacing_small" />
+                android:layout_margin="@dimen/spacing_small"
+                style="@style/button" />
         </LinearLayout>
 
         <LinearLayout
@@ -89,7 +91,8 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight="1.5"
                 android:textAlignment="center"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textColor="@color/primary_text" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -103,7 +106,8 @@
                     android:id="@+id/game_button_first"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/spacing_small" />
+                    android:layout_margin="@dimen/spacing_small"
+                    style="@style/button" />
 
                 <Button
                     android:layout_width="0dp"
@@ -112,7 +116,8 @@
                     android:id="@+id/game_button_prev"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/spacing_small" />
+                    android:layout_margin="@dimen/spacing_small"
+                    style="@style/button" />
             </LinearLayout>
 
         </LinearLayout>
@@ -124,8 +129,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_weight="1"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_marginLeft="@dimen/spacing_small"
+        android:layout_marginRight="@dimen/spacing_small">
 
         <net.ldvsoft.warofviruses.SquareLayout
             android:orientation="vertical"
@@ -136,7 +141,6 @@
             android:layout_margin="0dp">
 
         </net.ldvsoft.warofviruses.SquareLayout>
-
     </FrameLayout>
 
     <LinearLayout
@@ -187,7 +191,8 @@
                 android:text="UNKNOWN"
                 android:id="@+id/game_text_game_status_2"
                 android:layout_gravity="center"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/primary_text" />
 
             <Button
                 android:layout_width="match_parent"
@@ -196,7 +201,8 @@
                 android:id="@+id/game_button_passturn"
                 android:layout_weight="1"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="@dimen/spacing_small" />
+                android:layout_margin="@dimen/spacing_small"
+                style="@style/button" />
         </LinearLayout>
 
         <LinearLayout
@@ -216,7 +222,8 @@
                 android:layout_marginRight="10dp"
                 android:layout_weight="1.5"
                 android:textAlignment="center"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:textColor="@color/primary_text" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -230,7 +237,8 @@
                     android:id="@+id/game_button_next"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/spacing_small" />
+                    android:layout_margin="@dimen/spacing_small"
+                    style="@style/button" />
 
                 <Button
                     android:layout_width="0dp"
@@ -239,7 +247,8 @@
                     android:id="@+id/game_button_last"
                     android:layout_weight="1"
                     android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/spacing_small" />
+                    android:layout_margin="@dimen/spacing_small"
+                    style="@style/button" />
             </LinearLayout>
 
         </LinearLayout>
