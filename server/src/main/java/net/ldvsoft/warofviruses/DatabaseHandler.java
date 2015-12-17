@@ -138,7 +138,12 @@ public class DatabaseHandler implements DBProvider {
 
     @Override
     public void addUser(User user) {
-        throw new UnsupportedOperationException("DatabaseHandler::addUser()");
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement addUserStatement = connection.prepareStatement(ADD_USER);
+            addUserStatement.executeQuery();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+        }
     }
 
     @Override
