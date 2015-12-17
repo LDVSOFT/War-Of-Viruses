@@ -105,15 +105,7 @@ public class ClientNetworkPlayer extends Player {
 
         JsonObject data = new JsonObject();
         data.add(WoVProtocol.EVENT, gson.toJsonTree(event));
-        Bundle message = new Bundle();
-        message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
-        message.putString(WoVProtocol.DATA, data.toString());
-        String id = UUID.randomUUID().toString();
-        try {
-            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        WoVGcmListenerService.sendGcmMessage(context, WoVProtocol.ACTION_TURN, data);
     }
 
     @Override
@@ -124,13 +116,6 @@ public class ClientNetworkPlayer extends Player {
 
     @Override
     public void updateGameInfo(Game game) {
-        String id = UUID.randomUUID().toString();
-        Bundle message = new Bundle();
-        message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_UPDATE_LOCAL_GAME);
-        try {
-            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        WoVGcmListenerService.sendGcmMessage(context, WoVProtocol.ACTION_UPDATE_LOCAL_GAME, null);
     }
 }

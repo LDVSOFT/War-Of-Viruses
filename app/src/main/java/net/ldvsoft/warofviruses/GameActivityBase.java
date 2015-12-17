@@ -69,13 +69,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_game, menu);
-        return true;
-    }
-
     public boolean checkGoogleServices() {
         GoogleApiAvailability availability = GoogleApiAvailability.getInstance();
         int result = availability.isGooglePlayServicesAvailable(this);

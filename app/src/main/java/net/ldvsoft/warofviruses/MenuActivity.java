@@ -198,15 +198,7 @@ public class MenuActivity extends AppCompatActivity {
     private class PlayOnline implements Runnable {
         @Override
         public void run() {
-            GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(MenuActivity.this);
-            Bundle data = new Bundle();
-            data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
-            String id = UUID.randomUUID().toString();
-            try {
-                gcm.send(MenuActivity.this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_USER_READY, null);
             gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
             registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
         }

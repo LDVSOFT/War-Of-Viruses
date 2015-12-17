@@ -1,10 +1,16 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.JsonObject;
+
+import java.io.IOException;
+import java.util.UUID;
 
 public class WoVGcmListenerService extends GcmListenerService {
 
@@ -38,5 +44,20 @@ public class WoVGcmListenerService extends GcmListenerService {
          *     - Store message in local database.
          *     - Update UI.
          */
+    }
+
+    public static void sendGcmMessage(Context context, String action, JsonObject data) {
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+        String id = UUID.randomUUID().toString();
+        Bundle message = new Bundle();
+        message.putString(WoVProtocol.ACTION, action);
+        if (data != null) {
+            message.putString(WoVProtocol.DATA, data.toString());
+        }
+        try {
+            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
