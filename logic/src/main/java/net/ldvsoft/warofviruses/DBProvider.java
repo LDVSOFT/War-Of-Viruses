@@ -76,6 +76,9 @@ public interface DBProvider {
             COLOR_CROSS + " = VALUES(" + COLOR_CROSS + "), " + COLOR_ZERO + " = VALUES(" + COLOR_ZERO + "), " +
             INVITATION_TARGET + " = VALUES(" + INVITATION_TARGET + ");";
 
+    String ACTIVE_GAME_COUNT = "SELECT COUNT(*) FROM " + GAME_TABLE +
+            " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
+
     //adds game to database and returns its ID
     long addGame(Game game);
     void deleteActiveGame();

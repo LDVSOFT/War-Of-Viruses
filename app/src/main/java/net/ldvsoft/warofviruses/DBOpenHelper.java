@@ -190,7 +190,11 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     }
 
     public boolean hasActiveGame() {
-        return getActiveGame() != null;
+        Cursor cursor = getReadableDatabase().rawQuery(ACTIVE_GAME_COUNT, null);
+        cursor.moveToFirst();
+        int result = cursor.getInt(0);
+        cursor.close();
+        return result > 0;
     }
 
     public Game getGameById(long id) {
