@@ -20,7 +20,7 @@ public class HumanPlayer extends Player {
             DBProvider.USER_ANONYMOUS,
             "uniqueGoogleTokenForAnonymousPlayer",
             //0, //DBOpenHelper.playerClasses[0]
-            "Anonymous", "1",
+            "Anonymous", 1,
             0, 0,
             null);
 

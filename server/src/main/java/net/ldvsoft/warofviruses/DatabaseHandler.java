@@ -17,7 +17,11 @@ import java.util.logging.Logger;
 public class DatabaseHandler implements DBProvider {
     protected MysqlDataSource dataSource;
     protected WarOfVirusesServer server;
-    private String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + " WHERE " + GOOGLE_TOKEN + " = ?;";
+
+    private final static String DEVICE_USER = "user";
+    private final static String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + "u INNER JOIN " + DEVICE_TABLE +
+            "d ON d." + DEVICE_USER + " = u." + ID + " WHERE " + GOOGLE_TOKEN + " = ?;";
+
     private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
     public DatabaseHandler(WarOfVirusesServer server) throws SQLException {
@@ -134,7 +138,12 @@ public class DatabaseHandler implements DBProvider {
 
     @Override
     public void addUser(User user) {
-        throw new UnsupportedOperationException("DatabaseHandler::addUser()");
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement addUserStatement = connection.prepareStatement(ADD_USER);
+            addUserStatement.executeQuery();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+        }
     }
 
     @Override
@@ -149,10 +158,10 @@ public class DatabaseHandler implements DBProvider {
             return new User(
                     users.getLong(1),
                     users.getString(2),
-                    users.getString(4),
-                    users.getString(5),
+                    users.getString(3),
+                    users.getInt(4),
+                    users.getInt(5),
                     users.getInt(6),
-                    users.getInt(7),
                     null /*FIXME Load separetly*/
             );
         } catch (SQLException e) {
@@ -173,7 +182,7 @@ public class DatabaseHandler implements DBProvider {
                     users.getLong(1),
                     users.getString(2),
                     users.getString(4),
-                    users.getString(5),
+                    users.getInt(5),
                     users.getInt(6),
                     users.getInt(7),
                     null /*FIXME Load separetly*/

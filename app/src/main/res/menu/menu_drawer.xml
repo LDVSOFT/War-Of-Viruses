@@ -8,6 +8,10 @@
         <item
             android:id="@+id/drawer_favourite"
             android:title="222" />
+
+        <item
+            android:id="@+id/drawer_settings"
+            android:title="Settings" />
     </group>
 
     <group android:id="@+id/group2">

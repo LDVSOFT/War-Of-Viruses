@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -27,14 +28,18 @@ import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
-
+    private BoardCellButton crossButton;
+    private BoardCellButton zeroButton;
     private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-
+        SharedPreferences preferences = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE);
+        if (!preferences.contains(WoVPreferences.CURRENT_USER_ID)) {
+            preferences.edit().putLong(WoVPreferences.CURRENT_USER_ID, HumanPlayer.USER_ANONYMOUS.getId()).apply();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -47,12 +52,19 @@ public class MenuActivity extends AppCompatActivity {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         NavigationView view = (NavigationView) findViewById(R.id.navigation_view);
+        View drawerHeader = view.inflateHeaderView(R.layout.drawer_header);
+        crossButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_cross);
+        zeroButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_zero);
         view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.drawer_clear_db:
                         clearDB();
+                        return true;
+                    case R.id.drawer_settings:
+                        Intent intent = new Intent(MenuActivity.this, SettingsActivity.class);
+                        startActivity(intent);
                         return true;
                     default:
                         Toast.makeText(MenuActivity.this, menuItem.getTitle() + " pressed", Toast.LENGTH_LONG).show();
@@ -61,7 +73,12 @@ public class MenuActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -72,8 +89,8 @@ public class MenuActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                ((BoardCellButton) findViewById(R.id.avatar_cross)).setImageDrawable(BoardCellButton.cellCross);
-                ((BoardCellButton) findViewById(R.id.avatar_zero )).setImageDrawable(BoardCellButton.cellZero );
+                crossButton.setImageDrawable(BoardCellButton.cellCross);
+                zeroButton.setImageDrawable(BoardCellButton.cellZero);
             }
         }.execute();
     }
@@ -98,10 +115,11 @@ public class MenuActivity extends AppCompatActivity {
 
         public void execute() {
             new AlertDialog.Builder(MenuActivity.this)
-                    .setMessage("Found saved game. Do you want to restore it?")
+                    .setMessage("Found saved game. What should I do with it?") //todo: more understandable options
                     .setCancelable(false)
-                    .setPositiveButton("Yes", new RestoreGame())
-                    .setNegativeButton("No", new NewGame())
+                    .setPositiveButton("Load it", new RestoreGame())
+                    .setNeutralButton("Do nothing", null)
+                    .setNegativeButton("Give up and start new game", new NewGame())
                     .show();
         }
 
@@ -115,7 +133,9 @@ public class MenuActivity extends AppCompatActivity {
         private class NewGame implements Dialog.OnClickListener {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                DBOpenHelper.getInstance(MenuActivity.this).deleteActiveGame();
+                Game game = DBOpenHelper.getInstance(MenuActivity.this).getAndRemoveActiveGame();
+                game.giveUp(game.getCurrentPlayer()); //todo: give up for me, not for current player!
+                DBOpenHelper.getInstance(MenuActivity.this).addGame(game);
                 loadGame.run();
             }
         }
@@ -204,6 +224,7 @@ public class MenuActivity extends AppCompatActivity {
     protected void onStop() {
         if (gameLoadedFromServerReceiver != null) {
             unregisterReceiver(gameLoadedFromServerReceiver);
+            gameLoadedFromServerReceiver = null;
         }
         super.onStop();
     }

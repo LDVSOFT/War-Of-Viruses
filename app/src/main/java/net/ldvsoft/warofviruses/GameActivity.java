@@ -60,21 +60,32 @@ public class GameActivity extends GameActivityBase {
                     });
                 }
             };
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, CROSS,
+    private HumanPlayer humanPlayer = new HumanPlayer(DBOpenHelper.getInstance(this).getUserById(HumanPlayer.USER_ANONYMOUS.getId()), CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
 
     private class OnExitActivityListener implements DialogInterface.OnClickListener {
         private boolean saveGame;
+        private boolean giveUp;
+        private boolean exitActivity;
 
-        public OnExitActivityListener(boolean saveGame) {
+        public OnExitActivityListener(boolean saveGame, boolean giveUp, boolean exitActivity) {
             this.saveGame = saveGame;
+            this.giveUp = giveUp;
+            this.exitActivity= exitActivity;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (!saveGame)
+            if (giveUp) {
+                game.giveUp(humanPlayer);
+            }
+            if (saveGame) {
+                saveCurrentGame();
+            }
+            if (exitActivity) {
                 game = null;
-            GameActivity.super.onBackPressed();
+                GameActivity.super.onBackPressed();
+            }
         }
     }
 
@@ -147,8 +158,10 @@ public class GameActivity extends GameActivityBase {
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new OnExitActivityListener(true))
-                .setNegativeButton("No", new OnExitActivityListener(false))
+                .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(true, false, true))
+                .setNeutralButton("Cancel: I don't want to quit", new OnExitActivityListener(false, false, false))
+                .setNegativeButton("I want to give up and quit", new OnExitActivityListener(true, true, true))
+                //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
                 .show();
     }
 
@@ -337,6 +350,9 @@ public class GameActivity extends GameActivityBase {
                 Log.d("GameActivity", "FAIL: Null game loaded");
             } else {
                 Log.d("GameActivity", "OK: game loaded");
+                if (game != null) {
+                    game.onStop();
+                }
                 game = loadedGame;
                 if (game.getCrossPlayer() instanceof HumanPlayer) {
                     ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
@@ -395,6 +411,9 @@ public class GameActivity extends GameActivityBase {
         humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
         int crossType = myFigure == CROSS ? 0 : 2;
         int zeroType = 2 - crossType; //fixme remove magic constants
+        if (game != null) {
+            game.onStop();
+        }
         game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                 playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
         initButtons();
