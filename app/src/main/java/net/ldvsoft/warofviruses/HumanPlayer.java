@@ -2,8 +2,6 @@ package net.ldvsoft.warofviruses;
 
 import android.content.Context;
 
-import java.util.Random;
-
 /**
  * Created by Сева on 21.10.2015.
  */

@@ -41,7 +41,7 @@ public class ClientNetworkPlayer extends Player {
         return new ClientNetworkPlayer(user, ownFigure, context);
     }
 
-    public ClientNetworkPlayer(User user, GameLogic.PlayerFigure ownFigure, Context context) {
+    public ClientNetworkPlayer(User user, final GameLogic.PlayerFigure ownFigure, Context context) {
         this.user = user;
         this.ownFigure = ownFigure;
         this.context = context;
@@ -51,6 +51,9 @@ public class ClientNetworkPlayer extends Player {
             @Override
             public synchronized void onReceive(Context context, Intent intent) {
                 String data = intent.getBundleExtra(WoVPreferences.TURN_BUNDLE).getString(WoVProtocol.DATA);
+                if (data == null) {
+                    throw new IllegalArgumentException("Missing data field in TURN_BUNDLE!");
+                }
                 JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
                 GameEvent event = gson.fromJson(jsonData.get(WoVProtocol.EVENT), GameEvent.class);
                 pendingEvents.add(event);
@@ -60,9 +63,21 @@ public class ClientNetworkPlayer extends Player {
                         case TURN_EVENT:
                             game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
                             break;
-                        case GIVE_UP_EVENT:
+
+                        case CROSS_GIVE_UP_EVENT:
+                            if (ownFigure != GameLogic.PlayerFigure.CROSS) {
+                                throw new IllegalArgumentException("Expected ZERO_GIVE_UP_EVENT, found CROSS_GIVE_UP_EVENT!");
+                            }
                             game.giveUp(ClientNetworkPlayer.this);
                             break;
+
+                        case ZERO_GIVE_UP_EVENT:
+                            if (ownFigure != GameLogic.PlayerFigure.CROSS) {
+                                throw new IllegalArgumentException("Expected CROSS_GIVE_UP_EVENT, found ZERO_GIVE_UP_EVENT!");
+                            }
+                            game.giveUp(ClientNetworkPlayer.this);
+                            break;
+
                         case SKIP_TURN_EVENT:
                             game.skipTurn(ClientNetworkPlayer.this);
                             break;

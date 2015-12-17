@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class GameEvent implements Serializable {
 
-    public enum GameEventType {TURN_EVENT, SKIP_TURN_EVENT, GIVE_UP_EVENT};
+    public enum GameEventType {TURN_EVENT, SKIP_TURN_EVENT, CROSS_GIVE_UP_EVENT, ZERO_GIVE_UP_EVENT};
 
     private int turnX, turnY;
     private int number;
@@ -39,8 +39,15 @@ public class GameEvent implements Serializable {
         return type.ordinal();
     }
 
-    static GameEvent newGiveUpEvent(int number) {
-        return new GameEvent(-1, -1, number, GameEventType.GIVE_UP_EVENT);
+    static GameEvent newGiveUpEvent(GameLogic.PlayerFigure whoGivesUp, int number) {
+        switch (whoGivesUp) {
+            case CROSS:
+                return new GameEvent(-1, -1, number, GameEventType.CROSS_GIVE_UP_EVENT);
+            case ZERO:
+                return new GameEvent(-1, -1, number, GameEventType.ZERO_GIVE_UP_EVENT);
+            default:
+                throw new IllegalArgumentException("Illegal figure type!");
+        }
     }
 
     static GameEvent newSkipTurnEvent(int number) {
@@ -61,8 +68,12 @@ public class GameEvent implements Serializable {
                 logic.skipTurn();
                 break;
 
-            case GIVE_UP_EVENT:
-                logic.giveUp();
+            case CROSS_GIVE_UP_EVENT:
+                logic.giveUp(GameLogic.PlayerFigure.CROSS);
+                break;
+
+            case ZERO_GIVE_UP_EVENT:
+                logic.giveUp(GameLogic.PlayerFigure.ZERO);
                 break;
         }
     }

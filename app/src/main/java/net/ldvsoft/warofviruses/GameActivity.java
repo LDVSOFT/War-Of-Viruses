@@ -44,6 +44,9 @@ public class GameActivity extends GameActivityBase {
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
     private Game game = null;
+    private static final long NO_GAME_SAVED = -1;
+    private static final long DO_NOT_SAVE_GAME = -2;
+    private static long lastSavedGameID = NO_GAME_SAVED; //it's somewhat a hack, but it's the simplest solution
 
     private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
             new HumanPlayer.OnGameStateChangedListener() {
@@ -133,6 +136,7 @@ public class GameActivity extends GameActivityBase {
     @Override
     public void onBackPressed() {
         if (game == null || game.isFinished()) {
+            lastSavedGameID = DO_NOT_SAVE_GAME;
             super.onBackPressed();
             return;
         }
@@ -281,6 +285,7 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStop() {
         super.onStop();
+        lastSavedGameID = DO_NOT_SAVE_GAME;
     }
 
     protected void onResume() {
@@ -307,8 +312,10 @@ public class GameActivity extends GameActivityBase {
         new AsyncTask<Game, Void, Void> (){
             @Override
             protected Void doInBackground(Game... params) {
-                for (Game game : params) { //actually, there is only one game
-                    DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                if (lastSavedGameID != DO_NOT_SAVE_GAME) {
+                    for (Game game : params) { //actually, there is only one game
+                        lastSavedGameID = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    }
                 }
                 return null;
             }
@@ -319,7 +326,10 @@ public class GameActivity extends GameActivityBase {
         @Override
         protected Void doInBackground(Void... params) {
             Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getAndRemoveActiveGame();
-
+            if (loadedGame == null) {
+                loadedGame = DBOpenHelper.getInstance(GameActivity.this).getGameById(lastSavedGameID);
+                lastSavedGameID = NO_GAME_SAVED;
+            }
             if (loadedGame == null) {
                 Log.d("GameActivity", "FAIL: Null game loaded");
             } else {

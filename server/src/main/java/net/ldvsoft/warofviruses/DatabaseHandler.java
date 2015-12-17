@@ -34,7 +34,7 @@ public class DatabaseHandler implements DBProvider {
     }
 
     @Override
-    public void addGame(Game game) {
+    public long addGame(Game game) {
         try {
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(false);
@@ -90,6 +90,7 @@ public class DatabaseHandler implements DBProvider {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Failed to save game.", e);
         }
+        return -1; //todo: return game id
     }
 
     @Override
