@@ -27,7 +27,7 @@ public class AIPlayer extends Player {
             "uniqueGoogleTokenForAiPlayer",
 //            1, //DBOpenHelper.playerClasses[1]
             "SkyNet", 1,
-            0, 0,
+            30, 210,
             null);
     private AsyncTask<Void, CoordinatePair, Void> runningStrategy;
 

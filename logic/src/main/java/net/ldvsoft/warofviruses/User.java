@@ -58,4 +58,12 @@ public class User {
     public void setNickNameStr(String nickname) {
         this.nickNameStr = nickname;
     }
+
+    public void setCrossColor(int crossColor) {
+        this.colorCross = crossColor;
+    }
+
+    public void setZeroColor(int zeroColor) {
+        this.colorZero = zeroColor;
+    }
 }

@@ -288,7 +288,10 @@ public class GameActivity extends GameActivityBase {
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
         giveUpButton.setOnClickListener(new OnGiveUpListener());
-
+        if (game != null) {
+            BoardCellButton.loadDrawables(this, game.getCrossPlayer().getUser().getColorCross(),
+                    game.getZeroPlayer().getUser().getColorZero());
+        }
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 boardButtons[i][j].setOnClickListener(new OnBoardClickListener(i, j));

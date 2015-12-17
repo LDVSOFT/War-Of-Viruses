@@ -36,15 +36,95 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="change nickname!"
-            android:id="@+id/button_play_against_bot"
+            android:id="@+id/button_change_nickname"
             android:layout_gravity="center_horizontal"
             android:onClick="changeNickname"
             android:layout_marginLeft="@dimen/spacing_medium"
             android:layout_marginRight="@dimen/spacing_medium"
             android:layout_marginTop="@dimen/spacing_medium"
             style="@style/button" />
-    </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <net.ldvsoft.warofviruses.BoardCellButton
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/color_cross_alive"
+                android:elevation="4dp"
+                android:layout_margin="@dimen/spacing_large"/>
 
+            <net.ldvsoft.warofviruses.BoardCellButton
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/color_cross_dead"
+                android:elevation="4dp"
+                android:layout_alignTop="@+id/color_cross_alive"
+                android:layout_toRightOf="@+id/color_cross_alive"
+                android:layout_toEndOf="@+id/color_cross_alive" />
+        </RelativeLayout>
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/color_cross_value"
+            android:max="240"
+            android:progress="1"
+            android:indeterminate="false" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="change cross color!"
+            android:id="@+id/button_change_cross_color"
+            android:layout_gravity="center_horizontal"
+            android:onClick="changeCrossColor"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <net.ldvsoft.warofviruses.BoardCellButton
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/color_zero_alive"
+                android:elevation="4dp"
+                android:layout_margin="@dimen/spacing_large"/>
+
+            <net.ldvsoft.warofviruses.BoardCellButton
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/color_zero_dead"
+                android:elevation="4dp"
+                android:layout_alignTop="@+id/color_zero_alive"
+                android:layout_toRightOf="@+id/color_zero_alive"
+                android:layout_toEndOf="@+id/color_zero_alive" />
+        </RelativeLayout>
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/color_zero_value"
+            android:max="240"
+            android:progress="1"
+            android:indeterminate="false" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="change zero color!"
+            android:id="@+id/button_change_zero_color"
+            android:layout_gravity="center_horizontal"
+            android:onClick="changeZeroColor"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/button" />
+
+
+    </LinearLayout>
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="wrap_content"
@@ -52,4 +132,6 @@
         android:layout_gravity="start"
         app:menu="@menu/menu_drawer"
         app:headerLayout="@layout/drawer_header" />
+
+
 </android.support.v4.widget.DrawerLayout>

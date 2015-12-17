@@ -21,7 +21,7 @@ public class HumanPlayer extends Player {
             "uniqueGoogleTokenForAnonymousPlayer",
             //0, //DBOpenHelper.playerClasses[0]
             "Anonymous", 1,
-            0, 0,
+            30, 210,
             null);
 
     public static HumanPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
