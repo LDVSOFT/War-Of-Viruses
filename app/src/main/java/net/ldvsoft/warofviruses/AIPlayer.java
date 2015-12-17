@@ -26,7 +26,7 @@ public class AIPlayer extends Player {
             DBProvider.USER_AI_PLAYER,
             "uniqueGoogleTokenForAiPlayer",
 //            1, //DBOpenHelper.playerClasses[1]
-            "SkyNet", "1",
+            "SkyNet", 1,
             0, 0,
             null);
     private AsyncTask<Void, CoordinatePair, Void> runningStrategy;

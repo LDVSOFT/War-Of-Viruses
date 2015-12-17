@@ -232,10 +232,10 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         User user = new User(
                 userCursor.getLong(0),
                 userCursor.getString(1),
-                userCursor.getString(3),
+                userCursor.getString(2),
+                userCursor.getInt(3),
                 userCursor.getInt(4),
                 userCursor.getInt(5),
-                userCursor.getInt(6),
                 null /*FIXME Load separetly*/
         );
 

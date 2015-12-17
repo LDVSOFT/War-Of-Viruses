@@ -11,7 +11,6 @@ public class User {
     private int colorCross;
     private int colorZero;
     private User invitationTarget;
-    private byte[] nicknameStr;
 
     public User(
             long id,
@@ -54,5 +53,9 @@ public class User {
 
     public int getColorZero() {
         return colorZero;
+    }
+
+    public void setNickNameStr(String nickname) {
+        this.nickNameStr = nickname;
     }
 }

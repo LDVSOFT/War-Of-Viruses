@@ -60,7 +60,7 @@ public class GameActivity extends GameActivityBase {
                     });
                 }
             };
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, CROSS,
+    private HumanPlayer humanPlayer = new HumanPlayer(DBOpenHelper.getInstance(this).getUserById(HumanPlayer.USER_ANONYMOUS.getId()), CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
 
     private class OnExitActivityListener implements DialogInterface.OnClickListener {
@@ -155,7 +155,7 @@ public class GameActivity extends GameActivityBase {
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
-                .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(false, true, true))
+                .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(true, false, true))
                 .setNeutralButton("Cancel: I don't want to quit", new OnExitActivityListener(false, false, false))
                 .setNegativeButton("I want to give up and quit", new OnExitActivityListener(true, true, true))
                 //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
