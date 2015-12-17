@@ -154,7 +154,7 @@ public class DatabaseHandler implements DBProvider {
                     users.getLong(1),
                     users.getString(2),
                     users.getString(4),
-                    users.getString(5),
+                    users.getInt(5),
                     users.getInt(6),
                     users.getInt(7),
                     null /*FIXME Load separetly*/
@@ -177,7 +177,7 @@ public class DatabaseHandler implements DBProvider {
                     users.getLong(1),
                     users.getString(2),
                     users.getString(4),
-                    users.getString(5),
+                    users.getInt(5),
                     users.getInt(6),
                     users.getInt(7),
                     null /*FIXME Load separetly*/

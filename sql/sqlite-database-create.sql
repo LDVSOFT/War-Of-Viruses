@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `User` (
   `id` INTEGER,
   `googleToken` TEXT NOT NULL UNIQUE,
   `nicknameStr` TEXT NOT NULL,
-  `nicknameId` TEXT NOT NULL,
+  `nicknameId` INT NOT NULL,
   `colorCross` INT UNSIGNED NOT NULL,
   `colorZero` INT UNSIGNED NOT NULL,
   `invitationTarget` INTEGER NULL,

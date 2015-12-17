@@ -7,7 +7,7 @@ public class User {
     private long id;
     private String googleToken;
     private String nickNameStr;
-    private String nickNameId;
+    private int nickNameId;
     private int colorCross;
     private int colorZero;
     private User invitationTarget;
@@ -16,7 +16,7 @@ public class User {
     public User(
             long id,
             String googleToken,
-            String nickNameStr, String nickNameId,
+            String nickNameStr, int nickNameId,
             int colorCross, int colorZero,
             User invitationTarget) {
         this.id = id;
@@ -44,7 +44,7 @@ public class User {
         return nickNameStr;
     }
 
-    public String getNickNameId() {
+    public int getNickNameId() {
         return nickNameId;
     }
 

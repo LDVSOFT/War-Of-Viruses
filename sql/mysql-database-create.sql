@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `WarOfViruses`.`User` (
   `id` INT UNSIGNED NOT NULL,
   `googleToken` VARCHAR(255) NOT NULL,
   `nicknameStr` VARCHAR(45) NOT NULL,
-  `nicknameId` VARCHAR(45) NOT NULL,
+  `nicknameId` INT NOT NULL,
   `colorCross` INT UNSIGNED NOT NULL,
   `colorZero` INT UNSIGNED NOT NULL,
   `invitationTarget` INT UNSIGNED NULL,
