@@ -207,6 +207,7 @@ public class MenuActivity extends AppCompatActivity {
     protected void onStop() {
         if (gameLoadedFromServerReceiver != null) {
             unregisterReceiver(gameLoadedFromServerReceiver);
+            gameLoadedFromServerReceiver = null;
         }
         super.onStop();
     }
