@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import java.util.List;
+
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
 
@@ -33,15 +35,24 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
     }
 
-    protected void redrawGame(GameLogic gameLogic) {
+    protected void redrawGame(GameLogic gameLogic, PlayerFigure currentPlayer) {
         if (gameLogic == null) {
             return;
         }
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure());
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), false);
             }
+        }
+        List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(gameLogic.getOpponent(currentPlayer));
+        for (GameEvent event : lastOpponentEvents) {
+            if (event.type != GameEvent.GameEventType.TURN_EVENT) {
+                break;
+            }
+            int i = event.getTurnX();
+            int j = event.getTurnY();
+            setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), true);
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
@@ -81,38 +92,62 @@ public abstract class GameActivityBase extends AppCompatActivity {
     }
 
 
-    private void setButton(BoardCellButton button, GameLogic.Cell cell, GameLogic.PlayerFigure current) {
+    private void setButton(BoardCellButton button, GameLogic.Cell cell, GameLogic.PlayerFigure current, boolean highlight) {
         switch (cell.getCellType()) {
             case CROSS:
                 if (cell.isActive()) {
                     button.setImageDrawable(BoardCellButton.cellCross_forCross);
                 } else if (cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.cellCross_forZero);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellCross_forZero_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellCross_forZero);
+                    }
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellCross);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellCross_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellCross);
+                    }
                 }
                 break;
             case ZERO:
                 if (cell.isActive()) {
                     button.setImageDrawable(BoardCellButton.cellZero_forZero);
                 } else if (cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.cellZero_forCross);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellZero_forCross_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellZero_forCross);
+                    }
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellZero);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellZero_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellZero);
+                    }
                 }
                 break;
             case DEAD_CROSS:
                 if (cell.isActive()) {
                     button.setImageDrawable(BoardCellButton.cellCrossDead_forZero);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellCrossDead);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellCrossDead_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellCrossDead);
+                    }
                 }
                 break;
             case DEAD_ZERO:
                 if (cell.isActive()) {
                     button.setImageDrawable(BoardCellButton.cellZeroDead_forCross);
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellZeroDead);
+                    if (highlight) {
+                        button.setImageDrawable(BoardCellButton.cellZeroDead_highlighted);
+                    } else {
+                        button.setImageDrawable(BoardCellButton.cellZeroDead);
+                    }
                 }
                 break;
             case EMPTY:
@@ -154,6 +189,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
 
         boardRoot.invalidate();
-        redrawGame(null);
+        redrawGame(null, PlayerFigure.NONE);
     }
 }

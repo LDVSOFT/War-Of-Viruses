@@ -84,7 +84,7 @@ public class BoardCellButton extends ImageView {
     }
 
     protected static int getMediumColor(float hue) {
-        return hueToColor(hue, 0.64f, 1.00f);
+        return hueToColor(hue, 0.63f, 1.00f);
     }
 
     protected static int getLowColor(float hue) {
@@ -97,10 +97,10 @@ public class BoardCellButton extends ImageView {
 
     public static void loadDrawables(Context context, int hueCross, int hueZero) {
         int crossHigh   = getHighColor(hueCross);
-        int crossMegium = getMediumColor(hueCross);
+        int crossMedium = getMediumColor(hueCross);
         int crossLow    = getLowColor(hueCross);
         int zeroHigh    = getHighColor(hueZero);
-        int zeroMedium  = getMediumColor(hueCross);
+        int zeroMedium  = getMediumColor(hueZero);
         int zeroLow     = getLowColor(hueZero);
         String cross, crossDead, zero, zeroDead, empty;
         try {
@@ -145,13 +145,13 @@ public class BoardCellButton extends ImageView {
         cellZero                      = getImage(zero     , colors);
         cellCrossDead                 = getImage(crossDead, colors);
 
-        colors.put(CROSS_BG, crossMegium);
+        colors.put(CROSS_BG, crossMedium);
         colors.put(ZERO_BG, zeroMedium);
 
         colors.put(BORDER, crossHigh);
         cellZero_forCross_highlighted = getImage(zero     , colors);
 
-        colors.put(BORDER, crossMegium);
+        colors.put(BORDER, crossMedium);
         cellCross_highlighted         = getImage(cross    , colors);
         cellZeroDead_highlighted      = getImage(zeroDead , colors);
 

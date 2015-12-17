@@ -79,7 +79,10 @@ public class GameActivity extends GameActivityBase {
     }
 
     protected void redrawGame(Game game) {
-        super.redrawGame(game.getGameLogic());
+        if (game == null) {
+            return;
+        }
+        super.redrawGame(game.getGameLogic(), humanPlayer.ownFigure);
 
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());

@@ -3,12 +3,15 @@ package net.ldvsoft.warofviruses;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by Сева on 21.10.2015.
  */
 public class GameLogic {
     private ArrayList<GameEvent> events;
+    private ArrayList<GameEvent> crossesEvents;
+    private ArrayList<GameEvent> zeroesEvents;
 
     public static final int BOARD_SIZE = 10;
 
@@ -132,10 +135,14 @@ public class GameLogic {
         currentGameState = logic.currentGameState;
         currentPlayerFigure = logic.currentPlayerFigure;
         events = new ArrayList<>(logic.events);
+        crossesEvents = new ArrayList<>(logic.crossesEvents);
+        zeroesEvents = new ArrayList<>(logic.zeroesEvents);
     }
 
     public void newGame() {
         events = new ArrayList<>();
+        crossesEvents = new ArrayList<>();
+        zeroesEvents = new ArrayList<>();
         currentTurn = 0;
         currentMiniturn = 0;
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -271,7 +278,7 @@ public class GameLogic {
             return false;
         }
 
-        events.add(GameEvent.newSkipTurnEvent(events.size()));
+        storeEvent(GameEvent.newSkipTurnEvent(events.size()));
 
         if (previousTurnSkipped) {
             draw();
@@ -284,12 +291,24 @@ public class GameLogic {
         return true;
     }
 
+    private void storeEvent(GameEvent event) {
+        events.add(event);
+        switch (currentPlayerFigure) {
+            case CROSS:
+                crossesEvents.add(event);
+                break;
+            case ZERO:
+                zeroesEvents.add(event);
+                break;
+        }
+    }
+
     //returns true if turn was correct, false otherwise
     public boolean doTurn(int x, int y) {
         if (!board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
             return false;
         }
-        events.add(GameEvent.newTurnEvent(x, y, events.size()));
+        storeEvent(GameEvent.newTurnEvent(x, y, events.size()));
         previousTurnSkipped = false;
 
         if (board[x][y].cellType != CellType.EMPTY) {
@@ -305,12 +324,12 @@ public class GameLogic {
     public boolean giveUp(PlayerFigure whoGivesUp) {
         switch (whoGivesUp) {
             case CROSS:
+                storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.CROSS, events.size()));
                 zeroWon();
-                events.add(GameEvent.newGiveUpEvent(PlayerFigure.CROSS, events.size()));
                 return true;
             case ZERO:
+                storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.ZERO, events.size()));
                 crossWon();
-                events.add(GameEvent.newGiveUpEvent(PlayerFigure.ZERO, events.size()));
                 return true;
             default:
                 return false;
@@ -393,5 +412,38 @@ public class GameLogic {
             }
         }
         return false;
+    }
+
+    public List<GameEvent> getLastEventsBy(PlayerFigure figure) {
+        List<GameEvent> result = new ArrayList<>();
+        if (currentPlayerFigure == figure) {
+            return result;
+        }
+        List<GameEvent> source;
+        switch (figure) {
+            case CROSS:
+                source = crossesEvents;
+                break;
+            case ZERO:
+                source = zeroesEvents;
+                break;
+            default:
+                return result;
+        }
+        ListIterator<GameEvent> it = source.listIterator(source.size());
+        int lastEventNo = -1;
+        while (it.hasPrevious()) {
+            GameEvent event = it.previous();
+            if (lastEventNo == -1 || event.getNumber() == lastEventNo - 1) {
+                result.add(event);
+                lastEventNo = event.getNumber();
+            } else {
+                break;
+            }
+            if (event.type != GameEvent.GameEventType.TURN_EVENT) {
+                break;
+            }
+        }
+        return result;
     }
 }
