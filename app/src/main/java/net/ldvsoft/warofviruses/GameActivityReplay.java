@@ -88,9 +88,8 @@ public class GameActivityReplay extends GameActivityBase {
         redrawGame(gameReplay.getGameLogic());
     }
 
-    @Override
     protected void redrawGame(GameLogic gameLogic) {
-        super.redrawGame(gameLogic);
+        super.redrawGame(gameLogic, gameLogic.getCurrentPlayerFigure());
         if (gameReplay != null) {
             ((TextView) findViewById(R.id.game_text_game_position_1)).setText(String.format("%d/%d",
                     gameReplay.getCurrentEventNumber(), gameReplay.getEventCount()));
