@@ -84,7 +84,7 @@ public class BoardCellButton extends ImageView {
     }
 
     protected static int getMediumColor(float hue) {
-        return hueToColor(hue, 0.63f, 1.00f);
+        return hueToColor(hue, 0.70f, 1.00f);
     }
 
     protected static int getLowColor(float hue) {
