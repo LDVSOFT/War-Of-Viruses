@@ -13,13 +13,8 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
 
-import static android.graphics.Color.BLUE;
-import static android.graphics.Color.GREEN;
 import static android.graphics.Color.HSVToColor;
-import static android.graphics.Color.RED;
-import static android.graphics.Color.WHITE;
 import static android.graphics.Color.argb;
-import static android.graphics.Color.rgb;
 
 /**
  * Created by ldvsoft on 17.10.15.
@@ -42,13 +37,19 @@ public class BoardCellButton extends ImageView {
     protected static Drawable cellCross;
     protected static Drawable cellCross_forCross;
     protected static Drawable cellCross_forZero;
+    protected static Drawable cellCross_forZero_highlighted;
+    protected static Drawable cellCross_highlighted;
     protected static Drawable cellCrossDead;
     protected static Drawable cellCrossDead_forZero;
+    protected static Drawable cellCrossDead_highlighted;
     protected static Drawable cellZero;
     protected static Drawable cellZero_forCross;
+    protected static Drawable cellZero_forCross_highlighted;
     protected static Drawable cellZero_forZero;
+    protected static Drawable cellZero_highlighted;
     protected static Drawable cellZeroDead;
     protected static Drawable cellZeroDead_forCross;
+    protected static Drawable cellZeroDead_highlighted;
 
 
     public BoardCellButton(Context context) {
@@ -82,15 +83,25 @@ public class BoardCellButton extends ImageView {
         return hueToColor(hue, 1.00f, 1.00f);
     }
 
+    protected static int getMediumColor(float hue) {
+        return hueToColor(hue, 0.70f, 1.00f);
+    }
+
     protected static int getLowColor(float hue) {
         return hueToColor(hue, 0.43f, 1.00f);
     }
 
+    protected static Drawable getImage(String svg, Map<Integer, Integer> map) {
+        return SVGParser.getSVGFromString(svg, map).createPictureDrawable();
+    }
+
     public static void loadDrawables(Context context, int hueCross, int hueZero) {
-        int crossHigh = getHighColor(hueCross);
-        int crossLow  = getLowColor(hueCross);
-        int zeroHigh  = getHighColor(hueZero);
-        int zeroLow   = getLowColor(hueZero);
+        int crossHigh   = getHighColor(hueCross);
+        int crossMedium = getMediumColor(hueCross);
+        int crossLow    = getLowColor(hueCross);
+        int zeroHigh    = getHighColor(hueZero);
+        int zeroMedium  = getMediumColor(hueZero);
+        int zeroLow     = getLowColor(hueZero);
         String cross, crossDead, zero, zeroDead, empty;
         try {
             empty      = loadSVG(context, R.raw.board_cell_empty     );
@@ -112,27 +123,44 @@ public class BoardCellButton extends ImageView {
         colors.put(NEUTRAL_BG, EMPTY_BG);
 
         colors.put(BORDER, EMPTY_BG);
-        cellEmpty             = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
+        cellEmpty                     = getImage(empty    , colors);
 
         colors.put(BORDER, crossHigh);
-        cellEmpty_forCross    = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
-        cellCross_forCross    = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
-        cellZero_forCross     = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
-        cellZeroDead_forCross = SVGParser.getSVGFromString(zeroDead , colors).createPictureDrawable();
+        cellEmpty_forCross            = getImage(empty    , colors);
+        cellCross_forCross            = getImage(cross    , colors);
+        cellZero_forCross             = getImage(zero     , colors);
+        cellZeroDead_forCross         = getImage(zeroDead , colors);
 
         colors.put(BORDER, crossLow );
-        cellCross             = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
-        cellZeroDead          = SVGParser.getSVGFromString(zeroDead , colors).createPictureDrawable();
+        cellCross                     = getImage(cross    , colors);
+        cellZeroDead                  = getImage(zeroDead , colors);
 
         colors.put(BORDER, zeroHigh );
-        cellEmpty_forZero     = SVGParser.getSVGFromString(empty    , colors).createPictureDrawable();
-        cellCross_forZero     = SVGParser.getSVGFromString(cross    , colors).createPictureDrawable();
-        cellCrossDead_forZero = SVGParser.getSVGFromString(crossDead, colors).createPictureDrawable();
-        cellZero_forZero      = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
+        cellEmpty_forZero             = getImage(empty    , colors);
+        cellCross_forZero             = getImage(cross    , colors);
+        cellCrossDead_forZero         = getImage(crossDead, colors);
+        cellZero_forZero              = getImage(zero     , colors);
 
         colors.put(BORDER, zeroLow  );
-        cellZero              = SVGParser.getSVGFromString(zero     , colors).createPictureDrawable();
-        cellCrossDead         = SVGParser.getSVGFromString(crossDead, colors).createPictureDrawable();
+        cellZero                      = getImage(zero     , colors);
+        cellCrossDead                 = getImage(crossDead, colors);
+
+        colors.put(CROSS_BG, crossMedium);
+        colors.put(ZERO_BG, zeroMedium);
+
+        colors.put(BORDER, crossHigh);
+        cellZero_forCross_highlighted = getImage(zero     , colors);
+
+        colors.put(BORDER, crossMedium);
+        cellCross_highlighted         = getImage(cross    , colors);
+        cellZeroDead_highlighted      = getImage(zeroDead , colors);
+
+        colors.put(BORDER, zeroHigh);
+        cellCross_forZero_highlighted = getImage(cross    , colors);
+
+        colors.put(BORDER, zeroMedium);
+        cellZero_highlighted          = getImage(zero     , colors);
+        cellCrossDead_highlighted     = getImage(crossDead, colors);
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {

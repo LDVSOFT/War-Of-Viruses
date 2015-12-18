@@ -117,10 +117,10 @@ public class Game {
     }
 
     public boolean giveUp(Player sender) {
-        if (!sender.equals(getCurrentPlayer())) {
-            return false;
-        }
-        boolean result = gameLogic.giveUp();
+        /*if (!sender.equals(getCurrentPlayer())) {
+            return false; //it's ok to give up for opponent
+        }*/
+        boolean result = gameLogic.giveUp(sender.ownFigure);
         if (result) {
             crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
             zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
@@ -166,5 +166,18 @@ public class Game {
             zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
         return result;
+    }
+
+    public GameLogic.PlayerFigure getMineFigure(long userId) {
+        if (crossPlayer.getUser().getId() == zeroPlayer.getUser().getId()) {
+            //Just a local game
+            return GameLogic.PlayerFigure.NONE;
+        }
+        if (crossPlayer.getUser().getId() == userId) {
+            return GameLogic.PlayerFigure.CROSS;
+        } else {
+            return GameLogic.PlayerFigure.ZERO;
+        }
+
     }
 }

@@ -7,16 +7,15 @@ public class User {
     private long id;
     private String googleToken;
     private String nickNameStr;
-    private String nickNameId;
+    private int nickNameId;
     private int colorCross;
     private int colorZero;
     private User invitationTarget;
-    private byte[] nicknameStr;
 
     public User(
             long id,
             String googleToken,
-            String nickNameStr, String nickNameId,
+            String nickNameStr, int nickNameId,
             int colorCross, int colorZero,
             User invitationTarget) {
         this.id = id;
@@ -44,7 +43,7 @@ public class User {
         return nickNameStr;
     }
 
-    public String getNickNameId() {
+    public int getNickNameId() {
         return nickNameId;
     }
 
@@ -54,5 +53,17 @@ public class User {
 
     public int getColorZero() {
         return colorZero;
+    }
+
+    public void setNickNameStr(String nickname) {
+        this.nickNameStr = nickname;
+    }
+
+    public void setCrossColor(int crossColor) {
+        this.colorCross = crossColor;
+    }
+
+    public void setZeroColor(int zeroColor) {
+        this.colorZero = zeroColor;
     }
 }

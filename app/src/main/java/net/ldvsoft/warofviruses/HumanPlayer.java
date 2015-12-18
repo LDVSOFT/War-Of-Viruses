@@ -2,8 +2,6 @@ package net.ldvsoft.warofviruses;
 
 import android.content.Context;
 
-import java.util.Random;
-
 /**
  * Created by Сева on 21.10.2015.
  */
@@ -22,8 +20,8 @@ public class HumanPlayer extends Player {
             DBProvider.USER_ANONYMOUS,
             "uniqueGoogleTokenForAnonymousPlayer",
             //0, //DBOpenHelper.playerClasses[0]
-            "Anonymous", "1",
-            0, 0,
+            "Anonymous", 1,
+            30, 210,
             null);
 
     public static HumanPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {

@@ -18,5 +18,6 @@ public abstract class WoVPreferences {
     public static final int OPPONENT_NETWORK_PLAYER = 2;
     public static final int OPPONENT_RESTORED_GAME = 3;
     public static final String OPPONENT_TYPE = "OPPONENT_TYPE";
-
+    public static final String CURRENT_USER_ID = "currentUserID";
+    public static final String PREFERENCES = "Preferences";
 }

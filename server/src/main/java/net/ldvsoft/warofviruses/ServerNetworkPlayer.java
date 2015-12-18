@@ -83,8 +83,11 @@ public class ServerNetworkPlayer extends Player {
                 case TURN_EVENT:
                     game.doTurn(this, event.getTurnX(), event.getTurnY());
                     break;
-                case GIVE_UP_EVENT:
-                    game.giveUp(this);
+                case CROSS_GIVE_UP_EVENT:
+                    game.giveUp(ownFigure == GameLogic.PlayerFigure.CROSS ? this : game.getZeroPlayer());
+                    break;
+                case ZERO_GIVE_UP_EVENT:
+                    game.giveUp(ownFigure == GameLogic.PlayerFigure.ZERO ? this : game.getCrossPlayer());
                     break;
                 case SKIP_TURN_EVENT:
                     game.skipTurn(this);

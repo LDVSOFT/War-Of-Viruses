@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -28,13 +29,24 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.CROSS;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.NONE;
+import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.ZERO;
 
 public class GameActivity extends GameActivityBase {
     private static Gson gson = new Gson();
 
+    private TextView crossNick;
+    private TextView zeroNick;
+    private TextView gameStatus1;
+    private TextView gameStatus2;
+
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
     private Game game = null;
+    private static final long NO_GAME_SAVED = -1;
+    private static final long DO_NOT_SAVE_GAME = -2;
+    private static long lastSavedGameID = NO_GAME_SAVED; //it's somewhat a hack, but it's the simplest solution
 
     private final HumanPlayer.OnGameStateChangedListener ON_GAME_STATE_CHANGED_LISTENER =
             new HumanPlayer.OnGameStateChangedListener() {
@@ -43,40 +55,114 @@ public class GameActivity extends GameActivityBase {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            redrawGame(gameLogic);
+                            redrawGame(game);
                         }
                     });
                 }
             };
-    private HumanPlayer humanPlayer = new HumanPlayer(HumanPlayer.USER_ANONYMOUS, GameLogic.PlayerFigure.CROSS,
+    private HumanPlayer humanPlayer = new HumanPlayer(DBOpenHelper.getInstance(this).getUserById(HumanPlayer.USER_ANONYMOUS.getId()), CROSS,
             ON_GAME_STATE_CHANGED_LISTENER);
 
     private class OnExitActivityListener implements DialogInterface.OnClickListener {
         private boolean saveGame;
+        private boolean giveUp;
+        private boolean exitActivity;
 
-        public OnExitActivityListener(boolean saveGame) {
+        public OnExitActivityListener(boolean saveGame, boolean giveUp, boolean exitActivity) {
             this.saveGame = saveGame;
+            this.giveUp = giveUp;
+            this.exitActivity= exitActivity;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (!saveGame)
+            if (giveUp) {
+                game.giveUp(humanPlayer);
+            }
+            if (saveGame) {
+                saveCurrentGame();
+            }
+            if (exitActivity) {
                 game = null;
-            GameActivity.super.onBackPressed();
+                GameActivity.super.onBackPressed();
+            }
         }
     }
+
+    protected void redrawGame(Game game) {
+        if (game == null) {
+            return;
+        }
+        super.redrawGame(game.getGameLogic(), humanPlayer.ownFigure);
+
+        crossNick.setText(game.getCrossPlayer().getName());
+        zeroNick .setText(game.getZeroPlayer().getName());
+
+        GameLogic.PlayerFigure mineFigure = game.getMineFigure(humanPlayer.getUser().getId());
+        GameLogic.GameState gameState = game.getGameState();
+        switch (gameState) {
+            case RUNNING:
+                GameLogic.PlayerFigure currentFigure = game.getCurrentPlayer().ownFigure;
+                if (mineFigure == NONE) {
+                    switch (currentFigure) {
+                        case CROSS:
+                            gameStatus1.setText(getString(R.string.GAME_CROSS_TURN));
+                            break;
+                        case ZERO:
+                            gameStatus1.setText(getString(R.string.GAME_ZERO_TURN));
+                            break;
+                    }
+                } else if (currentFigure == mineFigure) {
+                    gameStatus1.setText(getString(R.string.GAME_USER_TURN));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_OPPONENT_TURN));
+                }
+                int miniturnsLeft = 3 - game.getGameLogic().getCurrentMiniturn();
+                gameStatus2.setText(String.format(getString(R.string.GAME_MINITURNS_LEFT), miniturnsLeft));
+                break;
+            case DRAW:
+                gameStatus1.setText(getString(R.string.GAME_DRAW));
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+            case CROSS_WON:
+                if (mineFigure == NONE) {
+                    gameStatus1.setText(getString(R.string.GAME_CROSS_WON));
+                } else if (mineFigure == CROSS) {
+                    gameStatus1.setText(getString(R.string.GAME_WON));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_LOST));
+                }
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+            case ZERO_WON:
+                if (mineFigure == NONE) {
+                    gameStatus1.setText(getString(R.string.GAME_ZERO_WON));
+                } else if (mineFigure == ZERO) {
+                    gameStatus1.setText(getString(R.string.GAME_WON));
+                } else {
+                    gameStatus1.setText(getString(R.string.GAME_LOST));
+                }
+                gameStatus2.setText(getString(R.string.GAME_OVER));
+                break;
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (game == null || game.isFinished()) {
+            saveCurrentGame();
+            lastSavedGameID = DO_NOT_SAVE_GAME;
             super.onBackPressed();
             return;
         }
-        
+
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new OnExitActivityListener(true))
-                .setNegativeButton("No", new OnExitActivityListener(false))
+                .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(true, false, true))
+                .setNeutralButton("Cancel: I don't want to quit", new OnExitActivityListener(false, false, false))
+                .setNegativeButton("I want to give up and quit", new OnExitActivityListener(true, true, true))
+                        //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
                 .show();
     }
 
@@ -92,6 +178,11 @@ public class GameActivity extends GameActivityBase {
                 findViewById(R.id.game_bar_replay_right).setVisibility(View.GONE);
                 break;
         }
+
+        crossNick   = (TextView) findViewById(R.id.game_cross_nick);
+        zeroNick    = (TextView) findViewById(R.id.game_zero_nick);
+        gameStatus1 = (TextView) findViewById(R.id.game_text_game_status_1);
+        gameStatus2 = (TextView) findViewById(R.id.game_text_game_status_2);
 
         game = new Game();
         tokenSentReceiver = new BroadcastReceiver() {
@@ -114,10 +205,10 @@ public class GameActivity extends GameActivityBase {
                 game = null; //will be loaded during onStart()
                 break;
             case WoVPreferences.OPPONENT_BOT:
-                game.startNewGame(humanPlayer, new AIPlayer(GameLogic.PlayerFigure.ZERO));
+                game.startNewGame(humanPlayer, new AIPlayer(ZERO));
                 break;
             case WoVPreferences.OPPONENT_LOCAL_PLAYER:
-                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), GameLogic.PlayerFigure.ZERO));
+                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), ZERO));
                 break;
             case WoVPreferences.OPPONENT_NETWORK_PLAYER:
                 loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
@@ -127,7 +218,7 @@ public class GameActivity extends GameActivityBase {
         }
         initButtons();
         if (game != null) {
-            redrawGame(game.getGameLogic());
+            redrawGame(game);
         }
     }
 
@@ -201,7 +292,10 @@ public class GameActivity extends GameActivityBase {
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
         giveUpButton.setOnClickListener(new OnGiveUpListener());
-
+        if (game != null) {
+            BoardCellButton.loadDrawables(this, game.getCrossPlayer().getUser().getColorCross(),
+                    game.getZeroPlayer().getUser().getColorZero());
+        }
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 boardButtons[i][j].setOnClickListener(new OnBoardClickListener(i, j));
@@ -211,6 +305,7 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStop() {
         super.onStop();
+        //lastSavedGameID = DO_NOT_SAVE_GAME;
     }
 
     protected void onResume() {
@@ -237,9 +332,14 @@ public class GameActivity extends GameActivityBase {
         new AsyncTask<Game, Void, Void> (){
             @Override
             protected Void doInBackground(Game... params) {
+                //if (lastSavedGameID != DO_NOT_SAVE_GAME) {
                 for (Game game : params) { //actually, there is only one game
-                    DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    long id = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    if (lastSavedGameID != DO_NOT_SAVE_GAME) {
+                        lastSavedGameID = id;
+                    }
                 }
+                //}
                 return null;
             }
         }.execute(game);
@@ -249,11 +349,17 @@ public class GameActivity extends GameActivityBase {
         @Override
         protected Void doInBackground(Void... params) {
             Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getAndRemoveActiveGame();
-
+            if (loadedGame == null) {
+                loadedGame = DBOpenHelper.getInstance(GameActivity.this).getGameById(lastSavedGameID);
+                lastSavedGameID = NO_GAME_SAVED;
+            }
             if (loadedGame == null) {
                 Log.d("GameActivity", "FAIL: Null game loaded");
             } else {
                 Log.d("GameActivity", "OK: game loaded");
+                if (game != null) {
+                    game.onStop();
+                }
                 game = loadedGame;
                 if (game.getCrossPlayer() instanceof HumanPlayer) {
                     ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
@@ -296,12 +402,12 @@ public class GameActivity extends GameActivityBase {
 
         switch (myFigure) {
             case CROSS:
-                playerZero = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.ZERO, GameActivity.this);
-                playerCross = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.CROSS);
+                playerZero = new ClientNetworkPlayer(cross, ZERO, GameActivity.this);
+                playerCross = humanPlayer = new HumanPlayer(zero, CROSS);
                 break;
             case ZERO:
-                playerCross = new ClientNetworkPlayer(cross, GameLogic.PlayerFigure.CROSS, GameActivity.this);
-                playerZero = humanPlayer = new HumanPlayer(zero, GameLogic.PlayerFigure.ZERO);
+                playerCross = new ClientNetworkPlayer(cross, CROSS, GameActivity.this);
+                playerZero = humanPlayer = new HumanPlayer(zero, ZERO);
                 break;
             default:
                 throw new IllegalArgumentException("Illegal myFigure value!");
@@ -310,12 +416,15 @@ public class GameActivity extends GameActivityBase {
         List<GameEvent> events = (WoVProtocol.getEventsFromIntArray(gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class)));
 
         humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-        int crossType = myFigure == GameLogic.PlayerFigure.CROSS ? 0 : 2;
+        int crossType = myFigure == CROSS ? 0 : 2;
         int zeroType = 2 - crossType; //fixme remove magic constants
+        if (game != null) {
+            game.onStop();
+        }
         game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                 playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
         initButtons();
-        redrawGame(game.getGameLogic());
+        redrawGame(game);
     }
 
     @Override
@@ -328,7 +437,7 @@ public class GameActivity extends GameActivityBase {
         game.updateGameInfo();
         setCurrentGameListeners();
         initButtons();
-        redrawGame(game.getGameLogic());
+        redrawGame(game);
     }
 
     @Override

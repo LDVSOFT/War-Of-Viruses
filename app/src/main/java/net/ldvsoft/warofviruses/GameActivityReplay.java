@@ -80,7 +80,7 @@ public class GameActivityReplay extends GameActivityBase {
     }
 
     private void onGameLoaded(Game game) {
-        gameReplay = new GameReplay(game.getGameLogic().getEventHistory());
+        gameReplay = new GameReplay(game.getGameLogic().getEventHistory(), game.getCrossPlayer(), game.getZeroPlayer());
         initButtons();
         for (int i = 0; i < turnToStartReplay - 1; i++) {
             gameReplay.nextEvent();
@@ -88,10 +88,12 @@ public class GameActivityReplay extends GameActivityBase {
         redrawGame(gameReplay.getGameLogic());
     }
 
-    @Override
     protected void redrawGame(GameLogic gameLogic) {
-        super.redrawGame(gameLogic);
+        super.redrawGame(gameLogic, gameLogic.getCurrentPlayerFigure());
         if (gameReplay != null) {
+            ((TextView) findViewById(R.id.game_cross_nick)).setText(gameReplay.getCrossPlayer().getName());
+            ((TextView) findViewById(R.id.game_zero_nick)).setText(gameReplay.getZeroPlayer().getName());
+
             ((TextView) findViewById(R.id.game_text_game_position_1)).setText(String.format("%d/%d",
                     gameReplay.getCurrentEventNumber(), gameReplay.getEventCount()));
         }
@@ -103,6 +105,11 @@ public class GameActivityReplay extends GameActivityBase {
     }
 
     private void initButtons() {
+        if (gameReplay != null) {
+            BoardCellButton.loadDrawables(this, gameReplay.getCrossPlayer().getUser().getColorCross(),
+                    gameReplay.getZeroPlayer().getUser().getColorZero());
+        }
+
         findViewById(R.id.game_button_first).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

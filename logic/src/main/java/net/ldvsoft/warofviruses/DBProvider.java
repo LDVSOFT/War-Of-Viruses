@@ -13,6 +13,7 @@ public interface DBProvider {
     String PLAYER_ZERO = "playerZero";
     String PLAYER_CROSSES = "playerCrosses";
 
+    String DEVICE_TABLE = "Device";
     String TURN_TABLE = "Turn";
     String GAME_ID = "game";
     String TURN_NUMBER = "turnNo";
@@ -28,6 +29,8 @@ public interface DBProvider {
     String INVITATION_TARGET = "invocationTarget";
     String PLAYER_CROSSES_TYPE = "playerCrossesType";
     String PLAYER_ZEROES_TYPE = "playerZeroesType";
+    String TOKEN = "token";
+
     /**
      * Special user ids.
      */
@@ -68,9 +71,17 @@ public interface DBProvider {
 
     String GET_USER_BY_ID = "SELECT * FROM " + USER_TABLE + " WHERE " + ID + " = ?;";
 
-    String ADD_USER = "INSERT INTO " + USER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String ADD_USER = "INSERT INTO " + USER_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE " +
+            ID + " = VALUES(" + ID + "), " + GOOGLE_TOKEN + " = VALUES(" + GOOGLE_TOKEN + "), " +
+            NICKNAME_STR + " = VALUES(" + NICKNAME_STR + "), " + NICKNAME_ID + " = VALUES(" + NICKNAME_ID + "), " +
+            COLOR_CROSS + " = VALUES(" + COLOR_CROSS + "), " + COLOR_ZERO + " = VALUES(" + COLOR_ZERO + "), " +
+            INVITATION_TARGET + " = VALUES(" + INVITATION_TARGET + ");";
 
-    void addGame(Game game);
+    String ACTIVE_GAME_COUNT = "SELECT COUNT(*) FROM " + GAME_TABLE +
+            " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
+
+    //adds game to database and returns its ID
+    long addGame(Game game);
     void deleteActiveGame();
     ArrayList<Game> getGameHistory();
     Game getGameById(long id);
