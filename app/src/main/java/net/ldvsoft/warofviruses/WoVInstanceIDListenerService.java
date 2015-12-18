@@ -10,6 +10,7 @@ import com.google.android.gms.iid.InstanceIDListenerService;
 public class WoVInstanceIDListenerService extends InstanceIDListenerService {
     @Override
     public void onTokenRefresh() {
-        startService(new Intent(this, WoVRegistrationIntentService.class));
+        //TODO write something right
+        //Maybe send message to server?
     }
 }

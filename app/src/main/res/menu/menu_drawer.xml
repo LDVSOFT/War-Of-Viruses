@@ -2,12 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:id="@+id/group1">
         <item
-            android:id="@+id/drawer_home"
-            android:title="111" />
+            android:id="@+id/drawer_sign_in"
+            android:icon="@drawable/common_google_signin_btn_icon_light"
+            android:title="@string/common_signin_button_text" />
 
         <item
-            android:id="@+id/drawer_favourite"
-            android:title="222" />
+            android:id="@+id/drawer_sign_out"
+            android:title="@string/sign_out" />
 
         <item
             android:id="@+id/drawer_settings"

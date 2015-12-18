@@ -2,13 +2,14 @@ package net.ldvsoft.warofviruses;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,21 +17,38 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
-import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
+    private static final int RC_SIGN_IN = 9000;
+    private static final String TAG = "MenuActivity";
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
     private BoardCellButton crossButton;
     private BoardCellButton zeroButton;
     private DrawerLayout drawerLayout;
+    private GoogleApiClient apiClient;
+    private ProgressDialog progressDialog;
+
+    private MenuItem menuSignIn;
+    private MenuItem menuSignOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,31 +58,42 @@ public class MenuActivity extends AppCompatActivity {
         if (!preferences.contains(WoVPreferences.CURRENT_USER_ID)) {
             preferences.edit().putLong(WoVPreferences.CURRENT_USER_ID, HumanPlayer.USER_ANONYMOUS.getId()).apply();
         }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        NavigationView view = (NavigationView) findViewById(R.id.navigation_view);
-        View drawerHeader = view.inflateHeaderView(R.layout.drawer_header);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        View drawerHeader = navigationView.inflateHeaderView(R.layout.drawer_header);
         crossButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_cross);
         zeroButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_zero);
-        view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        menuSignIn = navigationView.getMenu().findItem(R.id.drawer_sign_in);
+        menuSignOut = navigationView.getMenu().findItem(R.id.drawer_sign_out);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.drawer_sign_in:
+                         signIn();
+                         drawerLayout.closeDrawers();
+                         return true;
+                    case R.id.drawer_sign_out:
+                        signOut();
+                        drawerLayout.closeDrawers();
+                        return true;
                     case R.id.drawer_clear_db:
                         clearDB();
+                        drawerLayout.closeDrawers();
                         return true;
                     case R.id.drawer_settings:
                         Intent intent = new Intent(MenuActivity.this, SettingsActivity.class);
                         startActivity(intent);
+                        drawerLayout.closeDrawers();
                         return true;
                     default:
                         Toast.makeText(MenuActivity.this, menuItem.getTitle() + " pressed", Toast.LENGTH_LONG).show();
@@ -73,12 +102,120 @@ public class MenuActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        // Build a GoogleApiClient with access to the Google Sign-In API and the
+        // options specified by gso.
+        apiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                        Toast.makeText(MenuActivity.this, "No Google?", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(apiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(apiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        updateUI(false);
+                    }
+                });
+    }
+
+    private void updateUI(boolean connected) {
+        if (connected) {
+            menuSignIn.setEnabled(false);
+            menuSignOut.setEnabled(true);
+        } else {
+            menuSignIn.setEnabled(true);
+            menuSignOut.setEnabled(false);
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d("MainActivity", "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            String token = acct.getIdToken();
+
+            JsonObject data = new JsonObject();
+            data.addProperty(WoVProtocol.GOOGLE_TOKEN, token);
+            WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_REGISTER, data);
+            Toast.makeText(MenuActivity.this, getString(R.string.TOAST_REGISTRATION_IN_PROCESS), Toast.LENGTH_SHORT).show();
+            //Actual UI changes will come on message result
+        } else {
+            WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_LOGOUT, null);
+        }
+    }
+
+    private void showProgressDialog() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage(getString(R.string.loading));
+            progressDialog.setIndeterminate(true);
+        }
+
+        progressDialog.show();
+    }
+
+    private void hideProgressDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.hide();
+        }
     }
 
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(apiClient);
+        if (opr.isDone()) {
+            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+            // and the GoogleSignInResult will be available instantly.
+            Log.d(TAG, "Got cached sign-in");
+            GoogleSignInResult result = opr.get();
+            handleSignInResult(result);
+        } else {
+            // If the user has not previously signed in on this device or the sign-in has expired,
+            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+            // single sign-on will occur in this branch.
+            showProgressDialog();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult googleSignInResult) {
+                    hideProgressDialog();
+                    handleSignInResult(googleSignInResult);
+                }
+            });
+        }
+
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -198,9 +335,15 @@ public class MenuActivity extends AppCompatActivity {
     private class PlayOnline implements Runnable {
         @Override
         public void run() {
-            WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_USER_READY, null);
             gameLoadedFromServerReceiver = new GameLoadedFromServerReceiver();
             registerReceiver(gameLoadedFromServerReceiver, new IntentFilter(WoVPreferences.GAME_LOADED_FROM_SERVER_BROADCAST));
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_USER_READY, null);
+                    return null;
+                }
+            }.execute();
         }
     }
 
@@ -224,6 +367,20 @@ public class MenuActivity extends AppCompatActivity {
     public void clearDB() {
         DBOpenHelper instance = DBOpenHelper.getInstance(this);
         instance.onUpgrade(instance.getReadableDatabase(), 0, 0);
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    InstanceID.getInstance(MenuActivity.this).deleteInstanceID();
+                    InstanceID.getInstance(MenuActivity.this).getToken(MenuActivity.this.getString(R.string.gcm_defaultSenderId),
+                            GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+                } catch (IOException e) {
+                    Log.i(TAG, "/", e);
+                }
+                return null;
+            }
+        }.execute();
     }
 
     public void restoreSavedGame(View view) {

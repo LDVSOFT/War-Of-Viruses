@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -46,16 +47,30 @@ public class WoVGcmListenerService extends GcmListenerService {
          */
     }
 
+    @Override
+    public void onSendError(String msgId, String error) {
+        super.onSendError(msgId, error);
+        Log.e(TAG, "FAIL: " + msgId + " with: " + error);
+    }
+
+    @Override
+    public void onMessageSent(String msgId) {
+        super.onMessageSent(msgId);
+        Log.e(TAG, "SUCCESS: " + msgId);
+    }
+
     public static void sendGcmMessage(Context context, String action, JsonObject data) {
         GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-        String id = UUID.randomUUID().toString();
+        String id = "m-" + UUID.randomUUID().toString();
         Bundle message = new Bundle();
         message.putString(WoVProtocol.ACTION, action);
         if (data != null) {
             message.putString(WoVProtocol.DATA, data.toString());
         }
         try {
-            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
+            Log.d(TAG, "SENDING " + action + " TO " + context.getString(R.string.gcm_defaultSenderId) + " ID " + id);
+            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, (long) 0, message);
+            Log.d(TAG, "OVER?");
         } catch (IOException e) {
             e.printStackTrace();
         }

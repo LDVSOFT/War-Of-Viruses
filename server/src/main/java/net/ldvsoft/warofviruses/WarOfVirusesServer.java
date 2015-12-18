@@ -1,5 +1,6 @@
 package net.ldvsoft.warofviruses;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -13,6 +14,7 @@ import java.util.logging.Logger;
 
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_PING;
+import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_REGISTER;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_TURN;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_UPDATE_LOCAL_GAME;
 import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_USER_READY;
@@ -28,6 +30,7 @@ public final class WarOfVirusesServer {
 //    }
 
     private static final String DEFAULT_CONFIG_FILE = "/etc/war-of-viruses-server.conf";
+    private static final Gson gson = new Gson();
 
     private Logger logger;
     private Properties config = new Properties();
@@ -64,6 +67,8 @@ public final class WarOfVirusesServer {
                 return processTurn(message);
             case ACTION_UPDATE_LOCAL_GAME:
                 return processUpdateLocalGame(message);
+            case ACTION_REGISTER:
+                return processRegister(message);
             default:
                 return null;
         }
@@ -127,6 +132,20 @@ public final class WarOfVirusesServer {
             ((ServerNetworkPlayer) runningGame.getZeroPlayer()).performMove(data);
         }
         return null;
+    }
+
+    private JsonObject processRegister(JsonObject message) {
+        JsonObject data = (JsonObject) new JsonParser().parse(
+                message.get("data").getAsJsonObject().get("data").getAsString());
+        String googleToken = data.get(WoVProtocol.GOOGLE_TOKEN).getAsString();
+        User user = databaseHandler.getUserByGoogleToken(googleToken);
+        if (user == null) {
+            //create new one
+        }
+        databaseHandler.addDeviceToken(message.get("from").getAsString());
+        JsonObject answer = new JsonObject();
+        answer.addProperty(WoVProtocol.ACTION, WoVProtocol.RESULT_REGISTRATION_COMPLETE);
+        answer.addProperty(WoVProtocol.USER, gson);
     }
 
     /**

@@ -27,6 +27,10 @@ public class WoVProtocol {
     public static final String MY_FIGURE = "myFigure";
     public static final String ACTION_USER_READY = "userReady";
     public static final String ACTION_UPDATE_LOCAL_GAME = "updateLocalGame";
+    public static final String ACTION_REGISTER = "register";
+    public static final String GOOGLE_TOKEN = "googleToken";
+    public static final String ACTION_LOGOUT = "logout";
+    public static final String RESULT_REGISTRATION_COMPLETE = "registrationComplete";
 
     public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
         ArrayList<GameEvent> events = new ArrayList<>();

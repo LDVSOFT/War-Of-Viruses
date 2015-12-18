@@ -23,4 +23,7 @@
     <string name="GAME_ZERO_TURN">Zeroes\' turn</string>
     <string name="GAME_USER_TURN">Your turn</string>
     <string name="GAME_OPPONENT_TURN">Opponent\'s turn</string>
+    <string name="sign_out">Sign out</string>
+    <string name="TOAST_REGISTRATION_IN_PROCESS">Registration in process...</string>
+    <string name="loading">Loading...</string>
 </resources>
