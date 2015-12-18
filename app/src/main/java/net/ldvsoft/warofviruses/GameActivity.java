@@ -150,18 +150,19 @@ public class GameActivity extends GameActivityBase {
     @Override
     public void onBackPressed() {
         if (game == null || game.isFinished()) {
+            saveCurrentGame();
             lastSavedGameID = DO_NOT_SAVE_GAME;
             super.onBackPressed();
             return;
         }
-        
+
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to save current game?")
                 .setCancelable(false)
                 .setPositiveButton("Yes, save and quit!", new OnExitActivityListener(true, false, true))
                 .setNeutralButton("Cancel: I don't want to quit", new OnExitActivityListener(false, false, false))
                 .setNegativeButton("I want to give up and quit", new OnExitActivityListener(true, true, true))
-                //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
+                        //.setNegativeButton("No, don't save it", new OnExitActivityListener(false, false)) probably I don't need this option...
                 .show();
     }
 
@@ -304,7 +305,7 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStop() {
         super.onStop();
-        lastSavedGameID = DO_NOT_SAVE_GAME;
+        //lastSavedGameID = DO_NOT_SAVE_GAME;
     }
 
     protected void onResume() {
@@ -331,11 +332,14 @@ public class GameActivity extends GameActivityBase {
         new AsyncTask<Game, Void, Void> (){
             @Override
             protected Void doInBackground(Game... params) {
-                if (lastSavedGameID != DO_NOT_SAVE_GAME) {
-                    for (Game game : params) { //actually, there is only one game
-                        lastSavedGameID = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                //if (lastSavedGameID != DO_NOT_SAVE_GAME) {
+                for (Game game : params) { //actually, there is only one game
+                    long id = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
+                    if (lastSavedGameID != DO_NOT_SAVE_GAME) {
+                        lastSavedGameID = id;
                     }
                 }
+                //}
                 return null;
             }
         }.execute(game);
