@@ -66,8 +66,10 @@ public class Game {
     Is called when owner of this game (activity or server) is destroying to properly finish player work and close their resources
      */
     public void onStop() {
-        crossPlayer.onStop();
-        zeroPlayer.onStop();
+        if (crossPlayer != null)
+            crossPlayer.onStop();
+        if (zeroPlayer != null)
+            zeroPlayer.onStop();
     }
     public long getGameId() {
         return id;

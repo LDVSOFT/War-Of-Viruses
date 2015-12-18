@@ -192,4 +192,26 @@ public class DatabaseHandler implements DBProvider {
             return null;
         }
     }
+
+    public List<String> getTokens(long userId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getUserStatement = connection.prepareStatement(
+                    "SELECT token FROM Device WHERE user = ?"
+            );
+            getUserStatement.setLong(1, userId);
+            ResultSet users = getUserStatement.executeQuery();
+            if (!users.first())
+                return new ArrayList<>();
+
+            ArrayList<String> res = new ArrayList<>();
+            while (!users.isAfterLast()) {
+                res.add(users.getString(1));
+                users.next();
+            }
+            return res;
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+            return null;
+        }
+    }
 }

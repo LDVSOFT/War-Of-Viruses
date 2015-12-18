@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -136,7 +137,7 @@ public final class WarOfVirusesServer {
      * @param data additional JSON data, specifying action params
      */
     public boolean sendToUser(User user, String action, JsonObject data) {
-        String[] tokens = new String[] {user.getGoogleToken()};
+        List<String> tokens = databaseHandler.getTokens(user.getId());
         boolean success = true;
         for (String token : tokens) {
             success = success && gcmHandler.sendDownstreamMessage(gcmHandler.createJsonMessage(
