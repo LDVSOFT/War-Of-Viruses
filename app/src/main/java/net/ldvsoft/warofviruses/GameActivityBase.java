@@ -174,7 +174,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
         int marginValue = (int) Math.ceil(metrics.density * 1);
         boardButtonLayoutParams.setMargins(marginValue, marginValue, 0, 0);
 
-        BoardCellButton.loadDrawables(this, 30, 210);
+        //BoardCellButton.loadDrawables(this, 30, 210);
         boardButtons = new BoardCellButton[BOARD_SIZE][BOARD_SIZE];
 
         for (int row = BOARD_SIZE - 1; row != -1; row--) {
