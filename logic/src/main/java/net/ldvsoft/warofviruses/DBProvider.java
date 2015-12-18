@@ -29,6 +29,7 @@ public interface DBProvider {
     String INVITATION_TARGET = "invocationTarget";
     String PLAYER_CROSSES_TYPE = "playerCrossesType";
     String PLAYER_ZEROES_TYPE = "playerZeroesType";
+    String TOKEN = "token";
 
     /**
      * Special user ids.
