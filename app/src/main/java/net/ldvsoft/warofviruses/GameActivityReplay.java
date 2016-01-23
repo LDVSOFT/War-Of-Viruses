@@ -105,11 +105,6 @@ public class GameActivityReplay extends GameActivityBase {
     }
 
     private void initButtons() {
-        if (gameReplay != null) {
-            BoardCellButton.loadDrawables(this, gameReplay.getCrossPlayer().getUser().getColorCross(),
-                    gameReplay.getZeroPlayer().getUser().getColorZero());
-        }
-
         findViewById(R.id.game_button_first).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
