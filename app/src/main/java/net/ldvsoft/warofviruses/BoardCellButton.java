@@ -10,6 +10,7 @@ import com.larvalabs.svgandroid.SVGParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -20,6 +21,32 @@ import static android.graphics.Color.argb;
  * Created by ldvsoft on 17.10.15.
  */
 public class BoardCellButton extends ImageView {
+    public enum BoardCellType {
+        CELL_EMPTY,
+        CELL_EMPTY_FOR_CROSS,
+        CELL_EMPTY_FOR_ZERO,
+        CELL_CROSS,
+        CELL_CROSS_FOR_CROSS,
+        CELL_CROSS_FOR_ZERO,
+        CELL_CROSS_FOR_ZERO_HIGHLIGHTED,
+        CELL_CROSS_HIGHLIGHTED,
+        CELL_CROSS_DEAD,
+        CELL_CROSS_DEAD_FOR_ZERO,
+        CELL_CROSS_DEAD_HIGHLIGHTED,
+        CELL_ZERO,
+        CELL_ZERO_FOR_CROSS,
+        CELL_ZERO_FOR_CROSS_HIGHLIGHTED,
+        CELL_ZERO_FOR_ZERO,
+        CELL_ZERO_HIGHLIGHTED,
+        CELL_ZERO_DEAD,
+        CELL_ZERO_DEAD_FOR_CROSS,
+        CELL_ZERO_DEAD_HIGHLIGHTED
+    }
+
+    private static int hueCross = 30, hueZero = 210;
+
+    private static Map<BoardCellType, Drawable> loadedImages = new EnumMap<>(BoardCellType.class);
+
     protected final static int CROSS_FG   = argb(0, 255, 0  , 0  );
     protected final static int CROSS_BG   = argb(0, 127, 0  , 0  );
     protected final static int ZERO_FG    = argb(0, 0  , 0  , 255);
@@ -30,27 +57,6 @@ public class BoardCellButton extends ImageView {
 
     protected final static int EMPTY_FG   = argb(0, 200, 200, 200);
     protected final static int EMPTY_BG   = argb(0, 240, 240, 240);
-
-    protected static Drawable cellEmpty;
-    protected static Drawable cellEmpty_forCross;
-    protected static Drawable cellEmpty_forZero;
-    protected static Drawable cellCross;
-    protected static Drawable cellCross_forCross;
-    protected static Drawable cellCross_forZero;
-    protected static Drawable cellCross_forZero_highlighted;
-    protected static Drawable cellCross_highlighted;
-    protected static Drawable cellCrossDead;
-    protected static Drawable cellCrossDead_forZero;
-    protected static Drawable cellCrossDead_highlighted;
-    protected static Drawable cellZero;
-    protected static Drawable cellZero_forCross;
-    protected static Drawable cellZero_forCross_highlighted;
-    protected static Drawable cellZero_forZero;
-    protected static Drawable cellZero_highlighted;
-    protected static Drawable cellZeroDead;
-    protected static Drawable cellZeroDead_forCross;
-    protected static Drawable cellZeroDead_highlighted;
-
 
     public BoardCellButton(Context context) {
         super(context);
@@ -91,18 +97,34 @@ public class BoardCellButton extends ImageView {
         return hueToColor(hue, 0.43f, 1.00f);
     }
 
+    public static void setHueCross(int newHueCross) {
+        hueCross = newHueCross;
+        loadedImages.clear();
+    }
+
+    public static void setHueZero(int newHueZero) {
+        hueZero = newHueZero;
+        loadedImages.clear();
+    }
+
     protected static Drawable getImage(String svg, Map<Integer, Integer> map) {
         return SVGParser.getSVGFromString(svg, map).createPictureDrawable();
     }
 
-    public static void loadDrawables(Context context, int hueCross, int hueZero) {
+    public static Drawable getDrawable(Context context, BoardCellType type) {
+        if (loadedImages.containsKey(type)) {
+            return loadedImages.get(type);
+        }
+
         int crossHigh   = getHighColor(hueCross);
         int crossMedium = getMediumColor(hueCross);
         int crossLow    = getLowColor(hueCross);
         int zeroHigh    = getHighColor(hueZero);
         int zeroMedium  = getMediumColor(hueZero);
         int zeroLow     = getLowColor(hueZero);
+
         String cross, crossDead, zero, zeroDead, empty;
+
         try {
             empty      = loadSVG(context, R.raw.board_cell_empty     );
             cross      = loadSVG(context, R.raw.board_cell_cross     );
@@ -112,8 +134,9 @@ public class BoardCellButton extends ImageView {
         } catch (IOException e) {
             e.printStackTrace();
             Log.wtf("BoardCellButton", "Cannot load SVGs!");
-            return;
+            return null;
         }
+
         Hashtable<Integer, Integer> colors = new Hashtable<>(10);
         colors.put(CROSS_FG, crossHigh);
         colors.put(CROSS_BG, crossLow);
@@ -123,44 +146,101 @@ public class BoardCellButton extends ImageView {
         colors.put(NEUTRAL_BG, EMPTY_BG);
 
         colors.put(BORDER, EMPTY_BG);
-        cellEmpty                     = getImage(empty    , colors);
+
+        Drawable result = null;
+
+        if (type == BoardCellType.CELL_EMPTY) {
+            result = getImage(empty, colors);
+        }
 
         colors.put(BORDER, crossHigh);
-        cellEmpty_forCross            = getImage(empty    , colors);
-        cellCross_forCross            = getImage(cross    , colors);
-        cellZero_forCross             = getImage(zero     , colors);
-        cellZeroDead_forCross         = getImage(zeroDead , colors);
+        switch (type) {
+            case CELL_EMPTY_FOR_CROSS:
+                result = getImage(empty, colors);
+                break;
+            case CELL_CROSS_FOR_CROSS:
+                result = getImage(cross, colors);
+                break;
+            case CELL_ZERO_FOR_CROSS:
+                result = getImage(zero, colors);
+                break;
+            case CELL_ZERO_DEAD_FOR_CROSS:
+                result = getImage(zeroDead, colors);
+                break;
+        }
 
-        colors.put(BORDER, crossLow );
-        cellCross                     = getImage(cross    , colors);
-        cellZeroDead                  = getImage(zeroDead , colors);
+        colors.put(BORDER, crossLow);
+        switch (type) {
+            case CELL_CROSS:
+                result = getImage(cross, colors);
+                break;
+            case CELL_ZERO_DEAD:
+                result = getImage(zeroDead, colors);
+                break;
+        }
 
-        colors.put(BORDER, zeroHigh );
-        cellEmpty_forZero             = getImage(empty    , colors);
-        cellCross_forZero             = getImage(cross    , colors);
-        cellCrossDead_forZero         = getImage(crossDead, colors);
-        cellZero_forZero              = getImage(zero     , colors);
+        colors.put(BORDER, zeroHigh);
+        switch (type) {
+            case CELL_EMPTY_FOR_ZERO:
+                result =  getImage(empty, colors);
+                break;
+            case CELL_CROSS_FOR_ZERO:
+                result = getImage(cross, colors);
+                break;
+            case CELL_CROSS_DEAD_FOR_ZERO:
+                result = getImage(crossDead, colors);
+                break;
+            case CELL_ZERO_FOR_ZERO:
+                result = getImage(zero, colors);
+                break;
+        }
 
-        colors.put(BORDER, zeroLow  );
-        cellZero                      = getImage(zero     , colors);
-        cellCrossDead                 = getImage(crossDead, colors);
+        colors.put(BORDER, zeroLow);
+        switch (type) {
+            case CELL_ZERO:
+                result = getImage(zero, colors);
+                break;
+            case CELL_CROSS_DEAD:
+                result = getImage(crossDead, colors);
+                break;
+        }
 
         colors.put(CROSS_BG, crossMedium);
         colors.put(ZERO_BG, zeroMedium);
 
         colors.put(BORDER, crossHigh);
-        cellZero_forCross_highlighted = getImage(zero     , colors);
+
+        if (type == BoardCellType.CELL_ZERO_FOR_CROSS_HIGHLIGHTED) {
+            result = getImage(zero, colors);
+        }
 
         colors.put(BORDER, crossMedium);
-        cellCross_highlighted         = getImage(cross    , colors);
-        cellZeroDead_highlighted      = getImage(zeroDead , colors);
+        switch (type) {
+            case CELL_CROSS_HIGHLIGHTED:
+                result = getImage(cross, colors);
+                break;
+            case CELL_ZERO_DEAD_HIGHLIGHTED:
+                result = getImage(zeroDead, colors);
+                break;
+        }
 
         colors.put(BORDER, zeroHigh);
-        cellCross_forZero_highlighted = getImage(cross    , colors);
+        if (type == BoardCellType.CELL_CROSS_FOR_ZERO_HIGHLIGHTED) {
+            result = getImage(cross, colors);
+        }
 
         colors.put(BORDER, zeroMedium);
-        cellZero_highlighted          = getImage(zero     , colors);
-        cellCrossDead_highlighted     = getImage(crossDead, colors);
+        switch (type) {
+            case CELL_ZERO_HIGHLIGHTED:
+                result = getImage(zero, colors);
+                break;
+            case CELL_CROSS_DEAD_HIGHLIGHTED:
+                result = getImage(crossDead, colors);
+        }
+
+        assert result != null;
+        loadedImages.put(type, result);
+        return result;
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {

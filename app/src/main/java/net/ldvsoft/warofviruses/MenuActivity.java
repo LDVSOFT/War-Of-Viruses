@@ -25,6 +25,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 import java.util.UUID;
+import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 public class MenuActivity extends AppCompatActivity {
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
@@ -83,14 +84,14 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... params) {
                 //noinspection ResourceType
-                BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
+                //BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
                 return null;
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                crossButton.setImageDrawable(BoardCellButton.cellCross);
-                zeroButton.setImageDrawable(BoardCellButton.cellZero);
+                crossButton.setImageDrawable(BoardCellButton.getDrawable(MenuActivity.this, CELL_CROSS));
+                zeroButton.setImageDrawable(BoardCellButton.getDrawable(MenuActivity.this, CELL_ZERO));
             }
         }.execute();
     }

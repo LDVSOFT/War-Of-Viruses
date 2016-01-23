@@ -37,11 +37,12 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void reloadColors() {
-        BoardCellButton.loadDrawables(SettingsActivity.this, crossHueColor, zeroHueColor);
-        ((BoardCellButton)findViewById(R.id.color_cross_alive)).setImageDrawable(BoardCellButton.cellCross);
-        ((BoardCellButton)findViewById(R.id.color_cross_dead)).setImageDrawable(BoardCellButton.cellCrossDead);
-        ((BoardCellButton)findViewById(R.id.color_zero_alive)).setImageDrawable(BoardCellButton.cellZero);
-        ((BoardCellButton)findViewById(R.id.color_zero_dead)).setImageDrawable(BoardCellButton.cellZeroDead);
+        BoardCellButton.setHueCross(crossHueColor);
+        BoardCellButton.setHueZero(zeroHueColor);
+        ((BoardCellButton) findViewById(R.id.color_cross_alive)).setImageDrawable(BoardCellButton.getDrawable(this, BoardCellButton.BoardCellType.CELL_CROSS));
+        ((BoardCellButton)findViewById(R.id.color_cross_dead)).setImageDrawable(BoardCellButton.getDrawable(this, BoardCellButton.BoardCellType.CELL_CROSS_DEAD));
+        ((BoardCellButton)findViewById(R.id.color_zero_alive)).setImageDrawable(BoardCellButton.getDrawable(this, BoardCellButton.BoardCellType.CELL_ZERO));
+        ((BoardCellButton)findViewById(R.id.color_zero_dead)).setImageDrawable(BoardCellButton.getDrawable(this, BoardCellButton.BoardCellType.CELL_ZERO_DEAD));
     }
 
     @Override

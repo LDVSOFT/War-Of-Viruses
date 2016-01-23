@@ -17,6 +17,7 @@ import java.util.List;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
+import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 public abstract class GameActivityBase extends AppCompatActivity {
     protected static final int PLAY_SERVICES_DIALOG = 9001;
@@ -57,15 +58,15 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
         if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.CROSS) {
-            avatar.setImageDrawable(BoardCellButton.cellCross_forCross);
+            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_CROSS));
         } else {
-            avatar.setImageDrawable(BoardCellButton.cellCross);
+            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS));
         }
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
         if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO) {
-            avatar.setImageDrawable(BoardCellButton.cellZero_forZero);
+            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_ZERO));
         } else {
-            avatar.setImageDrawable(BoardCellButton.cellZero);
+            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO));
         }
     }
 
@@ -96,67 +97,67 @@ public abstract class GameActivityBase extends AppCompatActivity {
         switch (cell.getCellType()) {
             case CROSS:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellCross_forCross);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_CROSS));
                 } else if (cell.canMakeTurn()) {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellCross_forZero_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_ZERO_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellCross_forZero);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_ZERO));
                     }
                 } else {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellCross_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellCross);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS));
                     }
                 }
                 break;
             case ZERO:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellZero_forZero);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_ZERO));
                 } else if (cell.canMakeTurn()) {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellZero_forCross_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_CROSS_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellZero_forCross);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_CROSS));
                     }
                 } else {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellZero_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellZero);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO));
                     }
                 }
                 break;
             case DEAD_CROSS:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellCrossDead_forZero);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD_FOR_ZERO));
                 } else {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellCrossDead_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellCrossDead);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD));
                     }
                 }
                 break;
             case DEAD_ZERO:
                 if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.cellZeroDead_forCross);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD_FOR_CROSS));
                 } else {
                     if (highlight) {
-                        button.setImageDrawable(BoardCellButton.cellZeroDead_highlighted);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD_HIGHLIGHTED));
                     } else {
-                        button.setImageDrawable(BoardCellButton.cellZeroDead);
+                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD));
                     }
                 }
                 break;
             case EMPTY:
                 if (!cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.cellEmpty);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY));
                 } else if (current == GameLogic.PlayerFigure.CROSS) {
-                    button.setImageDrawable(BoardCellButton.cellEmpty_forCross);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY_FOR_CROSS));
                 } else {
-                    button.setImageDrawable(BoardCellButton.cellEmpty_forZero);
+                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY_FOR_ZERO));
                 }
         }
     }
@@ -174,7 +175,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
         int marginValue = (int) Math.ceil(metrics.density * 1);
         boardButtonLayoutParams.setMargins(marginValue, marginValue, 0, 0);
 
-        BoardCellButton.loadDrawables(this, 30, 210);
         boardButtons = new BoardCellButton[BOARD_SIZE][BOARD_SIZE];
 
         for (int row = BOARD_SIZE - 1; row != -1; row--) {

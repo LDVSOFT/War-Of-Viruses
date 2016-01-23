@@ -292,8 +292,8 @@ public class GameActivity extends GameActivityBase {
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
         giveUpButton.setOnClickListener(new OnGiveUpListener());
         if (game != null) {
-            BoardCellButton.loadDrawables(this, game.getCrossPlayer().getUser().getColorCross(),
-                    game.getZeroPlayer().getUser().getColorZero());
+            BoardCellButton.setHueZero(game.getZeroPlayer().getUser().getColorZero());
+            BoardCellButton.setHueCross(game.getCrossPlayer().getUser().getColorCross());
         }
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {

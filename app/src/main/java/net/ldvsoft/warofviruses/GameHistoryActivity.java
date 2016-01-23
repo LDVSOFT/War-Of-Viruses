@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import static net.ldvsoft.warofviruses.GameLogic.GameState.*;
+import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 /**
  * Activity which displays all the played finished games that stored locally.
@@ -119,7 +120,7 @@ public class GameHistoryActivity extends AppCompatActivity {
             switch (game.getMineFigure(userId)) {
                 case NONE:
                     holder.opponent.setText(getString(R.string.GAME_LOCAL));
-                    holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                    holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_EMPTY));
                     switch (game.getGameState()) {
                         case CROSS_WON:
                             holder.result.setText(getString(R.string.GAME_CROSS_WON));
@@ -136,15 +137,15 @@ public class GameHistoryActivity extends AppCompatActivity {
                     holder.opponent.setText(game.getZeroPlayer().getName());
                     switch (game.getGameState()) {
                         case CROSS_WON:
-                            holder.figure.setImageDrawable(BoardCellButton.cellCross);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_CROSS));
                             holder.result.setText(getString(R.string.GAME_WON));
                             break;
                         case ZERO_WON:
-                            holder.figure.setImageDrawable(BoardCellButton.cellCrossDead);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_CROSS_DEAD));
                             holder.result.setText(getString(R.string.GAME_LOST));
                             break;
                         case DRAW:
-                            holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_EMPTY));
                             holder.result.setText(getString(R.string.GAME_DRAW));
                     }
                     break;
@@ -152,15 +153,15 @@ public class GameHistoryActivity extends AppCompatActivity {
                     holder.opponent.setText(game.getCrossPlayer().getName());
                     switch (game.getGameState()) {
                         case CROSS_WON:
-                            holder.figure.setImageDrawable(BoardCellButton.cellZeroDead);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_ZERO_DEAD));
                             holder.result.setText(getString(R.string.GAME_LOST));
                             break;
                         case ZERO_WON:
-                            holder.figure.setImageDrawable(BoardCellButton.cellZero);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_ZERO));
                             holder.result.setText(getString(R.string.GAME_WON));
                             break;
                         case DRAW:
-                            holder.figure.setImageDrawable(BoardCellButton.cellEmpty);
+                            holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_EMPTY));
                             holder.result.setText(getString(R.string.GAME_DRAW));
                     }
                     break;
