@@ -19,8 +19,8 @@ public class DatabaseHandler implements DBProvider {
     protected WarOfVirusesServer server;
 
     private final static String DEVICE_USER = "user";
-    private final static String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + "u INNER JOIN " + DEVICE_TABLE +
-            "d ON d." + DEVICE_USER + " = u." + ID + " WHERE " + GOOGLE_TOKEN + " = ?;";
+    private final static String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + " u INNER JOIN " + DEVICE_TABLE +
+            " d ON d." + DEVICE_USER + " = u." + ID + " WHERE d." + TOKEN + " = ?;";
 
     private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
@@ -187,6 +187,28 @@ public class DatabaseHandler implements DBProvider {
                     users.getInt(7),
                     null /*FIXME Load separetly*/
             );
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+            return null;
+        }
+    }
+
+    public List<String> getTokens(long userId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getUserStatement = connection.prepareStatement(
+                    "SELECT token FROM Device WHERE user = ?"
+            );
+            getUserStatement.setLong(1, userId);
+            ResultSet users = getUserStatement.executeQuery();
+            if (!users.first())
+                return new ArrayList<>();
+
+            ArrayList<String> res = new ArrayList<>();
+            while (!users.isAfterLast()) {
+                res.add(users.getString(1));
+                users.next();
+            }
+            return res;
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Cannot find user", e);
             return null;
