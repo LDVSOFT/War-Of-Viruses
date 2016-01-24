@@ -76,6 +76,7 @@ public class GameActivity extends GameActivityBase {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
+            lastSavedGameID = DO_NOT_SAVE_GAME;
             if (giveUp) {
                 game.giveUp(humanPlayer);
             }
@@ -150,8 +151,9 @@ public class GameActivity extends GameActivityBase {
     @Override
     public void onBackPressed() {
         if (game == null || game.isFinished()) {
-            saveCurrentGame();
             lastSavedGameID = DO_NOT_SAVE_GAME;
+            saveCurrentGame();
+            game = null;
             super.onBackPressed();
             return;
         }
@@ -305,7 +307,6 @@ public class GameActivity extends GameActivityBase {
     @Override
     protected void onStop() {
         super.onStop();
-        //lastSavedGameID = DO_NOT_SAVE_GAME;
     }
 
     protected void onResume() {
@@ -332,7 +333,6 @@ public class GameActivity extends GameActivityBase {
         new AsyncTask<Game, Void, Void> (){
             @Override
             protected Void doInBackground(Game... params) {
-                //if (lastSavedGameID != DO_NOT_SAVE_GAME) {
                 for (Game game : params) { //actually, there is only one game
                     long id = DBOpenHelper.getInstance(GameActivity.this).addGame(game);
                     if (lastSavedGameID != DO_NOT_SAVE_GAME) {
@@ -351,8 +351,9 @@ public class GameActivity extends GameActivityBase {
             Game loadedGame = DBOpenHelper.getInstance(GameActivity.this).getAndRemoveActiveGame();
             if (loadedGame == null) {
                 loadedGame = DBOpenHelper.getInstance(GameActivity.this).getGameById(lastSavedGameID);
-                lastSavedGameID = NO_GAME_SAVED;
+                DBOpenHelper.getInstance(GameActivity.this).deleteGameById(lastSavedGameID);
             }
+            lastSavedGameID = NO_GAME_SAVED;
             if (loadedGame == null) {
                 Log.d("GameActivity", "FAIL: Null game loaded");
             } else {

@@ -80,6 +80,10 @@ public interface DBProvider {
     String ACTIVE_GAME_COUNT = "SELECT COUNT(*) FROM " + GAME_TABLE +
             " WHERE " + GAME_STATUS + " = " + GameStatus.RUNNING.ordinal() + ";";
 
+    String DELETE_GAME_TURNS_BY_ID = "DELETE FROM " + TURN_TABLE + " WHERE " + GAME_ID + " = ?;";
+
+    String DELETE_GAME_BY_ID = "DELETE FROM " + GAME_TABLE + " WHERE " + ID + " = ?;";
+
     //adds game to database and returns its ID
     long addGame(Game game);
     void deleteActiveGame();
