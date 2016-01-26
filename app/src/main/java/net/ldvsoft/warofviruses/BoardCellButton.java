@@ -43,7 +43,7 @@ public class BoardCellButton extends ImageView {
         CELL_ZERO_DEAD_HIGHLIGHTED
     }
 
-    private static int hueCross = 30, hueZero = 210;
+    private static int hueCross = WoVPreferences.DEFAULT_CROSS_COLOR, hueZero = WoVPreferences.DEFAULT_ZERO_COLOR;
 
     private static Map<BoardCellType, Drawable> loadedImages = new EnumMap<>(BoardCellType.class);
 

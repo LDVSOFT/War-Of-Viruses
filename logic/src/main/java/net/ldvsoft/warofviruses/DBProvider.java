@@ -34,8 +34,8 @@ public interface DBProvider {
     /**
      * Special user ids.
      */
-    int USER_AI_PLAYER = 1;
-    int USER_ANONYMOUS = 0;
+    int USER_AI_PLAYER_ID = 1;
+    int USER_ANONYMOUS_ID = 0;
 
     enum GameStatus {RUNNING, DELETED, FINISHED_DRAW, FINISHED_ZERO_WON, FINISHED_CROSS_WON}
 

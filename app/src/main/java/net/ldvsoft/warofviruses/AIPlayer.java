@@ -5,29 +5,25 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
 import static java.lang.Math.abs;
 import static java.lang.Thread.sleep;
-import static net.ldvsoft.warofviruses.GameLogic.ADJACENT_DIRECTIONS;
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.CoordinatePair;
 import static net.ldvsoft.warofviruses.GameLogic.GameState;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
-import static net.ldvsoft.warofviruses.GameLogic.isInside;
 
 /**
  * Created by Сева on 20.10.2015.
  */
 public class AIPlayer extends Player {
     public static final User AI_USER = new User(
-            DBProvider.USER_AI_PLAYER,
-            "uniqueGoogleTokenForAiPlayer",
-//            1, //DBOpenHelper.playerClasses[1]
-            "SkyNet", 1,
-            30, 210,
+            DBProvider.USER_AI_PLAYER_ID,
+            WoVPreferences.AI_GOOGLE_TOKEN,
+            WoVPreferences.AI_NICKNAME_STR, WoVPreferences.AI_NICKNAME_ID,
+            WoVPreferences.DEFAULT_CROSS_COLOR, WoVPreferences.DEFAULT_ZERO_COLOR,
             null);
     private AsyncTask<Void, CoordinatePair, Void> runningStrategy;
 
