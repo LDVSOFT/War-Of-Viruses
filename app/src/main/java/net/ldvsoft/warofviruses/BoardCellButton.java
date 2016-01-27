@@ -21,6 +21,197 @@ import static android.graphics.Color.argb;
  * Created by ldvsoft on 17.10.15.
  */
 public class BoardCellButton extends ImageView {
+    private static final String TAG = "BoardCellButton";
+
+    private static Hashtable<Integer, Integer> getDefaultHashtableInitializer() {
+        Hashtable<Integer, Integer> colors = new Hashtable<>(10);
+        colors.put(CROSS_FG, crossHigh);
+        colors.put(CROSS_BG, crossLow);
+        colors.put(ZERO_FG, zeroHigh);
+        colors.put(ZERO_BG, zeroLow);
+        colors.put(NEUTRAL_FG, EMPTY_FG);
+        colors.put(NEUTRAL_BG, EMPTY_BG);
+
+        colors.put(BORDER, EMPTY_BG);
+        return colors;
+    }
+
+    private static Hashtable<Integer, Integer> getDefaultHighlightedHashtableInitializer() {
+        Hashtable<Integer, Integer> colors = new Hashtable<>(10);
+        colors.put(CROSS_FG, crossHigh);
+        colors.put(ZERO_FG, zeroHigh);
+        colors.put(CROSS_BG, crossMedium);
+        colors.put(ZERO_BG, zeroMedium);
+        colors.put(NEUTRAL_FG, EMPTY_FG);
+        colors.put(NEUTRAL_BG, EMPTY_BG);
+
+        colors.put(BORDER, EMPTY_BG);
+        return colors;
+    }
+
+    private static abstract class SVGLoader {
+        protected int svgId;
+        abstract public Drawable load(Context context) throws IOException;
+    }
+
+    private static class EmptyCellLoader extends SVGLoader {
+        EmptyCellLoader(int svgName) {
+            this.svgId = svgName;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            return getImage(loadSVG(context, svgId), getDefaultHashtableInitializer());
+        }
+    }
+
+    private static class CrossActiveLoader extends SVGLoader {
+        CrossActiveLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
+            colors.put(BORDER, crossHigh);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class CrossNonActiveLoader extends SVGLoader {
+        CrossNonActiveLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
+            colors.put(BORDER, crossLow);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class ZeroActiveLoader extends SVGLoader {
+        ZeroActiveLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
+            colors.put(BORDER, zeroHigh);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class ZeroNonActiveLoader extends SVGLoader {
+        ZeroNonActiveLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
+            colors.put(BORDER, zeroLow);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class CrossActiveHighlightedLoader extends SVGLoader {
+        CrossActiveHighlightedLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
+            colors.put(BORDER, crossHigh);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class CrossNonActiveHighlightedLoader extends SVGLoader {
+        CrossNonActiveHighlightedLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
+            colors.put(BORDER, crossMedium);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class ZeroActiveHighlightedLoader extends SVGLoader {
+        ZeroActiveHighlightedLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
+            colors.put(BORDER, zeroHigh);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static class ZeroNonActiveHighlightedLoader extends SVGLoader {
+        ZeroNonActiveHighlightedLoader(int svgSource) {
+            this.svgId = svgSource;
+        }
+
+        @Override
+        public Drawable load(Context context) throws IOException{
+            Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
+            colors.put(BORDER, zeroMedium);
+            return getImage(loadSVG(context, svgId), colors);
+        }
+    }
+
+    private static int crossHigh, crossMedium, crossLow;
+    private static int zeroHigh, zeroMedium, zeroLow;
+
+    static Map<BoardCellType, SVGLoader> svgLoaders;
+    private static Map<BoardCellType, Drawable> loadedImages;
+
+    static {
+        loadedImages = new EnumMap<>(BoardCellType.class);
+
+        setHueCross(WoVPreferences.DEFAULT_CROSS_COLOR);
+        setHueZero(WoVPreferences.DEFAULT_ZERO_COLOR);
+
+        svgLoaders = new EnumMap<>(BoardCellType.class);
+
+        svgLoaders.put(BoardCellType.CELL_EMPTY, new EmptyCellLoader(R.raw.board_cell_empty));
+
+        svgLoaders.put(BoardCellType.CELL_EMPTY_FOR_CROSS, new CrossActiveLoader(R.raw.board_cell_empty));
+        svgLoaders.put(BoardCellType.CELL_CROSS_FOR_CROSS, new CrossActiveLoader(R.raw.board_cell_cross));
+        svgLoaders.put(BoardCellType.CELL_ZERO_FOR_CROSS, new CrossActiveLoader(R.raw.board_cell_zero));
+        svgLoaders.put(BoardCellType.CELL_ZERO_DEAD_FOR_CROSS, new CrossActiveLoader(R.raw.board_cell_zero_dead));
+
+        svgLoaders.put(BoardCellType.CELL_CROSS, new CrossNonActiveLoader(R.raw.board_cell_cross));
+        svgLoaders.put(BoardCellType.CELL_ZERO_DEAD, new CrossNonActiveLoader(R.raw.board_cell_zero_dead));
+
+        svgLoaders.put(BoardCellType.CELL_EMPTY_FOR_ZERO, new ZeroActiveLoader(R.raw.board_cell_empty));
+        svgLoaders.put(BoardCellType.CELL_CROSS_FOR_ZERO, new ZeroActiveLoader(R.raw.board_cell_cross));
+        svgLoaders.put(BoardCellType.CELL_CROSS_DEAD_FOR_ZERO, new ZeroActiveLoader(R.raw.board_cell_cross_dead));
+        svgLoaders.put(BoardCellType.CELL_ZERO_FOR_ZERO, new ZeroActiveLoader(R.raw.board_cell_zero));
+
+        svgLoaders.put(BoardCellType.CELL_ZERO, new ZeroNonActiveLoader(R.raw.board_cell_zero));
+        svgLoaders.put(BoardCellType.CELL_CROSS_DEAD, new ZeroNonActiveLoader(R.raw.board_cell_cross_dead));
+
+        svgLoaders.put(BoardCellType.CELL_ZERO_FOR_CROSS_HIGHLIGHTED, new CrossActiveHighlightedLoader(R.raw.board_cell_zero));
+
+        svgLoaders.put(BoardCellType.CELL_CROSS_HIGHLIGHTED, new CrossNonActiveHighlightedLoader(R.raw.board_cell_cross));
+        svgLoaders.put(BoardCellType.CELL_ZERO_DEAD_HIGHLIGHTED, new CrossNonActiveHighlightedLoader(R.raw.board_cell_zero_dead));
+
+        svgLoaders.put(BoardCellType.CELL_CROSS_FOR_ZERO_HIGHLIGHTED, new ZeroActiveHighlightedLoader(R.raw.board_cell_cross));
+
+        svgLoaders.put(BoardCellType.CELL_ZERO_HIGHLIGHTED, new ZeroNonActiveHighlightedLoader(R.raw.board_cell_zero));
+        svgLoaders.put(BoardCellType.CELL_CROSS_DEAD_HIGHLIGHTED, new ZeroNonActiveHighlightedLoader(R.raw.board_cell_cross_dead));
+    }
+
     public enum BoardCellType {
         CELL_EMPTY,
         CELL_EMPTY_FOR_CROSS,
@@ -43,9 +234,6 @@ public class BoardCellButton extends ImageView {
         CELL_ZERO_DEAD_HIGHLIGHTED
     }
 
-    private static int hueCross = WoVPreferences.DEFAULT_CROSS_COLOR, hueZero = WoVPreferences.DEFAULT_ZERO_COLOR;
-
-    private static Map<BoardCellType, Drawable> loadedImages = new EnumMap<>(BoardCellType.class);
 
     protected final static int CROSS_FG   = argb(0, 255, 0  , 0  );
     protected final static int CROSS_BG   = argb(0, 127, 0  , 0  );
@@ -98,12 +286,18 @@ public class BoardCellButton extends ImageView {
     }
 
     public static void setHueCross(int newHueCross) {
-        hueCross = newHueCross;
+        crossHigh   = getHighColor(newHueCross);
+        crossMedium = getMediumColor(newHueCross);
+        crossLow    = getLowColor(newHueCross);
+
         loadedImages.clear();
     }
 
     public static void setHueZero(int newHueZero) {
-        hueZero = newHueZero;
+        zeroHigh    = getHighColor(newHueZero);
+        zeroMedium  = getMediumColor(newHueZero);
+        zeroLow     = getLowColor(newHueZero);
+
         loadedImages.clear();
     }
 
@@ -116,131 +310,14 @@ public class BoardCellButton extends ImageView {
             return loadedImages.get(type);
         }
 
-        int crossHigh   = getHighColor(hueCross);
-        int crossMedium = getMediumColor(hueCross);
-        int crossLow    = getLowColor(hueCross);
-        int zeroHigh    = getHighColor(hueZero);
-        int zeroMedium  = getMediumColor(hueZero);
-        int zeroLow     = getLowColor(hueZero);
-
-        String cross, crossDead, zero, zeroDead, empty;
-
         try {
-            empty      = loadSVG(context, R.raw.board_cell_empty     );
-            cross      = loadSVG(context, R.raw.board_cell_cross     );
-            crossDead  = loadSVG(context, R.raw.board_cell_cross_dead);
-            zero       = loadSVG(context, R.raw.board_cell_zero      );
-            zeroDead   = loadSVG(context, R.raw.board_cell_zero_dead );
+            Drawable result = svgLoaders.get(type).load(context);
+            loadedImages.put(type, result);
+            return result;
         } catch (IOException e) {
-            e.printStackTrace();
-            Log.wtf("BoardCellButton", "Cannot load SVGs!");
+            Log.e(TAG, "Failed to load SVG:\n" + Log.getStackTraceString(e));
             return null;
         }
-
-        Hashtable<Integer, Integer> colors = new Hashtable<>(10);
-        colors.put(CROSS_FG, crossHigh);
-        colors.put(CROSS_BG, crossLow);
-        colors.put(ZERO_FG, zeroHigh);
-        colors.put(ZERO_BG, zeroLow);
-        colors.put(NEUTRAL_FG, EMPTY_FG);
-        colors.put(NEUTRAL_BG, EMPTY_BG);
-
-        colors.put(BORDER, EMPTY_BG);
-
-        Drawable result = null;
-
-        if (type == BoardCellType.CELL_EMPTY) {
-            result = getImage(empty, colors);
-        }
-
-        colors.put(BORDER, crossHigh);
-        switch (type) {
-            case CELL_EMPTY_FOR_CROSS:
-                result = getImage(empty, colors);
-                break;
-            case CELL_CROSS_FOR_CROSS:
-                result = getImage(cross, colors);
-                break;
-            case CELL_ZERO_FOR_CROSS:
-                result = getImage(zero, colors);
-                break;
-            case CELL_ZERO_DEAD_FOR_CROSS:
-                result = getImage(zeroDead, colors);
-                break;
-        }
-
-        colors.put(BORDER, crossLow);
-        switch (type) {
-            case CELL_CROSS:
-                result = getImage(cross, colors);
-                break;
-            case CELL_ZERO_DEAD:
-                result = getImage(zeroDead, colors);
-                break;
-        }
-
-        colors.put(BORDER, zeroHigh);
-        switch (type) {
-            case CELL_EMPTY_FOR_ZERO:
-                result =  getImage(empty, colors);
-                break;
-            case CELL_CROSS_FOR_ZERO:
-                result = getImage(cross, colors);
-                break;
-            case CELL_CROSS_DEAD_FOR_ZERO:
-                result = getImage(crossDead, colors);
-                break;
-            case CELL_ZERO_FOR_ZERO:
-                result = getImage(zero, colors);
-                break;
-        }
-
-        colors.put(BORDER, zeroLow);
-        switch (type) {
-            case CELL_ZERO:
-                result = getImage(zero, colors);
-                break;
-            case CELL_CROSS_DEAD:
-                result = getImage(crossDead, colors);
-                break;
-        }
-
-        colors.put(CROSS_BG, crossMedium);
-        colors.put(ZERO_BG, zeroMedium);
-
-        colors.put(BORDER, crossHigh);
-
-        if (type == BoardCellType.CELL_ZERO_FOR_CROSS_HIGHLIGHTED) {
-            result = getImage(zero, colors);
-        }
-
-        colors.put(BORDER, crossMedium);
-        switch (type) {
-            case CELL_CROSS_HIGHLIGHTED:
-                result = getImage(cross, colors);
-                break;
-            case CELL_ZERO_DEAD_HIGHLIGHTED:
-                result = getImage(zeroDead, colors);
-                break;
-        }
-
-        colors.put(BORDER, zeroHigh);
-        if (type == BoardCellType.CELL_CROSS_FOR_ZERO_HIGHLIGHTED) {
-            result = getImage(cross, colors);
-        }
-
-        colors.put(BORDER, zeroMedium);
-        switch (type) {
-            case CELL_ZERO_HIGHLIGHTED:
-                result = getImage(zero, colors);
-                break;
-            case CELL_CROSS_DEAD_HIGHLIGHTED:
-                result = getImage(crossDead, colors);
-        }
-
-        assert result != null;
-        loadedImages.put(type, result);
-        return result;
     }
 
     protected static String loadSVG(Context context, int id) throws IOException {
