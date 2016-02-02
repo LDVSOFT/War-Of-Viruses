@@ -263,8 +263,9 @@ public class BoardCellButton extends ImageView {
 
     @Override
     public void setImageDrawable(Drawable drawable) {
-        if (drawable == getDrawable())
+        if (drawable == getDrawable()) {
             return;
+        }
         super.setImageDrawable(drawable);
         invalidate();
     }

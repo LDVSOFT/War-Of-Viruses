@@ -9,9 +9,9 @@ import java.util.ListIterator;
  * Created by Сева on 21.10.2015.
  */
 public class GameLogic {
-    private ArrayList<GameEvent> events;
-    private ArrayList<GameEvent> crossesEvents;
-    private ArrayList<GameEvent> zeroesEvents;
+    private List<GameEvent> events = new ArrayList<>();
+    private List<GameEvent> crossesEvents = new ArrayList<>();
+    private List<GameEvent> zeroesEvents = new ArrayList<>();
 
     public static final int BOARD_SIZE = 10;
 
@@ -27,9 +27,6 @@ public class GameLogic {
         private CellType cellType = CellType.EMPTY;
         private boolean canMakeTurn = false;
         private boolean isActive = false;
-
-        public Cell() {
-        }
 
         public Cell(CellType cellType, boolean canMakeTurn) {
             this.cellType = cellType;
@@ -47,12 +44,16 @@ public class GameLogic {
         }
 
         public PlayerFigure getOwner() {
-            if (cellType == CellType.ZERO || cellType == CellType.DEAD_CROSS) {
-                return PlayerFigure.ZERO;
-            } else if (cellType == CellType.CROSS || cellType == CellType.DEAD_ZERO) {
-                return PlayerFigure.CROSS;
-            } else {
-                return PlayerFigure.NONE;
+            switch (cellType) {
+                case ZERO:
+                case DEAD_CROSS:
+                    return PlayerFigure.ZERO;
+                case CROSS:
+                case DEAD_ZERO:
+                    return PlayerFigure.CROSS;
+                case EMPTY:
+                default:
+                    return PlayerFigure.NONE;
             }
         }
 
@@ -60,7 +61,7 @@ public class GameLogic {
             return isActive;
         }
 
-        public void setOwner(PlayerFigure newOwner) {
+        private void setOwner(PlayerFigure newOwner) {
             if (newOwner == PlayerFigure.CROSS) {
                 cellType = CellType.CROSS;
             } else if (newOwner == PlayerFigure.ZERO) {
@@ -82,7 +83,7 @@ public class GameLogic {
             return canMakeTurn;
         }
 
-        public void setOwnerOnDead(PlayerFigure newOwner) {
+        private void setOwnerOnDead(PlayerFigure newOwner) {
             if (newOwner == PlayerFigure.CROSS) {
                 cellType = CellType.DEAD_ZERO;
             } else {
@@ -108,7 +109,6 @@ public class GameLogic {
 
     public static GameLogic deserialize(List<GameEvent> events) {
         GameLogic logic = new GameLogic();
-        logic.newGame();
         for (GameEvent event : events) {
             event.applyEvent(logic);
         }
@@ -118,9 +118,14 @@ public class GameLogic {
     public GameLogic() {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                board[i][j] = new Cell();
+                board[i][j] = new Cell(CellType.EMPTY, false);
             }
         }
+        previousTurnSkipped = false;
+        currentPlayerFigure = PlayerFigure.CROSS;
+        currentGameState = GameState.RUNNING;
+        updateGameState();
+
     }
 
     public GameLogic(GameLogic logic) {
@@ -139,28 +144,11 @@ public class GameLogic {
         zeroesEvents = new ArrayList<>(logic.zeroesEvents);
     }
 
-    public void newGame() {
-        events = new ArrayList<>();
-        crossesEvents = new ArrayList<>();
-        zeroesEvents = new ArrayList<>();
-        currentTurn = 0;
-        currentMiniturn = 0;
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                board[i][j] = new Cell(CellType.EMPTY, false);
-            }
-        }
-        previousTurnSkipped = false;
-        currentPlayerFigure = PlayerFigure.CROSS;
-        currentGameState = GameState.RUNNING;
-        updateGameState();
-    }
-
     public GameState getCurrentGameState() {
         return currentGameState;
     }
 
-    static boolean isInside(int pos) {
+    static private boolean isInside(int pos) {
         return pos >= 0 && pos < BOARD_SIZE;
     }
 
@@ -179,16 +167,16 @@ public class GameLogic {
     private void updateAdjacentCells(int x, int y) {
         board[x][y].isActive = true;
         for (int[] adjacentDirection : ADJACENT_DIRECTIONS) {
-            int dx = x + adjacentDirection[0], dy = y + adjacentDirection[1];
-            if (isInside(dx) && isInside(dy)) {
-                if ((board[dx][dy].getOwner() == getOpponent(currentPlayerFigure) && !board[dx][dy].isDead()) ||
-                        board[dx][dy].cellType == CellType.EMPTY) {
-                    board[dx][dy].canMakeTurn = true;
+            int newX = x + adjacentDirection[0], newY = y + adjacentDirection[1];
+            if (isInside(newX) && isInside(newY)) {
+                if ((board[newX][newY].getOwner() == getOpponent(currentPlayerFigure) && !board[newX][newY].isDead()) ||
+                        board[newX][newY].cellType == CellType.EMPTY) {
+                    board[newX][newY].canMakeTurn = true;
                 }
 
-                if (!board[dx][dy].isActive) {
-                    if (board[dx][dy].isDead() && board[dx][dy].getOwner() == currentPlayerFigure) {
-                        updateAdjacentCells(dx, dy);
+                if (!board[newX][newY].isActive) {
+                    if (board[newX][newY].isDead() && board[newX][newY].getOwner() == currentPlayerFigure) {
+                        updateAdjacentCells(newX, newY);
                     }
                 }
             }

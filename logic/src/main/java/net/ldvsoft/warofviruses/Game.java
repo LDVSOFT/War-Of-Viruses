@@ -91,7 +91,6 @@ public class Game {
         crossType = cross.type;
         zeroType = zero.type;
         gameLogic = new GameLogic();
-        gameLogic.newGame();
         crossPlayer.setGame(this);
         zeroPlayer.setGame(this);
     }
@@ -170,7 +169,7 @@ public class Game {
         return result;
     }
 
-    public GameLogic.PlayerFigure getMineFigure(long userId) {
+    public GameLogic.PlayerFigure getMyFigure(long userId) {
         if (crossPlayer.getUser().getId() == zeroPlayer.getUser().getId()) {
             //Just a local game
             return GameLogic.PlayerFigure.NONE;

@@ -1,7 +1,5 @@
 package net.ldvsoft.warofviruses;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
@@ -11,25 +9,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import net.ldvsoft.warofviruses.GameLogic.GameState;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static net.ldvsoft.warofviruses.GameLogic.GameState.*;
 import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 /**
@@ -117,7 +107,7 @@ public class GameHistoryActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Game game = data.get(position);
-            switch (game.getMineFigure(userId)) {
+            switch (game.getMyFigure(userId)) {
                 case NONE:
                     holder.opponent.setText(getString(R.string.GAME_LOCAL));
                     holder.figure.setImageDrawable(BoardCellButton.getDrawable(GameHistoryActivity.this, CELL_EMPTY));

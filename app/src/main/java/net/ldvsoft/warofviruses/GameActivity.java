@@ -99,7 +99,7 @@ public class GameActivity extends GameActivityBase {
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
 
-        GameLogic.PlayerFigure mineFigure = game.getMineFigure(humanPlayer.getUser().getId());
+        GameLogic.PlayerFigure mineFigure = game.getMyFigure(humanPlayer.getUser().getId());
         GameLogic.GameState gameState = game.getGameState();
         switch (gameState) {
             case RUNNING:

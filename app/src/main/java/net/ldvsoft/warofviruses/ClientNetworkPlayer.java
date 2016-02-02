@@ -29,11 +29,7 @@ public class ClientNetworkPlayer extends Player {
     private final TreeSet<GameEvent> pendingEvents = new TreeSet<>(new Comparator<GameEvent>() {
         @Override
         public int compare(GameEvent x, GameEvent y) {
-            int xNum = x.getNumber(), yNum = y.getNumber();
-            if (xNum < yNum) {
-                return -1;
-            }
-            return xNum == yNum ? 0 : 1;
+            return Integer.compare(x.getNumber(), y.getNumber());
         }
     });
 
