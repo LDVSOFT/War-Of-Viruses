@@ -22,7 +22,6 @@ public class GameReplay {
      */
     GameReplay(List<GameEvent> gameEventHistory, Player crossPlayer, Player zeroPlayer) {
         GameLogic gameLogic = new GameLogic();
-        gameLogic.newGame();
         this.crossPlayer = crossPlayer;
         this.zeroPlayer = zeroPlayer;
         gameStates = new ArrayList<>();
