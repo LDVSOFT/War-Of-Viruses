@@ -1,6 +1,5 @@
 package net.ldvsoft.warofviruses;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -169,7 +168,7 @@ public class GameLogic {
         for (int[] adjacentDirection : ADJACENT_DIRECTIONS) {
             int newX = x + adjacentDirection[0], newY = y + adjacentDirection[1];
             if (isInside(newX) && isInside(newY)) {
-                if ((board[newX][newY].getOwner() == getOpponent(currentPlayerFigure) && !board[newX][newY].isDead()) ||
+                if ((board[newX][newY].getOwner() == getOpponentPlayerFigure(currentPlayerFigure) && !board[newX][newY].isDead()) ||
                         board[newX][newY].cellType == CellType.EMPTY) {
                     board[newX][newY].canMakeTurn = true;
                 }
@@ -187,7 +186,7 @@ public class GameLogic {
         return board[x][y];
     }
 
-    public PlayerFigure getOpponent(PlayerFigure curPlayerFigure) {
+    public PlayerFigure getOpponentPlayerFigure(PlayerFigure curPlayerFigure) {
         switch (curPlayerFigure) {
             case CROSS:
                 return PlayerFigure.ZERO;
@@ -347,7 +346,7 @@ public class GameLogic {
         if (currentMiniturn == 3 ) {
             currentTurn++;
             currentMiniturn = 0;
-            currentPlayerFigure = getOpponent(currentPlayerFigure);
+            currentPlayerFigure = getOpponentPlayerFigure(currentPlayerFigure);
         }
 
         updateGameState();
@@ -367,7 +366,7 @@ public class GameLogic {
     //should be used very carefully, as it might broke some game logic.
     //It's public for easier AI implementations
     public void setCurrentPlayerToOpponent() {
-        currentPlayerFigure = getOpponent(currentPlayerFigure);
+        currentPlayerFigure = getOpponentPlayerFigure(currentPlayerFigure);
         updateGameState();
     }
 

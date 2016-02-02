@@ -46,7 +46,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
                 setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), false);
             }
         }
-        List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(gameLogic.getOpponent(currentPlayer));
+        List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(gameLogic.getOpponentPlayerFigure(gameLogic.getCurrentPlayerFigure()));
         for (GameEvent event : lastOpponentEvents) {
             if (event.type != GameEvent.GameEventType.TURN_EVENT) {
                 break;
