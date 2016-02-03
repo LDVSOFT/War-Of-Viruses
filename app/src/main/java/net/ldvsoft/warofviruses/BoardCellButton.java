@@ -61,7 +61,7 @@ public class BoardCellButton extends ImageView {
 
         @Override
         public Drawable load(Context context) throws IOException{
-            return getImage(loadSVG(context, svgId), getDefaultHashtableInitializer());
+            return getImage(context, svgId, getDefaultHashtableInitializer());
         }
     }
 
@@ -74,7 +74,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
             colors.put(BORDER, crossHigh);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -87,7 +87,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
             colors.put(BORDER, crossLow);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -100,7 +100,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
             colors.put(BORDER, zeroHigh);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -113,7 +113,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHashtableInitializer();
             colors.put(BORDER, zeroLow);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -126,7 +126,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
             colors.put(BORDER, crossHigh);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -139,7 +139,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
             colors.put(BORDER, crossMedium);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -152,7 +152,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
             colors.put(BORDER, zeroHigh);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -165,7 +165,7 @@ public class BoardCellButton extends ImageView {
         public Drawable load(Context context) throws IOException{
             Hashtable<Integer, Integer> colors = getDefaultHighlightedHashtableInitializer();
             colors.put(BORDER, zeroMedium);
-            return getImage(loadSVG(context, svgId), colors);
+            return getImage(context, svgId, colors);
         }
     }
 
@@ -302,8 +302,9 @@ public class BoardCellButton extends ImageView {
         loadedImages.clear();
     }
 
-    protected static Drawable getImage(String svg, Map<Integer, Integer> map) {
-        return SVGParser.getSVGFromString(svg, map).createPictureDrawable();
+    protected static Drawable getImage(Context context, int id, Map<Integer, Integer> map) {
+        InputStream is = context.getResources().openRawResource(id);
+        return SVGParser.getSVGFromInputStream(is, map).createPictureDrawable();
     }
 
     public static Drawable getDrawable(Context context, BoardCellType type) {
@@ -318,18 +319,6 @@ public class BoardCellButton extends ImageView {
         } catch (IOException e) {
             Log.e(TAG, "Failed to load SVG:\n" + Log.getStackTraceString(e));
             return null;
-        }
-    }
-
-    protected static String loadSVG(Context context, int id) throws IOException {
-        try {
-            InputStream is = context.getResources().openRawResource(id);
-            byte[] b = new byte[is.available()];
-            is.read(b);
-            return new String(b);
-        } catch (Exception e) {
-            Log.wtf("BoardCellButton", "What the hell is with svg?!");
-            throw e;
         }
     }
 }
