@@ -16,14 +16,16 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import java.util.List;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
+import static net.ldvsoft.warofviruses.GameLogic.Cell;
+import static net.ldvsoft.warofviruses.GameLogic.CellType;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
-import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 public abstract class GameActivityBase extends AppCompatActivity {
     protected static final int PLAY_SERVICES_DIALOG = 9001;
 
     protected LinearLayout boardRoot;
     protected BoardCellButton[][] boardButtons;
+    protected FigureSet figureSet = new FigureSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +35,13 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
-
+        /* FIXME */
+        for (PlayerFigure figure : PlayerFigure.values()) {
+            figureSet.changeFigureSource(figure, new DefualtFigureSource(this));
+        }
     }
 
-    protected void redrawGame(GameLogic gameLogic, PlayerFigure currentPlayer) {
+    protected void redrawGame(GameLogic gameLogic) {
         if (gameLogic == null) {
             return;
         }
@@ -57,17 +62,12 @@ public abstract class GameActivityBase extends AppCompatActivity {
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.CROSS) {
-            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_CROSS));
-        } else {
-            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS));
-        }
+        boolean isActive = gameLogic.getCurrentPlayerFigure() == PlayerFigure.CROSS;
+        avatar.setFigure(figureSet, BoardCellState.get(CellType.CROSS, false, isActive ? PlayerFigure.CROSS : PlayerFigure.NONE));
+
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        if (gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO) {
-            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_ZERO));
-        } else {
-            avatar.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO));
-        }
+        isActive = gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO;
+        avatar.setFigure(figureSet, BoardCellState.get(CellType.CROSS, false, isActive ? PlayerFigure.ZERO : PlayerFigure.NONE));
     }
 
     @Override
@@ -93,73 +93,16 @@ public abstract class GameActivityBase extends AppCompatActivity {
     }
 
 
-    private void setButton(BoardCellButton button, GameLogic.Cell cell, GameLogic.PlayerFigure current, boolean highlight) {
-        switch (cell.getCellType()) {
-            case CROSS:
-                if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_CROSS));
-                } else if (cell.canMakeTurn()) {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_ZERO_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_FOR_ZERO));
-                    }
-                } else {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS));
-                    }
-                }
-                break;
-            case ZERO:
-                if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_ZERO));
-                } else if (cell.canMakeTurn()) {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_CROSS_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_FOR_CROSS));
-                    }
-                } else {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO));
-                    }
-                }
-                break;
-            case DEAD_CROSS:
-                if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD_FOR_ZERO));
-                } else {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_CROSS_DEAD));
-                    }
-                }
-                break;
-            case DEAD_ZERO:
-                if (cell.isActive()) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD_FOR_CROSS));
-                } else {
-                    if (highlight) {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD_HIGHLIGHTED));
-                    } else {
-                        button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_ZERO_DEAD));
-                    }
-                }
-                break;
-            case EMPTY:
-                if (!cell.canMakeTurn()) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY));
-                } else if (current == GameLogic.PlayerFigure.CROSS) {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY_FOR_CROSS));
-                } else {
-                    button.setImageDrawable(BoardCellButton.getDrawable(this, CELL_EMPTY_FOR_ZERO));
-                }
+    private void setButton(BoardCellButton button, Cell cell, PlayerFigure current, boolean highlight) {
+        PlayerFigure focus = PlayerFigure.NONE;
+        if (cell.isActive() || cell.canMakeTurn()) {
+            if (cell.getCellType() == CellType.EMPTY) {
+                focus = current;
+            } else {
+                focus = cell.getCellType().getOwner();
+            }
         }
+        button.setFigure(figureSet, BoardCellState.get(cell.getCellType(), highlight, focus));
     }
 
     private void buildBoard() {
@@ -189,6 +132,6 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
 
         boardRoot.invalidate();
-        redrawGame(null, PlayerFigure.NONE);
+        redrawGame(null);
     }
 }
