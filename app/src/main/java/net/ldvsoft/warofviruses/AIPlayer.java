@@ -156,8 +156,7 @@ public class AIPlayer extends Player {
         private List<CoordinatePair> orderMovesByCost(List<CoordinatePair> moves, GameLogic curGameLogic) {
             List<MoveCostPair> movesWithCosts = new ArrayList<>();
             for (CoordinatePair move : moves) {
-                GameLogic logic = new GameLogic(curGameLogic);
-                logic.doTurn(move.x, move.y);
+                GameLogic logic = curGameLogic.doTurn(move.x, move.y);
                 movesWithCosts.add(new MoveCostPair(move, getControlledCellsScore(logic)));
             }
 
@@ -200,12 +199,11 @@ public class AIPlayer extends Player {
             double optScore = -10000;
 
             for (CoordinatePair move: moves) {
-                GameLogic tmpGameLogic = new GameLogic(gameLogic);
-                tmpGameLogic.doTurn(move.x, move.y);
+                GameLogic tmpGameLogic = gameLogic.doTurn(move.x, move.y);
                 List<CoordinatePair> optMoves = bruteforceMoves(tmpGameLogic);
 
                 for (CoordinatePair optMove : optMoves) {
-                    tmpGameLogic.doTurn(optMove.x, optMove.y);
+                    tmpGameLogic = tmpGameLogic.doTurn(optMove.x, optMove.y);
                 }
                 for (int i = 0; i < GREEDY_TURNS_FOR_ENEMY; i++) {
                     ArrayList<CoordinatePair> enemyMoves = tmpGameLogic.getMoves();
@@ -213,7 +211,7 @@ public class AIPlayer extends Player {
                     if (enemyMoves.size() == 0) {
                         break;
                     }
-                    tmpGameLogic.doTurn(enemyMoves.get(0).x, enemyMoves.get(0).y); //greedy minimize AI score
+                    tmpGameLogic = tmpGameLogic.doTurn(enemyMoves.get(0).x, enemyMoves.get(0).y); //greedy minimize AI score
                 }
 
                 double newScore = getControlledCellsScore(tmpGameLogic);

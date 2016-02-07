@@ -118,15 +118,13 @@ public class Game {
     }
 
     public boolean giveUp(Player sender) {
-        /*if (!sender.equals(getCurrentPlayer())) {
-            return false; //it's ok to give up for opponent
-        }*/
-        boolean result = gameLogic.giveUp(sender.ownFigure);
-        if (result) {
+        GameLogic result = gameLogic.giveUp(sender.ownFigure);
+        if (result != null) {
+            gameLogic = result;
             crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
             zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
-        return result;
+        return result != null;
     }
 
     public boolean skipTurn(Player sender) {
@@ -135,8 +133,9 @@ public class Game {
         }
 
         GameLogic.PlayerFigure oldPlayer = gameLogic.getCurrentPlayerFigure();
-        boolean result = gameLogic.skipTurn();
-        if (result) {
+        GameLogic result = gameLogic.skipTurn();
+        if (result != null) {
+            gameLogic = result;
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
@@ -144,7 +143,7 @@ public class Game {
             crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
             zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
-        return result;
+        return result != null;
     }
 
     public void update() {
@@ -157,8 +156,9 @@ public class Game {
         }
 
         GameLogic.PlayerFigure oldPlayer = gameLogic.getCurrentPlayerFigure();
-        boolean result = gameLogic.doTurn(x, y);
-        if (result) {
+        GameLogic result = gameLogic.doTurn(x, y);
+        if (result != null) {
+            gameLogic = result;
             GameLogic.PlayerFigure currentPlayer = gameLogic.getCurrentPlayerFigure();
             if (!oldPlayer.equals(currentPlayer)) {
                 notifyPlayer();
@@ -166,7 +166,7 @@ public class Game {
             crossPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
             zeroPlayer.onGameStateChanged(gameLogic.getEventHistory().get(gameLogic.getEventHistory().size() - 1), sender);
         }
-        return result;
+        return result != null;
     }
 
     public GameLogic.PlayerFigure getMyFigure(long userId) {

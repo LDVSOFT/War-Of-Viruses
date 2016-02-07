@@ -260,22 +260,22 @@ public class GameLogic {
                 currentGameState == GameState.DRAW;
     }
 
-    public boolean skipTurn() {
+    public GameLogic skipTurn() {
         if (currentMiniturn != 0 || currentTurn < 2) {
-            return false;
+            return null;
         }
-
-        storeEvent(GameEvent.newSkipTurnEvent(events.size()));
+        GameLogic result = new GameLogic(this);
+        result.storeEvent(GameEvent.newSkipTurnEvent(events.size()));
 
         if (previousTurnSkipped) {
-            draw();
-            return true;
+            result.draw();
+            return result;
         }
 
-        previousTurnSkipped = true;
-        currentMiniturn = 2;
-        passTurn();
-        return true;
+        result.previousTurnSkipped = true;
+        result.currentMiniturn = 2;
+        result.passTurn();
+        return result;
     }
 
     private void storeEvent(GameEvent event) {
@@ -290,36 +290,38 @@ public class GameLogic {
         }
     }
 
-    //returns true if turn was correct, false otherwise
-    public boolean doTurn(int x, int y) {
+    //returns new instance of GameLogic with applied turn if it was correct, null otherwise. Does not modifies current instance
+    public GameLogic doTurn(int x, int y) {
         if (!board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
-            return false;
+            return null;
         }
-        storeEvent(GameEvent.newTurnEvent(x, y, events.size()));
-        previousTurnSkipped = false;
+        GameLogic result = new GameLogic(this);
+        result.storeEvent(GameEvent.newTurnEvent(x, y, events.size()));
+        result.previousTurnSkipped = false;
 
-        if (board[x][y].cellType != CellType.EMPTY) {
-            board[x][y].setOwnerOnDead(currentPlayerFigure);
+        if (result.board[x][y].cellType != CellType.EMPTY) {
+            result.board[x][y].setOwnerOnDead(currentPlayerFigure);
         } else {
-            board[x][y].setOwner(currentPlayerFigure);
+            result.board[x][y].setOwner(currentPlayerFigure);
         }
 
-        passTurn();
-        return true;
+        result.passTurn();
+        return result;
     }
 
-    public boolean giveUp(PlayerFigure whoGivesUp) {
+    public GameLogic giveUp(PlayerFigure whoGivesUp) {
+        GameLogic result = new GameLogic(this);
         switch (whoGivesUp) {
             case CROSS:
-                storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.CROSS, events.size()));
-                zeroWon();
-                return true;
+                result.storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.CROSS, events.size()));
+                result.zeroWon();
+                return result;
             case ZERO:
-                storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.ZERO, events.size()));
-                crossWon();
-                return true;
+                result.storeEvent(GameEvent.newGiveUpEvent(PlayerFigure.ZERO, events.size()));
+                result.crossWon();
+                return result;
             default:
-                return false;
+                return null;
         }
     }
 
