@@ -109,7 +109,7 @@ public class GameLogic {
     public static GameLogic deserialize(List<GameEvent> events) {
         GameLogic logic = new GameLogic();
         for (GameEvent event : events) {
-            event.applyEvent(logic);
+            logic = event.applyEvent(logic);
         }
         return logic;
     }
