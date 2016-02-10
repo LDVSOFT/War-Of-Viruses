@@ -51,14 +51,16 @@ public abstract class GameActivityBase extends AppCompatActivity {
                 setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), false);
             }
         }
-        List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(gameLogic.getOpponentPlayerFigure(gameLogic.getCurrentPlayerFigure()));
-        for (GameEvent event : lastOpponentEvents) {
-            if (event.type != GameEvent.GameEventType.TURN_EVENT) {
-                break;
+        for (PlayerFigure figure : new PlayerFigure[] {GameLogic.getOpponentPlayerFigure(gameLogic.getCurrentPlayerFigure()), gameLogic.getCurrentPlayerFigure()}) {
+            List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(figure);
+            for (GameEvent event : lastOpponentEvents) {
+                if (event.type != GameEvent.GameEventType.TURN_EVENT) {
+                    break;
+                }
+                int i = event.getTurnX();
+                int j = event.getTurnY();
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), true);
             }
-            int i = event.getTurnX();
-            int j = event.getTurnY();
-            setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), true);
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
@@ -67,7 +69,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
         isActive = gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO;
-        avatar.setFigure(figureSet, BoardCellState.get(CellType.CROSS, false, isActive ? PlayerFigure.ZERO : PlayerFigure.NONE));
+        avatar.setFigure(figureSet, BoardCellState.get(CellType.ZERO, false, isActive ? PlayerFigure.ZERO : PlayerFigure.NONE));
     }
 
     @Override
@@ -94,14 +96,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
 
     private void setButton(BoardCellButton button, Cell cell, PlayerFigure current, boolean highlight) {
-        PlayerFigure focus = PlayerFigure.NONE;
-        if (cell.isActive() || cell.canMakeTurn()) {
-            if (cell.getCellType() == CellType.EMPTY) {
-                focus = current;
-            } else {
-                focus = cell.getCellType().getOwner();
-            }
-        }
+        PlayerFigure focus = cell.isActive() || cell.canMakeTurn() ? current : PlayerFigure.NONE;
         button.setFigure(figureSet, BoardCellState.get(cell.getCellType(), highlight, focus));
     }
 

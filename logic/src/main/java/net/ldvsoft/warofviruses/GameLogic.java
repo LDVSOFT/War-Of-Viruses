@@ -189,7 +189,7 @@ public class GameLogic {
         return board[x][y];
     }
 
-    public PlayerFigure getOpponentPlayerFigure(PlayerFigure curPlayerFigure) {
+    public static PlayerFigure getOpponentPlayerFigure(PlayerFigure curPlayerFigure) {
         switch (curPlayerFigure) {
             case CROSS:
                 return PlayerFigure.ZERO;
@@ -406,9 +406,6 @@ public class GameLogic {
 
     public List<GameEvent> getLastEventsBy(PlayerFigure figure) {
         List<GameEvent> result = new ArrayList<>();
-        if (currentPlayerFigure == figure) {
-            return result;
-        }
         List<GameEvent> source;
         switch (figure) {
             case CROSS:
