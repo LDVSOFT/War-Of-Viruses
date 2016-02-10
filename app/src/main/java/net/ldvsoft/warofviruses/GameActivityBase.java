@@ -37,7 +37,7 @@ public abstract class GameActivityBase extends AppCompatActivity {
         buildBoard();
         /* FIXME */
         for (PlayerFigure figure : PlayerFigure.values()) {
-            figureSet.changeFigureSource(figure, new DefualtFigureSource(this));
+            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
         }
     }
 

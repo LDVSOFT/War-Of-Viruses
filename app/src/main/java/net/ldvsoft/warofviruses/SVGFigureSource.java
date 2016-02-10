@@ -28,19 +28,6 @@ public abstract class SVGFigureSource implements FigureSource {
     private final static int EMPTY_FG   = argb(0, 200, 200, 200);
     private final static int EMPTY_BG   = argb(0, 240, 240, 240);
 
-    private Context context;
-    /**
-     * Actual colors to be used. They are calculated from hues.
-     */
-    private int crossHigh, crossMedium, crossLow;
-    private int zeroHigh, zeroMedium, zeroLow;
-
-    public SVGFigureSource(Context context) {
-        this.context = context;
-        setHueCross(WoVPreferences.DEFAULT_CROSS_COLOR);
-        setHueZero(WoVPreferences.DEFAULT_ZERO_COLOR);
-    }
-
     private static int hueToColor(float hue, float saturation, float value) {
         return HSVToColor(new float[]{hue, saturation, value});
     }
@@ -58,21 +45,17 @@ public abstract class SVGFigureSource implements FigureSource {
     }
 
     @Override
-    public void setHueCross(int newHueCross) {
-        crossHigh   = getHighColor(newHueCross);
-        crossMedium = getMediumColor(newHueCross);
-        crossLow    = getLowColor(newHueCross);
-    }
+    public Drawable loadFigure(BoardCellState state, int hueCross, int hueZero, Context context) {
+        /*
+         Actual colors to be used. They are calculated from hues.
+        */
+        int crossHigh = getHighColor(hueCross);
+        int crossMedium = getMediumColor(hueCross);
+        int crossLow = getLowColor(hueCross);
+        int zeroHigh = getHighColor(hueZero);
+        int zeroMedium = getMediumColor(hueZero);
+        int zeroLow = getLowColor(hueZero);
 
-    @Override
-    public void setHueZero(int newHueZero) {
-        zeroHigh    = getHighColor(newHueZero);
-        zeroMedium  = getMediumColor(newHueZero);
-        zeroLow     = getLowColor(newHueZero);
-    }
-
-    @Override
-    public Drawable loadFigure(BoardCellState state) {
         Hashtable<Integer, Integer> colors = new Hashtable<>();
         colors.put(NEUTRAL_FG, EMPTY_FG);
         colors.put(CROSS_FG, crossHigh);

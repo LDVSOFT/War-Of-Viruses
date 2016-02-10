@@ -91,8 +91,8 @@ public class MenuActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS, false, GameLogic.PlayerFigure.NONE));
-                zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO, false, GameLogic.PlayerFigure.NONE));
+                crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
+                zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
             }
         }.execute();
     }

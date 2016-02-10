@@ -10,7 +10,8 @@ import static net.ldvsoft.warofviruses.GameLogic.CellType;
 /**
  * Created by ldvsoft on 05.02.16.
  */
-public class DefualtFigureSource extends SVGFigureSource {
+public class DefaultFigureSource extends SVGFigureSource {
+    public static String NAME = "default";
     private static final Map<CellType, Integer> resorceIds = new EnumMap<>(CellType.class);
 
     static {
@@ -21,12 +22,13 @@ public class DefualtFigureSource extends SVGFigureSource {
         resorceIds.put(CellType.DEAD_ZERO, R.raw.board_cell_zero_dead);
     }
 
-    public DefualtFigureSource(Context context) {
-        super(context);
-    }
-
     @Override
     protected int getResourceId(BoardCellState state) {
         return resorceIds.get(state.getCellType());
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

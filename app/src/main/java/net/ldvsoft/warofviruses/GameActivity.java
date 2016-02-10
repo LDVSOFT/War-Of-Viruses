@@ -94,7 +94,7 @@ public class GameActivity extends GameActivityBase {
         if (game == null) {
             return;
         }
-        super.redrawGame(game.getGameLogic(), humanPlayer.ownFigure);
+        super.redrawGame(game.getGameLogic());
 
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());

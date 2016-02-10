@@ -55,7 +55,7 @@ public class GameHistoryActivity extends AppCompatActivity {
 
         /*FIXME*/
         for (PlayerFigure figure : PlayerFigure.values()) {
-            figureSet.changeFigureSource(figure, new DefualtFigureSource(this));
+            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
         }
     }
 
@@ -117,7 +117,7 @@ public class GameHistoryActivity extends AppCompatActivity {
             switch (game.getMyFigure(userId)) {
                 case NONE:
                     holder.opponent.setText(getString(R.string.GAME_LOCAL));
-                    holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY, false, PlayerFigure.NONE));
+                    holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY));
                     switch (game.getGameState()) {
                         case CROSS_WON:
                             holder.result.setText(getString(R.string.GAME_CROSS_WON));
@@ -134,15 +134,15 @@ public class GameHistoryActivity extends AppCompatActivity {
                     holder.opponent.setText(game.getZeroPlayer().getName());
                     switch (game.getGameState()) {
                         case CROSS_WON:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.CROSS, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.CROSS));
                             holder.result.setText(getString(R.string.GAME_WON));
                             break;
                         case ZERO_WON:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.DEAD_CROSS, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.DEAD_CROSS));
                             holder.result.setText(getString(R.string.GAME_LOST));
                             break;
                         case DRAW:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY));
                             holder.result.setText(getString(R.string.GAME_DRAW));
                     }
                     break;
@@ -150,15 +150,15 @@ public class GameHistoryActivity extends AppCompatActivity {
                     holder.opponent.setText(game.getCrossPlayer().getName());
                     switch (game.getGameState()) {
                         case CROSS_WON:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.DEAD_ZERO, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.DEAD_ZERO));
                             holder.result.setText(getString(R.string.GAME_LOST));
                             break;
                         case ZERO_WON:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.ZERO, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.ZERO));
                             holder.result.setText(getString(R.string.GAME_WON));
                             break;
                         case DRAW:
-                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY, false, PlayerFigure.NONE));
+                            holder.figure.setFigure(figureSet, BoardCellState.get(CellType.EMPTY));
                             holder.result.setText(getString(R.string.GAME_DRAW));
                     }
                     break;

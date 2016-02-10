@@ -1,5 +1,6 @@
 package net.ldvsoft.warofviruses;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
@@ -15,11 +16,16 @@ import static net.ldvsoft.warofviruses.GameLogic.*;
  * @see FigureSource
  * FigureSet uses three sources for every owner of figures displayed.
  *
- * FigureSet is designed to be created once, then via `changeFigureSource' changing Drawables source
+ * FigureSet is designed to be created once, then via `setFigureSource' changing Drawables source
  * and unloading already loaded Drawables that are outdated now. Buttons itself are still required
  * to be updated manually.
  */
 public class FigureSet {
+    /**
+     * These are all available sources. All new ones should be added here!
+     */
+    private static final Map<String, FigureSource> SOURCES = new Hashtable<>();
+
     /**
      * For every figure, STATES holds list of BoardCellStates that are owned by that figure.
      * These are used to unload Drawables when changing source.
@@ -37,45 +43,59 @@ public class FigureSet {
                 }
             }
         }
+
+        addSource(new DefaultFigureSource());
     }
 
-    private Map<PlayerFigure, FigureSource> figureSource = new EnumMap<>(PlayerFigure.class);
+    private static void addSource(FigureSource source) {
+        SOURCES.put(source.getName(), source);
+    }
+
+    private Map<PlayerFigure, String> figureSource = new EnumMap<>(PlayerFigure.class);
     private Map<BoardCellState, Drawable> loadedFigures = new Hashtable<>();
+    private int hueCross, hueZero;
 
     /**
      * Returns Drawable for given BoardCellState. Loads it if not yet (or has been outdated).
      * @param state cell state
      * @return Drawable to display that state
      */
-    public Drawable getFigure(BoardCellState state) {
+    public Drawable getFigure(BoardCellState state, Context context) {
         if (! loadedFigures.containsKey(state) && figureSource.containsKey(state.getCellType().getOwner())) {
-            loadedFigures.put(state, figureSource.get(state.getCellType().getOwner()).loadFigure(state));
+            String sourceName = figureSource.get(state.getCellType().getOwner());
+            FigureSource source = SOURCES.get(sourceName);
+            loadedFigures.put(state, source.loadFigure(state, hueCross, hueZero, context));
         }
         return loadedFigures.get(state);
     }
 
     /**
      * Changes FigureSource for given figure. All already loaded Drawables for that figure will be
-     * unloaded, so that new requests will load new Drawables from new source
-     * @param figure figure to change source for
-     * @param source new FigureSource
+     * unloaded, so that new requests will load new Drawables from new sourceName
+     * @param figure figure to change sourceName for
+     * @param sourceName new FigureSource
      */
-    public void changeFigureSource(PlayerFigure figure, FigureSource source) {
+    public void setFigureSource(PlayerFigure figure, String sourceName) {
+        if (figureSource.get(figure) == sourceName) {
+            return;
+        }
         for (BoardCellState state : STATES.get(figure)) {
             loadedFigures.remove(state);
         }
-        figureSource.put(figure, source);
+        figureSource.put(figure, sourceName);
     }
 
     public void setHueCross(int newHueCross) {
-        for (FigureSource source : figureSource.values()) {
-            source.setHueCross(newHueCross);
+        if (hueCross == newHueCross) {
+            return;
         }
+        hueCross = newHueCross;
+        loadedFigures.clear();
     }
 
     public void setHueZero(int newHueZero) {
-        for (FigureSource source : figureSource.values()) {
-            source.setHueZero(newHueZero);
+        if (hueZero == newHueZero) {
+            return;
         }
     }
 }

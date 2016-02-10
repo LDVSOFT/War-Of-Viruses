@@ -23,6 +23,10 @@ public final class BoardCellState {
         return STATES[hash];
     }
 
+    public static BoardCellState get(CellType cellType) {
+        return get(cellType, false, PlayerFigure.NONE);
+    }
+
     private static int getHash(CellType cellType, boolean isHighlighted, PlayerFigure focus) {
         return (cellType.ordinal() * 2 + (isHighlighted ? 1 : 0)) * PlayerFigure.values().length + focus.ordinal();
     }
