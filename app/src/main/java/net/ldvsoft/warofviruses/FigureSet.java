@@ -97,5 +97,7 @@ public class FigureSet {
         if (hueZero == newHueZero) {
             return;
         }
+        hueZero = newHueZero;
+        loadedFigures.clear();
     }
 }
