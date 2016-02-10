@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -81,20 +80,16 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                //noinspection ResourceType
-                //BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
-                zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
-            }
-        }.execute();
+        /*FIXME*/
+        for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
+            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
+        }
+        long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
+        User user = DBOpenHelper.getInstance(this).getUserById(userId);
+        figureSet.setHueCross(user.getColorCross());
+        figureSet.setHueZero(user.getColorZero());
+        crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
+        zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
     }
 
     @Override
