@@ -18,30 +18,37 @@ public abstract class SVGFigureSource implements FigureSource {
     /**
      * Original colors in SVG to be changed with real ones.
      */
-    private final static int CROSS_FG   = argb(0, 255, 0  , 0  );
-    private final static int CROSS_BG   = argb(0, 127, 0  , 0  );
-    private final static int ZERO_FG    = argb(0, 0  , 0  , 255);
-    private final static int ZERO_BG    = argb(0, 0  , 0  , 127);
-    private final static int NEUTRAL_FG = argb(0, 255, 255, 255);
-    private final static int NEUTRAL_BG = argb(0, 127, 127, 127);
-    private final static int BORDER     = argb(0, 0  , 255, 0  );
-    private final static int EMPTY_FG   = argb(0, 200, 200, 200);
-    private final static int EMPTY_BG   = argb(0, 240, 240, 240);
+    private static final int CROSS_FG   = argb(0, 255, 0  , 0  );
+    private static final int CROSS_BG   = argb(0, 127, 0  , 0  );
+    private static final int ZERO_FG    = argb(0, 0  , 0  , 255);
+    private static final int ZERO_BG    = argb(0, 0  , 0  , 127);
+    private static final int NEUTRAL_FG = argb(0, 255, 255, 255);
+    private static final int NEUTRAL_BG = argb(0, 127, 127, 127);
+    private static final int BORDER     = argb(0, 0  , 255, 0  );
+
+    private static final float SATURATION_LOW    = 0.25f;
+    private static final float SATURATION_MEDIUM = 0.50f;
+    private static final float SATURATION_HIGH   = 1.00f;
+    private static final int EMPTY_FG_VALUE = 200;
+    private static final int EMPTY_BG_VALUE = 240;
+
+    private static final int EMPTY_FG = argb(0, EMPTY_FG_VALUE, EMPTY_FG_VALUE, EMPTY_FG_VALUE);
+    private static final int EMPTY_BG = argb(0, EMPTY_BG_VALUE, EMPTY_BG_VALUE, EMPTY_BG_VALUE);
 
     private static int hueToColor(float hue, float saturation, float value) {
         return HSVToColor(new float[]{hue, saturation, value});
     }
 
     private static int getHighColor(float hue) {
-        return hueToColor(hue, 1.00f, 1.00f);
+        return hueToColor(hue, SATURATION_HIGH, 1.00f);
     }
 
     private static int getMediumColor(float hue) {
-        return hueToColor(hue, 0.70f, 1.00f);
+        return hueToColor(hue, SATURATION_MEDIUM, 1.00f);
     }
 
     private static int getLowColor(float hue) {
-        return hueToColor(hue, 0.43f, 1.00f);
+        return hueToColor(hue, SATURATION_LOW, 1.00f);
     }
 
     @Override
