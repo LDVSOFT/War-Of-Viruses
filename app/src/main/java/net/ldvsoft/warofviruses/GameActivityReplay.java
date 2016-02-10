@@ -134,7 +134,8 @@ public class GameActivityReplay extends GameActivityBase {
                 redrawGame(gameReplay.getGameLogic());
             }
         });
-
+        figureSet.setHueZero(gameReplay.getZeroPlayer().getUser().getColorZero());
+        figureSet.setHueCross(gameReplay.getCrossPlayer().getUser().getColorCross());
     }
 
 }
