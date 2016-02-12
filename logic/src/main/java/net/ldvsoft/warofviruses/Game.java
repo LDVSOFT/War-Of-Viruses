@@ -94,7 +94,7 @@ public class Game {
             result = event.applyEvent(result);
         }
         if (result.getCurrentPlayerFigure() != gameLogic.getCurrentPlayerFigure()) {
-            result.setCurrentPlayerToNone(); //to not draw possible moves for an opponent
+            result.blockCurrentPlayer(); //to not draw possible moves for an opponent
         }
 
         return result;

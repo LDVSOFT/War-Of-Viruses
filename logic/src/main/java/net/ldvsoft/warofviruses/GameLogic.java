@@ -13,6 +13,7 @@ public class GameLogic {
     private List<GameEvent> zeroesEvents = new ArrayList<>();
 
     public static final int BOARD_SIZE = 10;
+    private boolean isPlayerBlocked = false;
 
     public List<GameEvent> getEventHistory() {
         return events;
@@ -188,8 +189,9 @@ public class GameLogic {
     public Cell getCellAt(int x, int y) {
         return board[x][y];
     }
-    public void setCurrentPlayerToNone() {
-        currentPlayerFigure = PlayerFigure.NONE;
+
+    public void blockCurrentPlayer() {
+        isPlayerBlocked = true;
         updateGameState();
     }
 
@@ -238,7 +240,7 @@ public class GameLogic {
                 crossWon();
             }
         }
-        if (currentPlayerFigure == PlayerFigure.NONE) {
+        if (isPlayerBlocked) {
             return;
         }
 
