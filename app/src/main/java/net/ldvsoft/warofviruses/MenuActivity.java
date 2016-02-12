@@ -6,9 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,8 +15,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -25,13 +24,14 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 import java.util.UUID;
-import static net.ldvsoft.warofviruses.BoardCellButton.BoardCellType.*;
 
 public class MenuActivity extends AppCompatActivity {
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
     private BoardCellButton crossButton;
     private BoardCellButton zeroButton;
     private DrawerLayout drawerLayout;
+    /*FIXME*/
+    private FigureSet figureSet = new FigureSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,20 +80,16 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                //noinspection ResourceType
-                //BoardCellButton.loadDrawables(MenuActivity.this, 30, 210);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                crossButton.setImageDrawable(BoardCellButton.getDrawable(MenuActivity.this, CELL_CROSS));
-                zeroButton.setImageDrawable(BoardCellButton.getDrawable(MenuActivity.this, CELL_ZERO));
-            }
-        }.execute();
+        /*FIXME*/
+        for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
+            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
+        }
+        long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
+        User user = DBOpenHelper.getInstance(this).getUserById(userId);
+        figureSet.setHueCross(user.getColorCross());
+        figureSet.setHueZero(user.getColorZero());
+        crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
+        zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
     }
 
     @Override

@@ -118,7 +118,7 @@ public class AIPlayer extends Player {
                             result += sign * CONTROL_FACTOR;
                         }
                         if (game.getCellAt(i, j).canMakeTurn() &&
-                                game.getCellAt(i, j).getOwner() == game.getOpponentPlayerFigure(game.getCurrentPlayerFigure())) {
+                                game.getCellAt(i, j).getCellType().getOwner() == game.getOpponentPlayerFigure(game.getCurrentPlayerFigure())) {
                             result += sign * DANGER_FACTOR;
                         }
                         if (game.getCellAt(i, j).canMakeTurn()) {

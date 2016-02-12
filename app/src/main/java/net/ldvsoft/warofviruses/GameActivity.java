@@ -94,7 +94,7 @@ public class GameActivity extends GameActivityBase {
         if (game == null) {
             return;
         }
-        super.redrawGame(game.getUnconfirmedGameLogic(), humanPlayer.ownFigure);
+        super.redrawGame(game.getUnconfirmedGameLogic());
 
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
@@ -339,8 +339,8 @@ public class GameActivity extends GameActivityBase {
         Button cancelTurnButton = (Button) findViewById(R.id.game_button_cancelturn);
         cancelTurnButton.setOnClickListener(new OnCancelTurnListener());
         if (game != null) {
-            BoardCellButton.setHueZero(game.getZeroPlayer().getUser().getColorZero());
-            BoardCellButton.setHueCross(game.getCrossPlayer().getUser().getColorCross());
+            figureSet.setHueZero(game.getZeroPlayer().getUser().getColorZero());
+            figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
         }
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {

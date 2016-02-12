@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/color_cross_value"
-            android:max="240"
+            android:max="360"
             android:progress="1"
             android:indeterminate="false" />
         <Button
@@ -108,7 +108,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/color_zero_value"
-            android:max="240"
+            android:max="360"
             android:progress="1"
             android:indeterminate="false" />
         <Button

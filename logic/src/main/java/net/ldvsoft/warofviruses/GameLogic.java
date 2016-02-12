@@ -18,7 +18,24 @@ public class GameLogic {
         return events;
     }
 
-    public enum CellType {CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY}
+    public enum CellType {
+        CROSS, ZERO, DEAD_CROSS, DEAD_ZERO, EMPTY;
+
+        public PlayerFigure getOwner() {
+            switch (this) {
+                case CROSS:
+                case DEAD_ZERO:
+                    return PlayerFigure.CROSS;
+                case ZERO:
+                case DEAD_CROSS:
+                    return PlayerFigure.ZERO;
+                case EMPTY:
+                default:
+                    return PlayerFigure.NONE;
+            }
+        }
+    }
+
     public enum PlayerFigure {CROSS, ZERO, NONE}
     public enum GameState {NOT_RUNNING, RUNNING, DRAW, CROSS_WON, ZERO_WON}
 
@@ -40,20 +57,6 @@ public class GameLogic {
             cellType = cell.cellType;
             canMakeTurn = cell.canMakeTurn;
             isActive = cell.isActive;
-        }
-
-        public PlayerFigure getOwner() {
-            switch (cellType) {
-                case ZERO:
-                case DEAD_CROSS:
-                    return PlayerFigure.ZERO;
-                case CROSS:
-                case DEAD_ZERO:
-                    return PlayerFigure.CROSS;
-                case EMPTY:
-                default:
-                    return PlayerFigure.NONE;
-            }
         }
 
         public boolean isActive() {
@@ -168,13 +171,13 @@ public class GameLogic {
         for (int[] adjacentDirection : ADJACENT_DIRECTIONS) {
             int newX = x + adjacentDirection[0], newY = y + adjacentDirection[1];
             if (isInside(newX) && isInside(newY)) {
-                if ((board[newX][newY].getOwner() == getOpponentPlayerFigure(currentPlayerFigure) && !board[newX][newY].isDead()) ||
+                if ((board[newX][newY].cellType.getOwner() == getOpponentPlayerFigure(currentPlayerFigure) && !board[newX][newY].isDead()) ||
                         board[newX][newY].cellType == CellType.EMPTY) {
                     board[newX][newY].canMakeTurn = true;
                 }
 
                 if (!board[newX][newY].isActive) {
-                    if (board[newX][newY].isDead() && board[newX][newY].getOwner() == currentPlayerFigure) {
+                    if (board[newX][newY].isDead() && board[newX][newY].cellType.getOwner() == currentPlayerFigure) {
                         updateAdjacentCells(newX, newY);
                     }
                 }
@@ -190,7 +193,7 @@ public class GameLogic {
         updateGameState();
     }
 
-    public PlayerFigure getOpponentPlayerFigure(PlayerFigure curPlayerFigure) {
+    public static PlayerFigure getOpponentPlayerFigure(PlayerFigure curPlayerFigure) {
         switch (curPlayerFigure) {
             case CROSS:
                 return PlayerFigure.ZERO;
@@ -214,7 +217,7 @@ public class GameLogic {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
                 if (!board[i][j].isDead() && board[i][j].cellType != CellType.EMPTY) {
-                    if (board[i][j].getOwner() == PlayerFigure.CROSS) {
+                    if (board[i][j].cellType.getOwner() == PlayerFigure.CROSS) {
                         isCrossAlive = true;
                     } else {
                         isZeroAlive = true;
@@ -239,10 +242,12 @@ public class GameLogic {
             return;
         }
 
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                if (!board[i][j].isActive && board[i][j].getOwner() == currentPlayerFigure && !board[i][j].isDead()) {
-                    updateAdjacentCells(i, j);
+        if (currentPlayerFigure != PlayerFigure.NONE) {
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    if (!board[i][j].isActive && board[i][j].cellType.getOwner() == currentPlayerFigure && !board[i][j].isDead()) {
+                        updateAdjacentCells(i, j);
+                    }
                 }
             }
         }
@@ -416,9 +421,6 @@ public class GameLogic {
 
     public List<GameEvent> getLastEventsBy(PlayerFigure figure) {
         List<GameEvent> result = new ArrayList<>();
-        if (currentPlayerFigure == figure) {
-            return result;
-        }
         List<GameEvent> source;
         switch (figure) {
             case CROSS:

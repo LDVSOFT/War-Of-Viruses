@@ -88,8 +88,9 @@ public class GameActivityReplay extends GameActivityBase {
         redrawGame(gameReplay.getGameLogic());
     }
 
+    @Override
     protected void redrawGame(GameLogic gameLogic) {
-        super.redrawGame(gameLogic, gameLogic.getCurrentPlayerFigure());
+        super.redrawGame(gameLogic);
         if (gameReplay != null) {
             ((TextView) findViewById(R.id.game_cross_nick)).setText(gameReplay.getCrossPlayer().getName());
             ((TextView) findViewById(R.id.game_zero_nick)).setText(gameReplay.getZeroPlayer().getName());
@@ -133,7 +134,8 @@ public class GameActivityReplay extends GameActivityBase {
                 redrawGame(gameReplay.getGameLogic());
             }
         });
-
+        figureSet.setHueZero(gameReplay.getZeroPlayer().getUser().getColorZero());
+        figureSet.setHueCross(gameReplay.getCrossPlayer().getUser().getColorCross());
     }
 
 }
