@@ -94,7 +94,7 @@ public class GameActivity extends GameActivityBase {
         if (game == null) {
             return;
         }
-        super.redrawGame(game.getGameLogic(), humanPlayer.ownFigure);
+        super.redrawGame(game.getUnconfirmedGameLogic(), humanPlayer.ownFigure);
 
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
@@ -210,7 +210,8 @@ public class GameActivity extends GameActivityBase {
                 game.startNewGame(humanPlayer, new AIPlayer(ZERO));
                 break;
             case WoVPreferences.OPPONENT_LOCAL_PLAYER:
-                game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), ZERO));
+                //game.startNewGame(humanPlayer, new HumanPlayer(humanPlayer.getUser(), ZERO));
+                game.startNewGame(humanPlayer, humanPlayer); //this is kind of hack since both players play for CROSS, but actually it doesn't matter
                 break;
             case WoVPreferences.OPPONENT_NETWORK_PLAYER:
                 loadGameFromJson(intent.getStringExtra(WoVPreferences.GAME_JSON_DATA));
@@ -270,6 +271,25 @@ public class GameActivity extends GameActivityBase {
         }
     }
 
+    private class OnCancelTurnListener implements  View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    redrawGame(game);
+                }
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    game.cancelTurn(humanPlayer);
+                    return null;
+                }
+            }.execute();
+        }
+    }
     private class OnBoardClickListener implements View.OnClickListener {
         private final int x, y;
 
@@ -285,6 +305,26 @@ public class GameActivity extends GameActivityBase {
                     game.doTurn(humanPlayer, x, y);
                     return null;
                 }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    redrawGame(game);
+                }
+            }.execute();
+        }
+    }
+
+    private class OnConfirmListener implements  View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    game.confirm(humanPlayer);
+                    return null;
+                }
             }.execute();
         }
     }
@@ -294,6 +334,10 @@ public class GameActivity extends GameActivityBase {
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
         giveUpButton.setOnClickListener(new OnGiveUpListener());
+        Button confirmButton = (Button) findViewById(R.id.game_button_confirm);
+        confirmButton.setOnClickListener(new OnConfirmListener());
+        Button cancelTurnButton = (Button) findViewById(R.id.game_button_cancelturn);
+        cancelTurnButton.setOnClickListener(new OnCancelTurnListener());
         if (game != null) {
             BoardCellButton.setHueZero(game.getZeroPlayer().getUser().getColorZero());
             BoardCellButton.setHueCross(game.getCrossPlayer().getUser().getColorCross());

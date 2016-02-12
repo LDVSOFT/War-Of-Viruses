@@ -151,6 +151,7 @@ public class AIPlayer extends Player {
                     Log.e(TAG, "An InterruptedException occurred while trying to publish moves to game:\n" + Log.getStackTraceString(e));
                 }
             }
+            game.confirm(AIPlayer.this);
         }
 
         private List<CoordinatePair> orderMovesByCost(List<CoordinatePair> moves, GameLogic curGameLogic) {

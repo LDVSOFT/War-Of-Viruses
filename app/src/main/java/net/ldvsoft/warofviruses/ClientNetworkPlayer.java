@@ -58,6 +58,7 @@ public class ClientNetworkPlayer extends Player {
                     switch (event.type) {
                         case TURN_EVENT:
                             game.doTurn(ClientNetworkPlayer.this, event.getTurnX(), event.getTurnY());
+                            game.confirm(ClientNetworkPlayer.this);
                             break;
 
                         case CROSS_GIVE_UP_EVENT:

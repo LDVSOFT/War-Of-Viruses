@@ -23,4 +23,6 @@
     <string name="GAME_ZERO_TURN">Zeroes\' turn</string>
     <string name="GAME_USER_TURN">Your turn</string>
     <string name="GAME_OPPONENT_TURN">Opponent\'s turn</string>
+    <string name="confirm">Confirm turn</string>
+    <string name="cancel_turn">Cancel turn</string>
 </resources>
