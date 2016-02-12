@@ -93,6 +93,7 @@ public class ServerNetworkPlayer extends Player {
                     game.skipTurn(this);
                     break;
             }
+            game.confirm(this);
         }
     }
 }
