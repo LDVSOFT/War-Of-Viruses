@@ -197,11 +197,14 @@ public class Game {
         GameLogic.PlayerFigure oldPlayerFigure = gameLogic.getCurrentPlayerFigure();
 
         List<GameEvent> lastEvents = new ArrayList<>(unconfirmedEvents);
-        unconfirmedEvents.clear(); //need to do it now, otherwise there is a chance to get concurrent exception
+        unconfirmedEvents.clear();
 
         for (GameEvent event: lastEvents) {
-            crossPlayer.onGameStateChanged(event, sender);
-            zeroPlayer.onGameStateChanged(event, sender);
+            if (getCurrentPlayer() == zeroPlayer) {
+                crossPlayer.onGameStateChanged(event, sender);
+            } else {
+                zeroPlayer.onGameStateChanged(event, sender);
+            }
             gameLogic = event.applyEvent(gameLogic);
         }
 

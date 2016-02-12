@@ -241,18 +241,8 @@ public class GameActivity extends GameActivityBase {
     }
 
     private class OnSkipTurnListener implements View.OnClickListener {
-        @Override
         public void onClick(View v) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    if (!game.skipTurn(humanPlayer)) {
-                        return null;
-                    }
-                    return null;
-                }
-            }.execute();
-
+            game.skipTurn(humanPlayer);
         }
     }
 
@@ -260,14 +250,7 @@ public class GameActivity extends GameActivityBase {
 
         @Override
         public void onClick(View v) {
-            new AsyncTask<Void, Void, Void>() {
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    game.giveUp(humanPlayer);
-                    return null;
-                }
-            }.execute();
+            game.giveUp(humanPlayer);
         }
     }
 
@@ -275,19 +258,8 @@ public class GameActivity extends GameActivityBase {
 
         @Override
         public void onClick(View v) {
-            new AsyncTask<Void, Void, Void>() {
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    redrawGame(game);
-                }
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    game.cancelTurn(humanPlayer);
-                    return null;
-                }
-            }.execute();
+            game.cancelTurn(humanPlayer);
+            redrawGame(game);
         }
     }
     private class OnBoardClickListener implements View.OnClickListener {
@@ -297,20 +269,11 @@ public class GameActivity extends GameActivityBase {
             this.x = x;
             this.y = y;
         }
+
         @Override
         public void onClick(View v) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    game.doTurn(humanPlayer, x, y);
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    redrawGame(game);
-                }
-            }.execute();
+            game.doTurn(humanPlayer, x, y);
+            redrawGame(game);
         }
     }
 
@@ -318,14 +281,8 @@ public class GameActivity extends GameActivityBase {
 
         @Override
         public void onClick(View v) {
-            new AsyncTask<Void, Void, Void>() {
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    game.confirm(humanPlayer);
-                    return null;
-                }
-            }.execute();
+            game.confirm(humanPlayer);
+            redrawGame(game);
         }
     }
 
