@@ -27,8 +27,8 @@ public class GameReplay {
         gameStates = new ArrayList<>();
         gameStates.add(new GameLogic(gameLogic));
         for (GameEvent event : gameEventHistory) {
-            event.applyEvent(gameLogic);
-            gameStates.add(new GameLogic(gameLogic));
+            gameLogic = event.applyEvent(gameLogic);
+            gameStates.add(gameLogic);
         }
         currentEventNumber = 0;
     }
