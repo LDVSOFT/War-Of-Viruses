@@ -95,8 +95,8 @@ public class GameActivityReplay extends GameActivityBase {
             ((TextView) findViewById(R.id.game_cross_nick)).setText(gameReplay.getCrossPlayer().getName());
             ((TextView) findViewById(R.id.game_zero_nick)).setText(gameReplay.getZeroPlayer().getName());
 
-            ((TextView) findViewById(R.id.game_text_game_position_1)).setText(String.format("%d/%d",
-                    gameReplay.getCurrentEventNumber(), gameReplay.getEventCount()));
+            ((TextView) findViewById(R.id.game_text_game_position_1)).setText(String.format("%d", gameReplay.getCurrentEventNumber()));
+            ((TextView) findViewById(R.id.game_text_game_position_2)).setText(String.format("%d", gameReplay.getEventCount()));
         }
     }
     @Override
@@ -106,6 +106,8 @@ public class GameActivityReplay extends GameActivityBase {
     }
 
     private void initButtons() {
+        figureSet.setHueZero(gameReplay.getZeroPlayer().getUser().getColorZero());
+        figureSet.setHueCross(gameReplay.getCrossPlayer().getUser().getColorCross());
         findViewById(R.id.game_button_first).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,8 +136,6 @@ public class GameActivityReplay extends GameActivityBase {
                 redrawGame(gameReplay.getGameLogic());
             }
         });
-        figureSet.setHueZero(gameReplay.getZeroPlayer().getUser().getColorZero());
-        figureSet.setHueCross(gameReplay.getCrossPlayer().getUser().getColorCross());
     }
 
 }
