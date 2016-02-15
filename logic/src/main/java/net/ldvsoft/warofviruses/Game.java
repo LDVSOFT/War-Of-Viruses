@@ -98,7 +98,8 @@ public class Game {
             return null;
         }
 
-        if (result.getCurrentPlayerFigure() != gameLogic.getCurrentPlayerFigure()) {
+        GameLogic.PlayerFigure newFigure = result.getCurrentPlayerFigure();
+        if (newFigure != gameLogic.getCurrentPlayerFigure() && newFigure != GameLogic.PlayerFigure.NONE) {
             result.blockCurrentPlayer(); //to not draw possible moves for an opponent
         }
 
@@ -209,9 +210,12 @@ public class Game {
 
         GameLogic.PlayerFigure oldPlayerFigure = gameLogic.getCurrentPlayerFigure();
 
+        if (getUnconfirmedGameLogic().getCurrentPlayerFigure() == oldPlayerFigure) {
+            return false;
+        }
+
         List<GameEvent> lastEvents = new ArrayList<>(unconfirmedEvents);
         unconfirmedEvents.clear();
-
         for (GameEvent event: lastEvents) {
             gameStateChanged(event, sender);
             gameLogic = event.applyEvent(gameLogic);

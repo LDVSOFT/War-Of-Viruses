@@ -30,7 +30,6 @@ import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.CROSS;
-import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.NONE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.ZERO;
 
 public class GameActivity extends GameActivityBase {
@@ -149,7 +148,7 @@ public class GameActivity extends GameActivityBase {
         };
 
         Intent intent = getIntent();
-        setCurrentGameListeners();
+
         switch (intent.getIntExtra(WoVPreferences.OPPONENT_TYPE, -1)) {
             case WoVPreferences.OPPONENT_RESTORED_GAME:
                 game = null; //will be loaded during onStart()
@@ -167,10 +166,7 @@ public class GameActivity extends GameActivityBase {
             default:
                 Log.wtf("GameActivityBase", "Could not start new game: incorrect opponent type");
         }
-        initButtons();
-        if (game != null) {
-            redrawGame(game);
-        }
+        initActivityStateAndListeners();
     }
 
     @Override
@@ -199,6 +195,7 @@ public class GameActivity extends GameActivityBase {
         @Override
         public void onClick(View v) {
             game.giveUp(humanPlayer);
+            redrawGame(game);
         }
     }
 
@@ -234,7 +231,14 @@ public class GameActivity extends GameActivityBase {
         }
     }
 
-    private void initButtons() {
+    //must be called AFTER creating/loading game to init everything properly
+    private void initActivityStateAndListeners() {
+        if (game == null) {
+            return;
+        }
+
+        game.updateGameInfo();
+
         Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
@@ -243,14 +247,23 @@ public class GameActivity extends GameActivityBase {
         confirmButton.setOnClickListener(new OnConfirmListener());
         Button cancelTurnButton = (Button) findViewById(R.id.game_button_cancelturn);
         cancelTurnButton.setOnClickListener(new OnCancelTurnListener());
-        if (game != null) {
-            figureSet.setHueZero(game.getZeroPlayer().getUser().getColorZero());
-            figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
-        }
+
+        figureSet.setHueZero(game.getZeroPlayer().getUser().getColorZero());
+        figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
+
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
                 boardButtons[i][j].setOnClickListener(new OnBoardClickListener(i, j));
             }
+
+        if (game.getCrossPlayer() instanceof HumanPlayer) {
+            ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+        }
+        if (game.getZeroPlayer() instanceof HumanPlayer) {
+            ((HumanPlayer) game.getZeroPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
+        }
+
+        redrawGame(game);
     }
 
     @Override
@@ -267,15 +280,6 @@ public class GameActivity extends GameActivityBase {
         LocalBroadcastManager
                 .getInstance(this)
                 .registerReceiver(tokenSentReceiver, new IntentFilter(WoVPreferences.GCM_REGISTRATION_COMPLETE));
-    }
-
-    private void setCurrentGameListeners() {
-        game.setOnGameFinishedListener(new Game.OnGameFinishedListener() {
-            @Override
-            public void onGameFinished() {
-                saveCurrentGame();
-            }
-        });
     }
 
     private void saveCurrentGame() {
@@ -311,11 +315,6 @@ public class GameActivity extends GameActivityBase {
                     game.onStop();
                 }
                 game = loadedGame;
-                if (game.getCrossPlayer() instanceof HumanPlayer) {
-                    ((HumanPlayer) game.getCrossPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-                } else if (game.getZeroPlayer() instanceof HumanPlayer) {
-                    ((HumanPlayer) game.getZeroPlayer()).setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
-                } //it's a dirty hack, don't know how to do better
             }
             return null;
         }
@@ -373,8 +372,7 @@ public class GameActivity extends GameActivityBase {
         }
         game = Game.deserializeGame(gson.fromJson(jsonData.get(WoVProtocol.GAME_ID), int.class),
                 playerCross, crossType, playerZero, zeroType, GameLogic.deserialize(events));
-        initButtons();
-        redrawGame(game);
+        initActivityStateAndListeners();
     }
 
     @Override
@@ -384,10 +382,7 @@ public class GameActivity extends GameActivityBase {
 
     private void onGameLoaded(Game game) {
         this.game = game;
-        game.updateGameInfo();
-        setCurrentGameListeners();
-        initButtons();
-        redrawGame(game);
+        initActivityStateAndListeners();
     }
 
     @Override
