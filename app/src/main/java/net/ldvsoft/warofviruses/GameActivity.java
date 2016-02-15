@@ -38,8 +38,6 @@ public class GameActivity extends GameActivityBase {
 
     private TextView crossNick;
     private TextView zeroNick;
-    private TextView gameStatus1;
-    private TextView gameStatus2;
 
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
@@ -98,54 +96,6 @@ public class GameActivity extends GameActivityBase {
 
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
-
-        GameLogic.PlayerFigure mineFigure = game.getMyFigure(humanPlayer.getUser().getId());
-        GameLogic.GameState gameState = game.getGameState();
-        switch (gameState) {
-            case RUNNING:
-                GameLogic.PlayerFigure currentFigure = game.getCurrentPlayer().ownFigure;
-                if (mineFigure == NONE) {
-                    switch (currentFigure) {
-                        case CROSS:
-                            gameStatus1.setText(getString(R.string.GAME_CROSS_TURN));
-                            break;
-                        case ZERO:
-                            gameStatus1.setText(getString(R.string.GAME_ZERO_TURN));
-                            break;
-                    }
-                } else if (currentFigure == mineFigure) {
-                    gameStatus1.setText(getString(R.string.GAME_USER_TURN));
-                } else {
-                    gameStatus1.setText(getString(R.string.GAME_OPPONENT_TURN));
-                }
-                int miniturnsLeft = 3 - game.getGameLogic().getCurrentMiniturn();
-                gameStatus2.setText(String.format(getString(R.string.GAME_MINITURNS_LEFT), miniturnsLeft));
-                break;
-            case DRAW:
-                gameStatus1.setText(getString(R.string.GAME_DRAW));
-                gameStatus2.setText(getString(R.string.GAME_OVER));
-                break;
-            case CROSS_WON:
-                if (mineFigure == NONE) {
-                    gameStatus1.setText(getString(R.string.GAME_CROSS_WON));
-                } else if (mineFigure == CROSS) {
-                    gameStatus1.setText(getString(R.string.GAME_WON));
-                } else {
-                    gameStatus1.setText(getString(R.string.GAME_LOST));
-                }
-                gameStatus2.setText(getString(R.string.GAME_OVER));
-                break;
-            case ZERO_WON:
-                if (mineFigure == NONE) {
-                    gameStatus1.setText(getString(R.string.GAME_ZERO_WON));
-                } else if (mineFigure == ZERO) {
-                    gameStatus1.setText(getString(R.string.GAME_WON));
-                } else {
-                    gameStatus1.setText(getString(R.string.GAME_LOST));
-                }
-                gameStatus2.setText(getString(R.string.GAME_OVER));
-                break;
-        }
     }
 
     @Override
@@ -183,8 +133,6 @@ public class GameActivity extends GameActivityBase {
 
         crossNick   = (TextView) findViewById(R.id.game_cross_nick);
         zeroNick    = (TextView) findViewById(R.id.game_zero_nick);
-        gameStatus1 = (TextView) findViewById(R.id.game_text_game_status_1);
-        gameStatus2 = (TextView) findViewById(R.id.game_text_game_status_2);
 
         game = new Game();
         tokenSentReceiver = new BroadcastReceiver() {

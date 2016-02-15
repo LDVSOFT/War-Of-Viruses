@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -23,6 +24,9 @@ import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure;
 public abstract class GameActivityBase extends AppCompatActivity {
     protected static final int PLAY_SERVICES_DIALOG = 9001;
 
+    protected TextView noteCross;
+    protected TextView noteZero;
+
     protected LinearLayout boardRoot;
     protected BoardCellButton[][] boardButtons;
     protected FigureSet figureSet = new FigureSet();
@@ -33,6 +37,8 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         setContentView(R.layout.activity_game_base);
 
+        noteCross = (TextView) findViewById(R.id.game_text_game_note_cross);
+        noteZero = (TextView) findViewById(R.id.game_text_game_note_zero);
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
         /* FIXME */
@@ -46,29 +52,59 @@ public abstract class GameActivityBase extends AppCompatActivity {
             return;
         }
 
+        PlayerFigure current = gameLogic.getCurrentPlayerFigure();
+        PlayerFigure opponent = GameLogic.getOpponentPlayerFigure(current);
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), false);
+                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), current, false);
             }
         }
-        for (PlayerFigure figure : new PlayerFigure[] {GameLogic.getOpponentPlayerFigure(gameLogic.getCurrentPlayerFigure()), gameLogic.getCurrentPlayerFigure()}) {
-            List<GameEvent> lastOpponentEvents = gameLogic.getLastEventsBy(figure);
-            for (GameEvent event : lastOpponentEvents) {
-                if (event.type != GameEvent.GameEventType.TURN_EVENT) {
-                    break;
+
+        noteCross.setText("");
+        noteZero.setText("");
+        if (current != PlayerFigure.NONE) {
+            for (PlayerFigure figure : new PlayerFigure[] {opponent, current}) {
+                List<GameEvent> lastEvents = gameLogic.getLastEventsBy(figure);
+                for (GameEvent event : lastEvents) {
+                    if (event.type != GameEvent.GameEventType.TURN_EVENT) {
+                        break;
+                    }
+                    int i = event.getTurnX();
+                    int j = event.getTurnY();
+                    setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), current, true);
                 }
-                int i = event.getTurnX();
-                int j = event.getTurnY();
-                setButton(boardButtons[i][j], gameLogic.getCellAt(i, j), gameLogic.getCurrentPlayerFigure(), true);
+            }
+
+            TextView note;
+            switch (opponent) {
+                case CROSS:
+                    note = noteCross;
+                    break;
+                case ZERO:
+                default:
+                    note = noteZero;
+                    break;
+            }
+            List<GameEvent> lastEvents = gameLogic.getLastEventsBy(opponent);
+            if (!lastEvents.isEmpty()) {
+                switch (lastEvents.get(lastEvents.size() - 1).type) {
+                    case SKIP_TURN_EVENT:
+                        note.setText("Passed turn");
+                        break;
+                    case CROSS_GIVE_UP_EVENT:
+                    case ZERO_GIVE_UP_EVENT:
+                        note.setText("Gave up");
+                        break;
+                }
             }
         }
 
         BoardCellButton avatar = (BoardCellButton) findViewById(R.id.game_cross_avatar);
-        boolean isActive = gameLogic.getCurrentPlayerFigure() == PlayerFigure.CROSS;
+        boolean isActive = current == PlayerFigure.CROSS;
         avatar.setFigure(figureSet, BoardCellState.get(CellType.CROSS, false, isActive ? PlayerFigure.CROSS : PlayerFigure.NONE));
 
         avatar = (BoardCellButton) findViewById(R.id.game_zero_avatar);
-        isActive = gameLogic.getCurrentPlayerFigure() == PlayerFigure.ZERO;
+        isActive = current == PlayerFigure.ZERO;
         avatar.setFigure(figureSet, BoardCellState.get(CellType.ZERO, false, isActive ? PlayerFigure.ZERO : PlayerFigure.NONE));
     }
 
