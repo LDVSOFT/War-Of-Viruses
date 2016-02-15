@@ -93,6 +93,11 @@ public class Game {
         for (GameEvent event : unconfirmedEvents) {
             result = event.applyEvent(result);
         }
+
+        if (result == null) {
+            return null;
+        }
+
         if (result.getCurrentPlayerFigure() != gameLogic.getCurrentPlayerFigure()) {
             result.blockCurrentPlayer(); //to not draw possible moves for an opponent
         }
@@ -188,6 +193,14 @@ public class Game {
         return true;
     }
 
+    private void gameStateChanged(GameEvent event, Player sender) {
+        if (sender == zeroPlayer) {
+            crossPlayer.onGameStateChanged(event, sender);
+        } else {
+            zeroPlayer.onGameStateChanged(event, sender);
+        }
+
+    }
 
     public boolean confirm(Player sender) {
         if (!sender.equals(getCurrentPlayer())) {
@@ -200,11 +213,7 @@ public class Game {
         unconfirmedEvents.clear();
 
         for (GameEvent event: lastEvents) {
-            if (getCurrentPlayer() == zeroPlayer) {
-                crossPlayer.onGameStateChanged(event, sender);
-            } else {
-                zeroPlayer.onGameStateChanged(event, sender);
-            }
+            gameStateChanged(event, sender);
             gameLogic = event.applyEvent(gameLogic);
         }
 
@@ -226,5 +235,39 @@ public class Game {
             return GameLogic.PlayerFigure.ZERO;
         }
 
+    }
+
+    public boolean applyPlayerEvents(List<GameEvent> events, Player sender) {
+        if (sender != getCurrentPlayer()) {
+            return false;
+        }
+
+        GameLogic result = gameLogic;
+        GameLogic.PlayerFigure oldPlayerFigure = gameLogic.getCurrentPlayerFigure();
+        unconfirmedEvents.clear();
+        for (GameEvent event : events) {
+            result = event.applyEvent(result);
+            unconfirmedEvents.add(event);
+            if (result == null) {
+                unconfirmedEvents.clear();
+                return false;
+            }
+            gameStateChanged(event, sender);
+            try {
+                Thread.sleep(750);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (oldPlayerFigure != result.getCurrentPlayerFigure()) {
+            gameLogic = result;
+            unconfirmedEvents.clear();
+            notifyPlayer();
+            return true;
+        }
+
+        unconfirmedEvents.clear();
+        return false;
     }
 }

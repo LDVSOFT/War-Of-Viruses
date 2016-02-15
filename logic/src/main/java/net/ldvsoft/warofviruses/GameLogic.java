@@ -1,6 +1,7 @@
 package net.ldvsoft.warofviruses;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -448,6 +449,7 @@ public class GameLogic {
                 break;
             }
         }
+        Collections.reverse(result);
         return result;
     }
 }

@@ -118,7 +118,7 @@ public class AIPlayer extends Player {
                             result += sign * CONTROL_FACTOR;
                         }
                         if (game.getCellAt(i, j).canMakeTurn() &&
-                                game.getCellAt(i, j).getCellType().getOwner() == game.getOpponentPlayerFigure(game.getCurrentPlayerFigure())) {
+                                game.getCellAt(i, j).getCellType().getOwner() == GameLogic.getOpponentPlayerFigure(game.getCurrentPlayerFigure())) {
                             result += sign * DANGER_FACTOR;
                         }
                         if (game.getCellAt(i, j).canMakeTurn()) {
@@ -144,14 +144,9 @@ public class AIPlayer extends Player {
             }
 
             for (CoordinatePair move : optMoves) {
-                publishProgress(move);
-                try {
-                    sleep(750);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "An InterruptedException occurred while trying to publish moves to game:\n" + Log.getStackTraceString(e));
-                }
+                gameLogic = gameLogic.doTurn(move.x, move.y);
             }
-            game.confirm(AIPlayer.this);
+            game.applyPlayerEvents(gameLogic.getLastEventsBy(ownFigure), AIPlayer.this);
         }
 
         private List<CoordinatePair> orderMovesByCost(List<CoordinatePair> moves, GameLogic curGameLogic) {
@@ -228,28 +223,9 @@ public class AIPlayer extends Player {
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("AIPlayer", "AIPlayer::run");
-            GameLogic gameLogic = game.getGameLogic();
-            if (!gameLogic.canMove()) {
-                publishProgress(new CoordinatePair(-1, -1));
-            }
-            runStrategy(gameLogic);
+            runStrategy(game.getGameLogic());
             Log.d("AIPlayer", "Turn finished");
             return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(CoordinatePair... cells) {
-            if (isCancelled()) {
-                return;
-            }
-
-            Log.d("AIPlayer", "Update progress: do move to " + cells[0].x + " " + cells[0].y);
-            if (cells[0].x < 0) {
-                game.skipTurn(AIPlayer.this);
-            } else {
-                game.doTurn(AIPlayer.this, cells[0].x, cells[0].y);
-            }
-
         }
     }
 }
