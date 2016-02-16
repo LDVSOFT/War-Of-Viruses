@@ -362,7 +362,7 @@ public class GameActivity extends GameActivityBase {
                 throw new IllegalArgumentException("Illegal myFigure value!");
         }
 
-        List<GameEvent> events = (WoVProtocol.eventsFromJson(jsonData);
+        List<GameEvent> events = WoVProtocol.eventsFromJson(jsonData);
 
         humanPlayer.setOnGameStateChangedListener(ON_GAME_STATE_CHANGED_LISTENER);
         int crossType = myFigure == CROSS ? 0 : 2;
