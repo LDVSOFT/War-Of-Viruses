@@ -37,8 +37,8 @@ public abstract class GameActivityBase extends AppCompatActivity {
 
         setContentView(R.layout.activity_game_base);
 
-        noteCross = (TextView) findViewById(R.id.game_text_game_note_cross);
-        noteZero = (TextView) findViewById(R.id.game_text_game_note_zero);
+        noteCross = (TextView) findViewById(R.id.game_note_cross);
+        noteZero = (TextView) findViewById(R.id.game_note_zero);
         boardRoot = (LinearLayout) findViewById(R.id.game_board_root);
         buildBoard();
         /* FIXME */
@@ -85,17 +85,34 @@ public abstract class GameActivityBase extends AppCompatActivity {
                     note = noteZero;
                     break;
             }
+
             List<GameEvent> lastEvents = gameLogic.getLastEventsBy(opponent);
             if (!lastEvents.isEmpty()) {
                 switch (lastEvents.get(lastEvents.size() - 1).type) {
                     case SKIP_TURN_EVENT:
                         note.setText("Passed turn");
                         break;
-                    case CROSS_GIVE_UP_EVENT:
-                    case ZERO_GIVE_UP_EVENT:
-                        note.setText("Gave up");
-                        break;
                 }
+            }
+        } else { // Gave is over!
+            switch (gameLogic.getCurrentGameState()) {
+                case DRAW:
+                    noteCross.setText(R.string.game_status_draw);
+                    break;
+                case CROSS_WON:
+                    if (gameLogic.getLastEvent().type == GameEvent.GameEventType.ZERO_GIVE_UP_EVENT) {
+                        noteZero.setText(R.string.game_status_zero_gave_up);
+                    } else {
+                        noteCross.setText(R.string.game_status_cross_won);
+                    }
+                    break;
+                case ZERO_WON:
+                    if (gameLogic.getLastEvent().type == GameEvent.GameEventType.CROSS_GIVE_UP_EVENT) {
+                        noteCross.setText(R.string.game_status_cross_gave_up);
+                    } else {
+                        noteZero.setText(R.string.game_status_zero_won);
+                    }
+                    break;
             }
         }
 

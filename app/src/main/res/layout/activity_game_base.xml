@@ -101,18 +101,28 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text=""
-            android:id="@+id/game_text_game_note_cross"
-            android:layout_gravity="center" />
+            android:id="@+id/game_note_cross"
+            android:layout_gravity="center"
+            android:textColor="@color/primary_text" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text=" "
+            android:id="@+id/game_note_space"
+            android:textColor="@color/primary_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text=""
-            android:id="@+id/game_text_game_note_zero"
-            android:layout_gravity="center" />
+            android:id="@+id/game_note_zero"
+            android:layout_gravity="center"
+            android:textColor="@color/primary_text" />
     </LinearLayout>
 
     <LinearLayout
@@ -124,7 +134,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/give_up"
+            android:text="@string/game_give_up"
             android:id="@+id/game_button_giveup"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
@@ -135,7 +145,7 @@
             style="@style/button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/cancel_turn"
+            android:text="@string/game_cancel_turn"
             android:id="@+id/game_button_cancelturn"
             android:layout_weight="1"
             android:layout_margin="@dimen/spacing_small" />
@@ -144,7 +154,7 @@
             style="@style/button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/confirm"
+            android:text="@string/game_confirm_turn"
             android:id="@+id/game_button_confirm"
             android:layout_margin="@dimen/spacing_small"
             android:layout_weight="1" />
@@ -152,7 +162,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/skip_turn"
+            android:text="@string/game_skip_turn"
             android:id="@+id/game_button_passturn"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
@@ -169,7 +179,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/first_turn"
+            android:text="@string/game_replay_first_turn"
             android:id="@+id/game_button_first"
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
@@ -179,7 +189,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/prev_turn"
+            android:text="@string/game_replay_prev_turn"
             android:id="@+id/game_button_prev"
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
@@ -190,12 +200,11 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1.3">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:orientation="horizontal"
@@ -217,7 +226,7 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceLarge"
                         android:text=" of "
-                        android:id="@+id/textView" />
+                        android:id="@+id/game_position_separator" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -235,7 +244,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/next_turn"
+            android:text="@string/game_replay_next_turn"
             android:id="@+id/game_button_next"
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
@@ -245,7 +254,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="@string/last_turn"
+            android:text="@string/game_replay_last_turn"
             android:id="@+id/game_button_last"
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
