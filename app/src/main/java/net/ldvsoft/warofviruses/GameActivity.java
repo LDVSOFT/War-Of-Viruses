@@ -237,8 +237,6 @@ public class GameActivity extends GameActivityBase {
             return;
         }
 
-        game.updateGameInfo();
-
         Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
         Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
@@ -316,6 +314,7 @@ public class GameActivity extends GameActivityBase {
                 }
                 game = loadedGame;
             }
+            game.updateGameInfo();
             return null;
         }
 
