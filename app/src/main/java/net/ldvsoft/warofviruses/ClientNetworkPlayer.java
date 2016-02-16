@@ -52,7 +52,8 @@ public class ClientNetworkPlayer extends Player {
 
     @Override
     public void makeTurn() {
-        JsonObject myTurns = WoVProtocol.eventsToJson(game.getGameLogic().getLastEventsBy(ownFigure));
+        JsonObject myTurns = WoVProtocol.eventsToJson(game.getGameLogic()
+                .getLastEventsBy(GameLogic.getOpponentPlayerFigure(ownFigure)));
         Bundle message = new Bundle();
         message.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_TURN);
         message.putString(WoVProtocol.DATA, myTurns.toString());

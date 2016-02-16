@@ -23,7 +23,8 @@ public class ServerNetworkPlayer extends Player {
 
     @Override
     public void makeTurn() {
-        server.sendToUser(user, WoVProtocol.ACTION_TURN, WoVProtocol.eventsToJson(game.getGameLogic().getLastEventsBy(ownFigure)));
+        server.sendToUser(user, WoVProtocol.ACTION_TURN, WoVProtocol.eventsToJson(game.getGameLogic()
+                .getLastEventsBy(GameLogic.getOpponentPlayerFigure(ownFigure))));
     }
 
     @Override
