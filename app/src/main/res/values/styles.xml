@@ -16,7 +16,7 @@
         <item name="android:colorPrimary" tools:ignore="NewApi">@color/primary</item>
         <item name="android:colorPrimaryDark" tools:ignore="NewApi">@color/primary_dark</item>
         <item name="android:colorAccent" tools:ignore="NewApi">@color/accent</item>
-        <item name="android:textColorPrimary">@color/primary_text</item>
+        <item name="android:textColorPrimary">@color/primary_text_selector</item>
         <item name="android:textColorSecondary">@color/secondary_text</item>
         <item name="colorPrimary" tools:ignore="NewApi">@color/primary</item>
         <item name="colorPrimaryDark" tools:ignore="NewApi">@color/primary_dark</item>
@@ -34,7 +34,7 @@
     </style>
 
     <style name="button" parent="Base.Widget.AppCompat.Button">
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">@color/primary_text_selector</item>
         <item name="android:background">@drawable/button</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>

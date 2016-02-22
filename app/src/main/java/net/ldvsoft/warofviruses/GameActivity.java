@@ -383,48 +383,4 @@ public class GameActivity extends GameActivityBase {
         this.game = game;
         initActivityStateAndListeners();
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        if (id == R.id.test2) {
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... params) {
-                    String msg;
-                    try {
-                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(GameActivity.this);
-
-                        Bundle data = new Bundle();
-                        data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_PING);
-                        String id = UUID.randomUUID().toString();
-                        gcm.send(getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
-                        msg = "Sent message";
-                    } catch (IOException ex) {
-                        msg = "Error :" + ex.getMessage();
-                    }
-                    return msg;
-                }
-
-                @Override
-                protected void onPostExecute(String msg) {
-                    if (msg == null)
-                        return;
-                    Toast.makeText(GameActivity.this, msg, Toast.LENGTH_SHORT).show();
-                }
-            }.execute(null, null, null);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

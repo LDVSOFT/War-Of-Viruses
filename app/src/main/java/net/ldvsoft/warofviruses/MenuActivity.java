@@ -18,6 +18,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -27,9 +29,15 @@ import java.util.UUID;
 
 public class MenuActivity extends AppCompatActivity {
     private GameLoadedFromServerReceiver gameLoadedFromServerReceiver = null;
+    private TextView userName;
     private BoardCellButton crossButton;
     private BoardCellButton zeroButton;
+    private NavigationView navigationView;
     private DrawerLayout drawerLayout;
+    private Button playAgainstBotButton;
+    private Button playAgainstLocalPlayerButton;
+    private Button playOnlineButton;
+    private Button restoreGameButton;
     /*FIXME*/
     private FigureSet figureSet = new FigureSet();
 
@@ -51,12 +59,17 @@ public class MenuActivity extends AppCompatActivity {
         }
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        playAgainstBotButton = (Button) findViewById(R.id.button_play_against_bot);
+        playAgainstLocalPlayerButton = (Button) findViewById(R.id.button_play_against_player);
+        playOnlineButton = (Button) findViewById(R.id.button_play_online);
+        restoreGameButton = (Button) findViewById(R.id.button_restore_game);
 
-        NavigationView view = (NavigationView) findViewById(R.id.navigation_view);
-        View drawerHeader = view.inflateHeaderView(R.layout.drawer_header);
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        View drawerHeader = navigationView.inflateHeaderView(R.layout.drawer_header);
         crossButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_cross);
         zeroButton = (BoardCellButton) drawerHeader.findViewById(R.id.avatar_zero);
-        view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        userName = (TextView) drawerHeader.findViewById(R.id.username);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
@@ -78,18 +91,18 @@ public class MenuActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        /*FIXME*/
-        for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
-            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
+    protected void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    @Override
+    protected void onStop() {
+        if (gameLoadedFromServerReceiver != null) {
+            unregisterReceiver(gameLoadedFromServerReceiver);
+            gameLoadedFromServerReceiver = null;
         }
-        long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
-        User user = DBOpenHelper.getInstance(this).getUserById(userId);
-        figureSet.setHueCross(user.getColorCross());
-        figureSet.setHueZero(user.getColorZero());
-        crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
-        zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
+        super.onStop();
     }
 
     @Override
@@ -138,7 +151,7 @@ public class MenuActivity extends AppCompatActivity {
         }
     }
 
-    private class PlayAgainstBot implements Runnable{
+    private class PlayAgainstBot implements Runnable {
         @Override
         public void run() {
             Intent intent = new Intent(MenuActivity.this, GameActivity.class);
@@ -155,7 +168,7 @@ public class MenuActivity extends AppCompatActivity {
         new PlayAgainstBot().run();
     }
 
-    private class PlayAgainstLocalPlayer implements Runnable{
+    private class PlayAgainstLocalPlayer implements Runnable {
         @Override
         public void run() {
             Intent intent = new Intent(MenuActivity.this, GameActivity.class);
@@ -217,23 +230,43 @@ public class MenuActivity extends AppCompatActivity {
         new PlayOnline().run();
     }
 
-    @Override
-    protected void onStop() {
-        if (gameLoadedFromServerReceiver != null) {
-            unregisterReceiver(gameLoadedFromServerReceiver);
-            gameLoadedFromServerReceiver = null;
-        }
-        super.onStop();
-    }
-
     public void clearDB() {
         DBOpenHelper instance = DBOpenHelper.getInstance(this);
         instance.onUpgrade(instance.getReadableDatabase(), 0, 0);
+        updateUI();
     }
 
     public void restoreSavedGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_RESTORED_GAME);
         startActivity(intent);
+    }
+
+    public void updateUI() {
+        boolean hasGame = DBOpenHelper.getInstance(this).hasActiveGame();
+        long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
+        User user = DBOpenHelper.getInstance(this).getUserById(userId);
+        boolean isOnline = user.getId() != WoVPreferences.ANONYMOUS_NICKNAME_ID;
+
+        playOnlineButton.setEnabled(!hasGame);
+        playAgainstBotButton.setEnabled(!hasGame);
+        playAgainstLocalPlayerButton.setEnabled(!hasGame);
+        playOnlineButton.setEnabled(!hasGame /* FIXME && isOnline */);
+        restoreGameButton.setEnabled(hasGame);
+
+        navigationView.getMenu().findItem(R.id.drawer_login).setEnabled(!isOnline);
+        navigationView.getMenu().findItem(R.id.drawer_logout).setEnabled(isOnline);
+
+        /*FIXME*/
+        for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
+            figureSet.setFigureSource(figure, DefaultFigureSource.NAME);
+        }
+        userName.setText(user.getFullNickname());
+        figureSet.setHueCross(user.getColorCross());
+        figureSet.setHueZero(user.getColorZero());
+        crossButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.CROSS));
+        zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
+
+
     }
 }
