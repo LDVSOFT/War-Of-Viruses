@@ -100,7 +100,8 @@ public class Game {
 
         GameLogic.PlayerFigure newFigure = result.getCurrentPlayerFigure();
         if (newFigure != gameLogic.getCurrentPlayerFigure() && newFigure != GameLogic.PlayerFigure.NONE) {
-            result.blockCurrentPlayer(); //to not draw possible moves for an opponent
+            result.setCurrentPlayerToOpponent(); //to not draw possible moves for an opponent
+            result.blockCurrentPlayer();
         }
 
         return result;
@@ -210,7 +211,7 @@ public class Game {
 
         GameLogic.PlayerFigure oldPlayerFigure = gameLogic.getCurrentPlayerFigure();
 
-        if (getUnconfirmedGameLogic().getCurrentPlayerFigure() == oldPlayerFigure) {
+        if (!getUnconfirmedGameLogic().isBlocked()) {
             return false;
         }
 
