@@ -156,6 +156,10 @@ public class GameLogic {
         return pos >= 0 && pos < BOARD_SIZE;
     }
 
+    public boolean isBlocked() {
+        return isPlayerBlocked;
+    }
+
     public int getCurrentTurn() {
         return currentTurn;
     }
@@ -273,7 +277,7 @@ public class GameLogic {
     }
 
     public GameLogic skipTurn() {
-        if (currentMiniturn != 0 || currentTurn < 2) {
+        if (isPlayerBlocked || currentMiniturn != 0 || currentTurn < 2) {
             return null;
         }
         GameLogic result = new GameLogic(this);
@@ -304,7 +308,7 @@ public class GameLogic {
 
     //returns new instance of GameLogic with applied turn if it was correct, null otherwise. Does not modifies current instance
     public GameLogic doTurn(int x, int y) {
-        if (!board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
+        if (isPlayerBlocked || !board[x][y].canMakeTurn || currentGameState != GameState.RUNNING) {
             return null;
         }
         GameLogic result = new GameLogic(this);
@@ -322,6 +326,9 @@ public class GameLogic {
     }
 
     public GameLogic giveUp(PlayerFigure whoGivesUp) {
+        if (isPlayerBlocked) {
+            return null;
+        }
         GameLogic result = new GameLogic(this);
         switch (whoGivesUp) {
             case CROSS:
