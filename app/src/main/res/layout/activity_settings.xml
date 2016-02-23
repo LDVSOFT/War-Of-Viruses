@@ -42,7 +42,7 @@
             android:layout_marginLeft="@dimen/spacing_medium"
             android:layout_marginRight="@dimen/spacing_medium"
             android:layout_marginTop="@dimen/spacing_medium"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
             android:layout_marginLeft="@dimen/spacing_medium"
             android:layout_marginRight="@dimen/spacing_medium"
             android:layout_marginTop="@dimen/spacing_medium"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -121,7 +121,7 @@
             android:layout_marginLeft="@dimen/spacing_medium"
             android:layout_marginRight="@dimen/spacing_medium"
             android:layout_marginTop="@dimen/spacing_medium"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
 
 
     </LinearLayout>

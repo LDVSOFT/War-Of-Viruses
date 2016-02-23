@@ -139,10 +139,10 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button.Red" />
 
         <Button
-            style="@style/button"
+            style="@style/AppTheme.Button.Yellow"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:text="@string/game_cancel_turn"
@@ -151,7 +151,7 @@
             android:layout_margin="@dimen/spacing_small" />
 
         <Button
-            style="@style/button"
+            style="@style/AppTheme.Button.Green"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:text="@string/game_confirm_turn"
@@ -163,11 +163,11 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:text="@string/game_skip_turn"
-            android:id="@+id/game_button_passturn"
+            android:id="@+id/game_button_skipturn"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button.Red" />
     </LinearLayout>
 
     <LinearLayout
@@ -184,7 +184,7 @@
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
 
         <Button
             android:layout_width="0dp"
@@ -194,7 +194,7 @@
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
 
         <LinearLayout
             android:orientation="vertical"
@@ -249,7 +249,7 @@
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
 
         <Button
             android:layout_width="0dp"
@@ -259,7 +259,7 @@
             android:layout_weight="0.5"
             android:layout_gravity="center_vertical"
             android:layout_margin="@dimen/spacing_small"
-            style="@style/button" />
+            style="@style/AppTheme.Button" />
     </LinearLayout>
 
 </LinearLayout>

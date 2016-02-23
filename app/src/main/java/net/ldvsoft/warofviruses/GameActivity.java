@@ -13,20 +13,16 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import static net.ldvsoft.warofviruses.GameLogic.BOARD_SIZE;
 import static net.ldvsoft.warofviruses.GameLogic.PlayerFigure.CROSS;
@@ -37,6 +33,10 @@ public class GameActivity extends GameActivityBase {
 
     private TextView crossNick;
     private TextView zeroNick;
+    private Button giveUpButton;
+    private Button cancelTurnButton;
+    private Button confirmTurnButton;
+    private Button skipTurnButton;
 
     private BroadcastReceiver tokenSentReceiver;
     private BroadcastReceiver gameLoadedFromServerReceiver;
@@ -91,10 +91,18 @@ public class GameActivity extends GameActivityBase {
         if (game == null) {
             return;
         }
-        super.redrawGame(game.getUnconfirmedGameLogic());
+        figureSet.setHueZero(game.getZeroPlayer().getUser().getColorZero());
+        figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
 
+        GameLogic displayState = game.getUnconfirmedGameLogic();
+        boolean canMakeTurn = !game.isFinished() && game.getCurrentPlayer() == humanPlayer;
+        super.redrawGame(displayState);
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
+        giveUpButton.setEnabled(!game.isFinished());
+        skipTurnButton.setEnabled(!game.isFinished() && canMakeTurn);
+        cancelTurnButton.setEnabled(! game.isFinished() && canMakeTurn && game.getUnconfirmedGameLogic() != game.getGameLogic());
+        confirmTurnButton.setEnabled(! game.isFinished() && canMakeTurn && game.getUnconfirmedGameLogic().getCurrentPlayerFigure() != game.getGameLogic().getCurrentPlayerFigure());
     }
 
     @Override
@@ -132,6 +140,10 @@ public class GameActivity extends GameActivityBase {
 
         crossNick   = (TextView) findViewById(R.id.game_cross_nick);
         zeroNick    = (TextView) findViewById(R.id.game_zero_nick);
+        giveUpButton      = (Button) findViewById(R.id.game_button_giveup);
+        cancelTurnButton  = (Button) findViewById(R.id.game_button_cancelturn);
+        confirmTurnButton = (Button) findViewById(R.id.game_button_confirm);
+        skipTurnButton    = (Button) findViewById(R.id.game_button_skipturn);
 
         game = new Game();
         tokenSentReceiver = new BroadcastReceiver() {
@@ -237,17 +249,10 @@ public class GameActivity extends GameActivityBase {
             return;
         }
 
-        Button skipTurnButton = (Button) findViewById(R.id.game_button_passturn);
         skipTurnButton.setOnClickListener(new OnSkipTurnListener());
-        Button giveUpButton = (Button) findViewById(R.id.game_button_giveup);
         giveUpButton.setOnClickListener(new OnGiveUpListener());
-        Button confirmButton = (Button) findViewById(R.id.game_button_confirm);
-        confirmButton.setOnClickListener(new OnConfirmListener());
-        Button cancelTurnButton = (Button) findViewById(R.id.game_button_cancelturn);
+        confirmTurnButton.setOnClickListener(new OnConfirmListener());
         cancelTurnButton.setOnClickListener(new OnCancelTurnListener());
-
-        figureSet.setHueZero(game.getZeroPlayer().getUser().getColorZero());
-        figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
 
         for (int i = 0; i != BOARD_SIZE; i++)
             for (int j = 0; j != BOARD_SIZE; j++) {
