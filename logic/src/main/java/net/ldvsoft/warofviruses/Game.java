@@ -99,8 +99,8 @@ public class Game {
         }
 
         GameLogic.PlayerFigure newFigure = result.getCurrentPlayerFigure();
-        if (newFigure != gameLogic.getCurrentPlayerFigure() && newFigure != GameLogic.PlayerFigure.NONE) {
-            result.setCurrentPlayerToOpponent(); //to not draw possible moves for an opponent
+        if (newFigure != gameLogic.getCurrentPlayerFigure()) {
+            //result.setCurrentPlayerToOpponent(); //to not draw possible moves for an opponent
             result.blockCurrentPlayer();
         }
 
@@ -153,7 +153,7 @@ public class Game {
         return false;
     }
 
-    private boolean isWaitingForConfirm() {
+    public boolean isWaitingForConfirm() {
         return getUnconfirmedGameLogic().getCurrentPlayerFigure() != gameLogic.getCurrentPlayerFigure();
     }
 
@@ -196,7 +196,7 @@ public class Game {
     }
 
     private void gameStateChanged(GameEvent event, Player sender) {
-        if (sender == zeroPlayer) {
+        if (sender.equals(zeroPlayer)) {
             crossPlayer.onGameStateChanged(event, sender);
         } else {
             zeroPlayer.onGameStateChanged(event, sender);

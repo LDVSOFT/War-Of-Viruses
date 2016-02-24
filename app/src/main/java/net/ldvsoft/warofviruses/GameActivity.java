@@ -95,14 +95,14 @@ public class GameActivity extends GameActivityBase {
         figureSet.setHueCross(game.getCrossPlayer().getUser().getColorCross());
 
         GameLogic displayState = game.getUnconfirmedGameLogic();
-        boolean canMakeTurn = !game.isFinished() && game.getCurrentPlayer() == humanPlayer;
+        boolean canMakeTurn = !game.isFinished() && game.getCurrentPlayer().equals(humanPlayer);
         super.redrawGame(displayState);
         crossNick.setText(game.getCrossPlayer().getName());
         zeroNick .setText(game.getZeroPlayer().getName());
         giveUpButton.setEnabled(!game.isFinished());
-        skipTurnButton.setEnabled(!game.isFinished() && canMakeTurn);
-        cancelTurnButton.setEnabled(! game.isFinished() && canMakeTurn && game.getUnconfirmedGameLogic() != game.getGameLogic());
-        confirmTurnButton.setEnabled(! game.isFinished() && canMakeTurn && game.getUnconfirmedGameLogic().getCurrentPlayerFigure() != game.getGameLogic().getCurrentPlayerFigure());
+        skipTurnButton.setEnabled(!game.isFinished() && canMakeTurn && game.getUnconfirmedGameLogic() == game.getGameLogic());
+        cancelTurnButton.setEnabled(game.getUnconfirmedGameLogic() != game.getGameLogic());
+        confirmTurnButton.setEnabled(game.isWaitingForConfirm());
     }
 
     @Override
