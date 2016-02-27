@@ -32,7 +32,10 @@ public class WoVProtocol {
 
     public static final String ACTION_LOGIN = "login";
     public static final String ACTION_LOGOUT = "logout";
-    public static final String GOOGLE_TOKEN = "google-token";
+    public static final String GOOGLE_TOKEN = "googleToken";
+    public static final String LOCAL_USER = "localUser";
+
+    public static final String ACTION_LOGIN_COMPLETE = "loginComplete";
 
     private static final Gson gson = new Gson();
     public static List<GameEvent> eventsFromJson(JsonObject jsonData) {
