@@ -29,9 +29,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class MenuActivity extends AppCompatActivity {
+    private static final Gson gson = new Gson();
     private static final int RC_SIGN_IN = 9000;
     private static final IntentFilter INTENT = new IntentFilter(WoVPreferences.MAIN_BROADCAST);
 
@@ -54,6 +58,8 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        GoogleCloudMessaging.getInstance(this); // Can this help?...
         setContentView(R.layout.activity_menu);
         SharedPreferences preferences = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE);
         if (!preferences.contains(WoVPreferences.CURRENT_USER_ID)) {
@@ -97,6 +103,10 @@ public class MenuActivity extends AppCompatActivity {
                         Intent intent = new Intent(MenuActivity.this, SettingsActivity.class);
                         startActivity(intent);
                         return true;
+                    case R.id.drawer_ping:
+                        WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_PING, null);
+                        drawerLayout.closeDrawers();
+                        return true;
                     default:
                         Toast.makeText(MenuActivity.this, menuItem.getTitle() + " pressed", Toast.LENGTH_LONG).show();
                         drawerLayout.closeDrawers();
@@ -133,6 +143,7 @@ public class MenuActivity extends AppCompatActivity {
         if (opr.isDone()) {
             // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
             // and the GoogleSignInResult will be available instantly.
+            hideProgressDialog();
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
         } else {
@@ -205,12 +216,14 @@ public class MenuActivity extends AppCompatActivity {
 
     private class GcmMessagesReceiver extends BroadcastReceiver {
         private boolean waitForGame = false;
+        private boolean waitForLogin = false;
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle tmp = intent.getBundleExtra(WoVPreferences.BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
             String action = tmp.getString(WoVProtocol.ACTION);
+            assert action != null && data != null;
             switch (action) {
                 case WoVProtocol.GAME_LOADED:
                     if (!waitForGame) {
@@ -222,6 +235,25 @@ public class MenuActivity extends AppCompatActivity {
                     intent.putExtra(WoVPreferences.GAME_JSON_DATA, data);
                     waitForGame = false;
                     startActivity(intent);
+                    break;
+                case WoVProtocol.ACTION_LOGIN_COMPLETE:
+                    if (!waitForLogin) {
+                        break;
+                    }
+                    JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
+                    if (jsonData.get(WoVProtocol.RESULT).getAsString().equals(WoVProtocol.RESULT_FAILURE)) {
+                        hideProgressDialog();
+                        Toast.makeText(MenuActivity.this, "Login failed by server.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        User newUser = gson.fromJson(jsonData.get(WoVProtocol.USER), User.class);
+                        SharedPreferences preferences = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE);
+                        preferences.edit().putLong(WoVPreferences.CURRENT_USER_ID, newUser.getId()).apply();
+                        DBOpenHelper.getInstance(MenuActivity.this).addUser(newUser);
+                        updateUI();
+                    }
+                    break;
+                case WoVProtocol.ACTION_PING:
+                    Toast.makeText(MenuActivity.this, "PING returned!", Toast.LENGTH_LONG).show();
                     break;
             }
         }
@@ -271,8 +303,8 @@ public class MenuActivity extends AppCompatActivity {
         playOnlineButton.setEnabled(!hasGame && isOnline);
         restoreGameButton.setEnabled(hasGame);
 
-        navigationView.getMenu().findItem(R.id.drawer_login).setEnabled(!isOnline);
-        navigationView.getMenu().findItem(R.id.drawer_logout).setEnabled(isOnline);
+        navigationView.getMenu().findItem(R.id.drawer_login).setEnabled(true ||!isOnline);
+        navigationView.getMenu().findItem(R.id.drawer_logout).setEnabled(true || isOnline);
 
         /*FIXME*/
         for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
@@ -292,8 +324,12 @@ public class MenuActivity extends AppCompatActivity {
             GoogleSignInAccount acct = result.getSignInAccount();
             String token = acct.getIdToken();
 
+            long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
+            User user = DBOpenHelper.getInstance(this).getUserById(userId);
+
             JsonObject data = new JsonObject();
             data.addProperty(WoVProtocol.GOOGLE_TOKEN, token);
+            data.add(WoVProtocol.LOCAL_USER, gson.toJsonTree(user));
             WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_LOGIN, data);
             showProgressDialog(getString(R.string.menu_connecting_to_server));
             //Actual UI changes will come on message result

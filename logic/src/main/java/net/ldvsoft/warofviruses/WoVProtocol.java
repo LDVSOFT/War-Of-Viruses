@@ -36,6 +36,7 @@ public class WoVProtocol {
     public static final String LOCAL_USER = "localUser";
 
     public static final String ACTION_LOGIN_COMPLETE = "loginComplete";
+    public static final String USER = "user";
 
     private static final Gson gson = new Gson();
     public static List<GameEvent> eventsFromJson(JsonObject jsonData) {

@@ -22,16 +22,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static net.ldvsoft.warofviruses.WoVProtocol.*;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_LOGIN;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_PING;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_TURN;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_UPDATE_LOCAL_GAME;
-import static net.ldvsoft.warofviruses.WoVProtocol.ACTION_USER_READY;
-import static net.ldvsoft.warofviruses.WoVProtocol.PING_ID;
-import static net.ldvsoft.warofviruses.WoVProtocol.RESULT;
-import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_FAILURE;
-import static net.ldvsoft.warofviruses.WoVProtocol.RESULT_SUCCESS;
 
 public final class WarOfVirusesServer {
     private static final JsonObject JSON_RESULT_FAILURE = new JsonObject();
@@ -42,11 +32,7 @@ public final class WarOfVirusesServer {
 
     private static final String DEFAULT_CONFIG_FILE = "/etc/war-of-viruses-server.conf";
 
-    private GoogleIdTokenVerifier verifier =
-            new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-            .setAudience(Collections.singletonList(getSetting("google.projectId")))
-            .setIssuer("https://accounts.google.com")
-            .build();
+    private GoogleIdTokenVerifier verifier;
     private Random random = new SecureRandom();
     private Gson gson = new Gson();
 
@@ -95,51 +81,63 @@ public final class WarOfVirusesServer {
     }
 
     private JsonObject processLogin(JsonObject message) {
+        boolean isGood = true;
+
         String deviceToken = message.get("from").getAsString();
         JsonObject data = (JsonObject) new JsonParser().parse(
                 message.get("data").getAsJsonObject().get("data").getAsString()
         );
         String encodedGoogleToken = data.get(GOOGLE_TOKEN).getAsString();
         String googleToken = null;
+        GoogleIdToken googleIdToken;
 
         try {
-            GoogleIdToken googleIdToken = verifier.verify(encodedGoogleToken);
-            if (googleIdToken == null) {
-                logger.log(Level.WARNING, "Wrong google token!");
-                return JSON_RESULT_FAILURE;
-            }
-
-            GoogleIdToken.Payload payload = googleIdToken.getPayload();
-            googleToken = payload.getSubject();
+            googleIdToken = verifier.verify(encodedGoogleToken);
         } catch (GeneralSecurityException | IOException e) {
             logger.log(Level.SEVERE, "What's wrong with that google verification?!", e);
             return JSON_RESULT_FAILURE;
         }
 
-        if (googleToken == null) {
+        if (googleIdToken == null) {
+            logger.log(Level.WARNING, "Wrong google token!");
+            isGood = false;
+        } else {
+            GoogleIdToken.Payload payload = googleIdToken.getPayload();
+            googleToken = payload.getSubject();
+        }
+
+        if (isGood && googleToken == null) {
             logger.log(Level.WARNING, "Wrong google token: no subject!");
-            return JSON_RESULT_FAILURE;
+            isGood = false;
         }
 
-        // Now user is OK, now we need to find it in DB or create new
-        User user = databaseHandler.getUserByGoogleToken(googleToken);
-        if (user == null) {
-            // Create new one!
-            User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
-            user = new User(
-                    random.nextLong(), googleToken,
-                    localUser.getNickNameStr(), localUser.getNickNameId(),
-                    localUser.getColorCross(), localUser.getColorZero(),
-                    null);
-            databaseHandler.addUser(user);
+        User user = null;
+        if (isGood) {
+            // Now user is OK, now we need to find it in DB or create new
+            user = databaseHandler.getUserByGoogleToken(googleToken);
+            if (user == null) {
+                // Create new one!
+                User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
+                user = new User(
+                        random.nextLong(), googleToken,
+                        localUser.getNickNameStr(), localUser.getNickNameId(),
+                        localUser.getColorCross(), localUser.getColorZero(),
+                        null);
+                databaseHandler.addUser(user);
+            }
+            databaseHandler.addDeviceToken(user.getId(), deviceToken);
         }
-        databaseHandler.addDeviceToken(user.getId(), deviceToken);
 
+        JsonObject answer = new JsonObject();
+        answer.addProperty(RESULT, isGood ? RESULT_SUCCESS : RESULT_FAILURE);
+        if (isGood) {
+            answer.add(USER, gson.toJsonTree(user));
+        }
         gcmHandler.sendDownstreamMessage(gcmHandler.createJsonMessage(
                 deviceToken,
                 gcmHandler.nextMessageId(),
                 ACTION_LOGIN_COMPLETE,
-                gson.toJsonTree(user),
+                answer,
                 null,
                 null,
                 false,
@@ -249,6 +247,10 @@ public final class WarOfVirusesServer {
         try {
             databaseHandler = new DatabaseHandler(this);
             gcmHandler = new GCMHandler(this);
+            verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList(getSetting("google.projectId")))
+                    .setIssuer("https://accounts.google.com")
+                    .build();
 
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override

@@ -228,7 +228,7 @@ public class DatabaseHandler implements DBProvider {
     public void addDeviceToken(long userId, String deviceToken) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement addTokenStatement = connection.prepareStatement(
-                    "INSERT IGNORE INTO " + DEVICE_TABLE + " VALUES (?, ?);"
+                    "INSERT INTO " + DEVICE_TABLE + " VALUES (?, ?) ON DUPLICATE KEY UPDATE;"
             );
             addTokenStatement.setString(1, deviceToken);
             addTokenStatement.setLong(2, userId);

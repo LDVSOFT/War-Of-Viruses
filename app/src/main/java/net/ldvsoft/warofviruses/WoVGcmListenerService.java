@@ -2,6 +2,7 @@ package net.ldvsoft.warofviruses;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -35,27 +36,53 @@ public class WoVGcmListenerService extends GcmListenerService {
                 intent.setAction(WoVPreferences.TURN_BROADCAST);
                 break;
             case WoVProtocol.GAME_LOADED:
+            case WoVProtocol.ACTION_LOGIN_COMPLETE:
+            case WoVProtocol.ACTION_PING:
                 intent.setAction(WoVPreferences.MAIN_BROADCAST);
                 break;
         }
         sendBroadcast(intent);
     }
 
-    public static void sendGcmMessage(Context context, String action, JsonObject data) {
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-        String id = "m-" + UUID.randomUUID().toString();
-        Bundle message = new Bundle();
-        message.putString(WoVProtocol.ACTION, action);
-        if (data != null) {
-            message.putString(WoVProtocol.DATA, data.toString());
-        }
-        try {
-            Log.d(TAG, "SENDING " + action + " TO " + context.getString(R.string.gcm_defaultSenderId) + " ID " + id);
-            gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, (long) 0, message);
-            Log.d(TAG, "OVER?");
-        } catch (IOException e) {
-            Log.wtf(TAG, "Something really wrong:", e);
-        }
+    public static void sendGcmMessage(final Context context, final String action, final JsonObject data) {
+        //AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+        //    @Override
+        //    protected Void doInBackground(Void... params) {
+                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+                String id = "m-" + UUID.randomUUID().toString();
+                Bundle message = new Bundle();
+                message.putString(WoVProtocol.ACTION, action);
+                if (data != null) {
+                    message.putString(WoVProtocol.DATA, data.toString());
+                }
+                try {
+                    Log.d(TAG, "SENDING " + action + " TO " + context.getString(R.string.gcm_defaultSenderId) + " ID " + id);
+                    gcm.send(context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, message);
+                    Log.d(TAG, "OVER?");
+                } catch (IOException e) {
+                    Log.wtf(TAG, "Something really wrong:", e);
+                }
+        //        return null;
+        //    }
+        //};
+        //task.execute();
     }
 
+    @Override
+    public void onMessageSent(String msgId) {
+        super.onMessageSent(msgId);
+        Log.d(TAG, "Message ID=" + msgId + " sent!");
+    }
+
+    @Override
+    public void onSendError(String msgId, String error) {
+        super.onSendError(msgId, error);
+        Log.d(TAG, "Message ID=" + msgId + " not sent: " + error + "!");
+    }
+
+    @Override
+    public void onDeletedMessages() {
+        super.onDeletedMessages();
+        Log.d(TAG, "Deleted?!");
+    }
 }
