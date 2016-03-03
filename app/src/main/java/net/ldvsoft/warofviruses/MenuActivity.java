@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -196,6 +198,12 @@ public class MenuActivity extends AppCompatActivity {
             Log.d("GameActivity", "networkLoadGame broadcast recieved!");
             Bundle tmp = intent.getBundleExtra(WoVPreferences.GAME_BUNDLE);
             String data = tmp.getString(WoVProtocol.DATA);
+            String action = ((JsonObject) new JsonParser().parse(data)).get(WoVProtocol.ACTION).getAsString();
+            /* FIXME temporary for testing */
+            if (action.equals(WoVProtocol.ACTION_PING)) {
+                Toast.makeText(MenuActivity.this, "PING SUCCESS", Toast.LENGTH_LONG).show();
+                return;
+            }
             intent = new Intent(MenuActivity.this, GameActivity.class);
             intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_NETWORK_PLAYER);
             intent.putExtra(WoVPreferences.GAME_JSON_DATA, data);
@@ -210,7 +218,7 @@ public class MenuActivity extends AppCompatActivity {
         public void run() {
             GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(MenuActivity.this);
             Bundle data = new Bundle();
-            data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_USER_READY);
+            data.putString(WoVProtocol.ACTION, WoVProtocol.ACTION_PING/* FIXME for testing purposes WoVProtocol.ACTION_USER_READY */);
             String id = UUID.randomUUID().toString();
             try {
                 gcm.send(MenuActivity.this.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", id, data);
