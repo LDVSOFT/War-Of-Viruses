@@ -11,7 +11,7 @@ import static net.ldvsoft.warofviruses.GameLogic.CellType;
  * Created by ldvsoft on 05.02.16.
  */
 public class DefaultFigureSource extends SVGFigureSource {
-    public static String NAME = "default";
+    public static final String NAME = "default";
     private static final Map<CellType, Integer> resorceIds = new EnumMap<>(CellType.class);
 
     static {
