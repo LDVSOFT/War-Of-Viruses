@@ -23,7 +23,7 @@ public class ClientNetworkPlayer extends Player {
 
     private Context context;
     private GoogleCloudMessaging gcm;
-    private BroadcastReceiver turnMessageReceiver;
+    private BroadcastReceiver turnMessageReceiver = null;
 
     public static ClientNetworkPlayer deserialize(User user, GameLogic.PlayerFigure ownFigure, Context context) {
         return new ClientNetworkPlayer(user, ownFigure, context);
@@ -73,7 +73,10 @@ public class ClientNetworkPlayer extends Player {
     @Override
     public void onStop() {
         super.onStop();
-        context.unregisterReceiver(turnMessageReceiver);
+        if (turnMessageReceiver != null) {
+            context.unregisterReceiver(turnMessageReceiver);
+            turnMessageReceiver = null;
+        }
     }
 
     @Override
