@@ -251,6 +251,11 @@ public class Game {
         GameLogic.PlayerFigure oldPlayerFigure = gameLogic.getCurrentPlayerFigure();
         unconfirmedEvents.clear();
         for (GameEvent event : events) {
+            try {
+                Thread.sleep(750);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             result = event.applyEvent(result);
             unconfirmedEvents.add(event);
             if (result == null) {
@@ -258,11 +263,6 @@ public class Game {
                 return false;
             }
             gameStateChanged(event, sender);
-            try {
-                Thread.sleep(750);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         if (oldPlayerFigure != result.getCurrentPlayerFigure()) {
