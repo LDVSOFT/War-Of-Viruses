@@ -71,6 +71,16 @@ public class GCMHandler extends SmackCcsClient {
         }
     }
 
+    @Override
+    protected void handleNackReceipt(JsonObject JsonObject) {
+        super.handleNackReceipt(JsonObject);
+        String from = JsonObject.get("from").getAsString();
+        String error = JsonObject.get("error").getAsString();
+        if (error.equals("DEVICE_UNREGISTERED")) {
+            server.getDatabaseHandler().deleteDeviceToken(from);
+        }
+    }
+
     public void stop() {
         disconnect();
     }

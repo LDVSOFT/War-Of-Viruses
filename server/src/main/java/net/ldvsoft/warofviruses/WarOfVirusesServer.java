@@ -53,6 +53,10 @@ public final class WarOfVirusesServer {
         return gcmHandler;
     }
 
+    public DatabaseHandler getDatabaseHandler() {
+        return databaseHandler;
+    }
+
     /**
      * Process incoming via GCM message from client.
      * If simple answer is required, returns an answer.
