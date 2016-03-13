@@ -251,8 +251,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
     }
 
     public void deleteGameById(long gameID) {
-        Object [] params = new Object[1];
-        params[0] = gameID;
+        Object[] params = new Object[]{gameID};
         getWritableDatabase().execSQL(DELETE_GAME_TURNS_BY_ID, params);
         getWritableDatabase().execSQL(DELETE_GAME_BY_ID, params);
     }
