@@ -264,7 +264,7 @@ public final class WarOfVirusesServer {
             databaseHandler = new DatabaseHandler(this);
             gcmHandler = new GCMHandler(this);
             verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList("555379223441-4ck01sd19d01ktd96c453pgvlhklmtk3.apps.googleusercontent.com"))
+                    .setAudience(Collections.singletonList(getSetting("google.serverClientId")))
                     .setIssuer("https://accounts.google.com")
                     .build();
 
