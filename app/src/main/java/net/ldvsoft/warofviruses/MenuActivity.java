@@ -100,6 +100,7 @@ public class MenuActivity extends AppCompatActivity {
                     case R.id.drawer_logout:
                         logOut();
                         drawerLayout.closeDrawers();
+                        return true;
                     case R.id.drawer_clear_db:
                         clearDB();
                         return true;
