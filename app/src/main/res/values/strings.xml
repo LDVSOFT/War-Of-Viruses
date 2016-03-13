@@ -20,4 +20,6 @@
     <string name="game_status_zero_gave_up">Zeroes gave up</string>
     <string name="game_confirm_turn">Confirm turn</string>
     <string name="game_cancel_turn">Cancel turn</string>
+    <string name="menu_connecting_to_server">Connecting to server...</string>
+    <string name="menu_logging_back">Logging back...</string>
 </resources>
