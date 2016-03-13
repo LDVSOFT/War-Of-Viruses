@@ -94,8 +94,8 @@ public final class WarOfVirusesServer {
         User user = null;
         User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
         String googleToken = null;
-        boolean isNotRefreshment = data.has(GOOGLE_TOKEN);
-        if (isNotRefreshment) {
+        boolean isRefreshment = !data.has(GOOGLE_TOKEN);
+        if (!isRefreshment) {
             String encodedGoogleToken = data.get(GOOGLE_TOKEN).getAsString();
             GoogleIdToken googleIdToken;
 
@@ -132,17 +132,18 @@ public final class WarOfVirusesServer {
                         localUser.getNickNameStr(), localUser.getNickNameId(),
                         localUser.getColorCross(), localUser.getColorZero(),
                         null);
-            } else {
+                databaseHandler.addUser(user);
+            } else if (isRefreshment) {
                 // Upgrade old one
                 user.setCrossColor(localUser.getColorCross());
                 user.setZeroColor(localUser.getColorZero());
                 user.setNickNameStr(localUser.getNickNameStr());
+                databaseHandler.addUser(user);
             }
-            databaseHandler.addUser(user);
             databaseHandler.addDeviceToken(user.getId(), deviceToken);
         }
 
-        if (isNotRefreshment) {
+        if (!isRefreshment) {
             JsonObject answer = new JsonObject();
             answer.addProperty(RESULT, isGood ? RESULT_SUCCESS : RESULT_FAILURE);
             if (isGood) {

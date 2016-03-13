@@ -62,6 +62,8 @@ public class SettingsActivity extends AppCompatActivity {
         User user = DBOpenHelper.getInstance(this).getUserById(userId);
         setContentView(R.layout.activity_settings);
 
+        ((EditText) findViewById(R.id.edit_nickname)).setText(user.getNickNameStr());
+
         crossColor = (SeekBar) findViewById(R.id.color_cross_value);
         crossColor.setOnSeekBarChangeListener(new ColorChangedListener(GameLogic.PlayerFigure.CROSS));
         crossHueColor = user.getColorCross();
@@ -75,7 +77,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void sendToServer(User user) {
-        if (user.getId() != HumanPlayer.USER_ANONYMOUS.getId()) {
+        if (user.getId() == HumanPlayer.USER_ANONYMOUS.getId()) {
             return;
         }
         JsonObject data = new JsonObject();
