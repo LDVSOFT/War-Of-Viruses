@@ -240,6 +240,7 @@ public class MenuActivity extends AppCompatActivity {
                     intent.putExtra(WoVPreferences.OPPONENT_TYPE, WoVPreferences.OPPONENT_NETWORK_PLAYER);
                     intent.putExtra(WoVPreferences.GAME_JSON_DATA, data);
                     waitForGame = false;
+                    hideProgressDialog();
                     startActivity(intent);
                     break;
                 case WoVProtocol.ACTION_LOGIN_COMPLETE:
@@ -300,6 +301,7 @@ public class MenuActivity extends AppCompatActivity {
     public void playOnline(View view) {
         WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_USER_READY, new JsonObject());
         gcmMessagesReceiver.waitForGame = true;
+        showProgressDialog("Searching for opponent...");
     }
 
     public void clearDB() {
@@ -388,7 +390,7 @@ public class MenuActivity extends AppCompatActivity {
             progressDialog = new ProgressDialog(this);
             progressDialog.setMessage(message);
             progressDialog.setIndeterminate(true);
-            /* FIXME progressDialog.setCancelable(false); */
+            progressDialog.setCancelable(false);
         }
 
         progressDialog.show();
