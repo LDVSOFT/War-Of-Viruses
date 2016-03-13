@@ -119,7 +119,7 @@ public final class WarOfVirusesServer {
                 // Create new one!
                 User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
                 user = new User(
-                        random.nextLong(), googleToken,
+                        Math.abs(random.nextLong()), googleToken,
                         localUser.getNickNameStr(), localUser.getNickNameId(),
                         localUser.getColorCross(), localUser.getColorZero(),
                         null);
@@ -248,7 +248,7 @@ public final class WarOfVirusesServer {
             databaseHandler = new DatabaseHandler(this);
             gcmHandler = new GCMHandler(this);
             verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(getSetting("google.projectId")))
+                    .setAudience(Collections.singletonList("555379223441-4ck01sd19d01ktd96c453pgvlhklmtk3.apps.googleusercontent.com"))
                     .setIssuer("https://accounts.google.com")
                     .build();
 

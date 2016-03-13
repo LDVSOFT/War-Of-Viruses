@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -30,9 +31,12 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import java.io.IOException;
 
 public class MenuActivity extends AppCompatActivity {
     private static final Gson gson = new Gson();
@@ -118,7 +122,8 @@ public class MenuActivity extends AppCompatActivity {
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
+                .requestProfile()
+                .requestIdToken("555379223441-4ck01sd19d01ktd96c453pgvlhklmtk3.apps.googleusercontent.com")
                 .build();
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
@@ -240,6 +245,7 @@ public class MenuActivity extends AppCompatActivity {
                     if (!waitForLogin) {
                         break;
                     }
+                    waitForLogin = false;
                     JsonObject jsonData = (JsonObject) new JsonParser().parse(data);
                     if (jsonData.get(WoVProtocol.RESULT).getAsString().equals(WoVProtocol.RESULT_FAILURE)) {
                         hideProgressDialog();
@@ -250,6 +256,7 @@ public class MenuActivity extends AppCompatActivity {
                         preferences.edit().putLong(WoVPreferences.CURRENT_USER_ID, newUser.getId()).apply();
                         DBOpenHelper.getInstance(MenuActivity.this).addUser(newUser);
                         updateUI();
+                        hideProgressDialog();
                     }
                     break;
                 case WoVProtocol.ACTION_PING:
@@ -271,7 +278,20 @@ public class MenuActivity extends AppCompatActivity {
                     public void onResult(Status status) {
                         SharedPreferences preferences = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE);
                         preferences.edit().putLong(WoVPreferences.CURRENT_USER_ID, HumanPlayer.USER_ANONYMOUS.getId()).apply();
+                        new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                try {
+                                    InstanceID instanceID = InstanceID.getInstance(MenuActivity.this);
+                                    instanceID.deleteToken(getString(R.string.gcm_defaultSenderId), "GCM");
+                                } catch (IOException e) {
+                                    Log.w(MenuActivity.class.getName(), "Error while deleting token", e);
+                                }
+                                return null;
+                            }
+                        }.execute();
                         updateUI();
+                        hideProgressDialog();
                     }
                 });
     }
@@ -296,6 +316,11 @@ public class MenuActivity extends AppCompatActivity {
         boolean hasGame = DBOpenHelper.getInstance(this).hasActiveGame();
         long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
         User user = DBOpenHelper.getInstance(this).getUserById(userId);
+        if (user == null) {
+            Toast.makeText(MenuActivity.this, "Credentials corrupted, logging out", Toast.LENGTH_SHORT).show();
+            logOut();
+            return;
+        }
         boolean isOnline = user.getId() != HumanPlayer.USER_ANONYMOUS.getId();
 
         playAgainstBotButton.setEnabled(!hasGame);
@@ -303,8 +328,8 @@ public class MenuActivity extends AppCompatActivity {
         playOnlineButton.setEnabled(!hasGame && isOnline);
         restoreGameButton.setEnabled(hasGame);
 
-        navigationView.getMenu().findItem(R.id.drawer_login).setEnabled(true ||!isOnline);
-        navigationView.getMenu().findItem(R.id.drawer_logout).setEnabled(true || isOnline);
+        navigationView.getMenu().findItem(R.id.drawer_login).setEnabled(!isOnline);
+        navigationView.getMenu().findItem(R.id.drawer_logout).setEnabled(isOnline);
 
         /*FIXME*/
         for (GameLogic.PlayerFigure figure : GameLogic.PlayerFigure.values()) {
@@ -317,22 +342,39 @@ public class MenuActivity extends AppCompatActivity {
         zeroButton.setFigure(figureSet, BoardCellState.get(GameLogic.CellType.ZERO));
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
+    private void handleSignInResult(final GoogleSignInResult result) {
         Log.d("MainActivity", "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            String token = acct.getIdToken();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        InstanceID instanceID = InstanceID.getInstance(MenuActivity.this);
+                        instanceID.getToken(getString(R.string.gcm_defaultSenderId), "GCM");
+                    } catch (IOException e) {
+                        Log.w(MenuActivity.class.getName(), "Error while getting token", e);
+                    }
+                    return null;
+                }
 
-            long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
-            User user = DBOpenHelper.getInstance(this).getUserById(userId);
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    // Signed in successfully, show authenticated UI.
+                    GoogleSignInAccount acct = result.getSignInAccount();
+                    String token = acct.getIdToken();
 
-            JsonObject data = new JsonObject();
-            data.addProperty(WoVProtocol.GOOGLE_TOKEN, token);
-            data.add(WoVProtocol.LOCAL_USER, gson.toJsonTree(user));
-            WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_LOGIN, data);
-            showProgressDialog(getString(R.string.menu_connecting_to_server));
-            //Actual UI changes will come on message result
+                    long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
+                    User user = DBOpenHelper.getInstance(MenuActivity.this).getUserById(userId);
+
+                    JsonObject data = new JsonObject();
+                    data.addProperty(WoVProtocol.GOOGLE_TOKEN, token);
+                    data.add(WoVProtocol.LOCAL_USER, gson.toJsonTree(user));
+                    gcmMessagesReceiver.waitForLogin = true;
+                    WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_LOGIN, data);
+                    showProgressDialog(getString(R.string.menu_connecting_to_server));
+                    //Actual UI changes will come on message result
+                }
+            }.execute();
         } else {
             WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_LOGOUT, null);
             updateUI();

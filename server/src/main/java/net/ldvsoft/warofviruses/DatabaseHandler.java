@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -142,7 +143,14 @@ public class DatabaseHandler implements DBProvider {
     public void addUser(User user) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement addUserStatement = connection.prepareStatement(ADD_USER);
-            addUserStatement.executeQuery();
+            addUserStatement.setLong(1, user.getId());
+            addUserStatement.setString(2, user.getGoogleToken());
+            addUserStatement.setString(3, user.getNickNameStr());
+            addUserStatement.setInt(4, user.getNickNameId());
+            addUserStatement.setInt(5, user.getColorCross());
+            addUserStatement.setInt(6, user.getColorZero());
+            addUserStatement.setNull(7, Types.INTEGER);
+            addUserStatement.execute();
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Cannot find user", e);
         }
@@ -227,9 +235,7 @@ public class DatabaseHandler implements DBProvider {
 
     public void addDeviceToken(long userId, String deviceToken) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement addTokenStatement = connection.prepareStatement(
-                    "INSERT INTO " + DEVICE_TABLE + " VALUES (?, ?) ON DUPLICATE KEY UPDATE;"
-            );
+            PreparedStatement addTokenStatement = connection.prepareStatement(ADD_DEVICE_TOKEN);
             addTokenStatement.setString(1, deviceToken);
             addTokenStatement.setLong(2, userId);
 
