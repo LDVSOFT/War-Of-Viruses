@@ -298,6 +298,7 @@ public class MenuActivity extends AppCompatActivity {
 
     public void playOnline(View view) {
         WoVGcmListenerService.sendGcmMessage(MenuActivity.this, WoVProtocol.ACTION_USER_READY, new JsonObject());
+        gcmMessagesReceiver.waitForGame = true;
     }
 
     public void clearDB() {
