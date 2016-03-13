@@ -6,7 +6,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 public class SettingsActivity extends AppCompatActivity {
+    private static Gson gson = new Gson();
+
     private int crossHueColor, zeroHueColor;
     private SeekBar crossColor = null, zeroColor = null;
     private FigureSet figureSet = new FigureSet();
@@ -69,12 +74,23 @@ public class SettingsActivity extends AppCompatActivity {
         reloadColors();
     }
 
+    private void sendToServer(User user) {
+        if (user.getId() != HumanPlayer.USER_ANONYMOUS.getId()) {
+            return;
+        }
+        JsonObject data = new JsonObject();
+        // Login without token will just rewrite our row
+        data.add(WoVProtocol.LOCAL_USER, gson.toJsonTree(user));
+        WoVGcmListenerService.sendGcmMessage(this, WoVProtocol.ACTION_LOGIN, data);
+    }
+
     public void changeNickname(View view) {
         String nickname = ((EditText) findViewById(R.id.edit_nickname)).getText().toString();
         long userId = getSharedPreferences(WoVPreferences.PREFERENCES, MODE_PRIVATE).getLong(WoVPreferences.CURRENT_USER_ID, -1);
         User user = DBOpenHelper.getInstance(this).getUserById(userId);
         user.setNickNameStr(nickname);
         DBOpenHelper.getInstance(this).addUser(user);
+        sendToServer(user);
     }
 
     public void changeCrossColor(View view) {
@@ -82,6 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
         User user = DBOpenHelper.getInstance(this).getUserById(userId);
         user.setCrossColor(crossColor.getProgress());
         DBOpenHelper.getInstance(this).addUser(user);
+        sendToServer(user);
     }
 
     public void changeZeroColor(View view) {
@@ -89,5 +106,6 @@ public class SettingsActivity extends AppCompatActivity {
         User user = DBOpenHelper.getInstance(this).getUserById(userId);
         user.setZeroColor(zeroColor.getProgress());
         DBOpenHelper.getInstance(this).addUser(user);
+        sendToServer(user);
     }
 }

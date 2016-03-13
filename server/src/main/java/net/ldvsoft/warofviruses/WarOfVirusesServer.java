@@ -91,62 +91,74 @@ public final class WarOfVirusesServer {
         JsonObject data = (JsonObject) new JsonParser().parse(
                 message.get("data").getAsJsonObject().get("data").getAsString()
         );
-        String encodedGoogleToken = data.get(GOOGLE_TOKEN).getAsString();
-        String googleToken = null;
-        GoogleIdToken googleIdToken;
-
-        try {
-            googleIdToken = verifier.verify(encodedGoogleToken);
-        } catch (GeneralSecurityException | IOException e) {
-            logger.log(Level.SEVERE, "What's wrong with that google verification?!", e);
-            return JSON_RESULT_FAILURE;
-        }
-
-        if (googleIdToken == null) {
-            logger.log(Level.WARNING, "Wrong google token!");
-            isGood = false;
-        } else {
-            GoogleIdToken.Payload payload = googleIdToken.getPayload();
-            googleToken = payload.getSubject();
-        }
-
-        if (isGood && googleToken == null) {
-            logger.log(Level.WARNING, "Wrong google token: no subject!");
-            isGood = false;
-        }
-
         User user = null;
+        User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
+        String googleToken = null;
+        boolean isNotRefreshment = data.has(GOOGLE_TOKEN);
+        if (isNotRefreshment) {
+            String encodedGoogleToken = data.get(GOOGLE_TOKEN).getAsString();
+            GoogleIdToken googleIdToken;
+
+            try {
+                googleIdToken = verifier.verify(encodedGoogleToken);
+            } catch (GeneralSecurityException | IOException e) {
+                logger.log(Level.SEVERE, "What's wrong with that google verification?!", e);
+                return JSON_RESULT_FAILURE;
+            }
+
+            if (googleIdToken == null) {
+                logger.log(Level.WARNING, "Wrong google token!");
+                isGood = false;
+            } else {
+                GoogleIdToken.Payload payload = googleIdToken.getPayload();
+                googleToken = payload.getSubject();
+            }
+
+            if (isGood && googleToken == null) {
+                logger.log(Level.WARNING, "Wrong google token: no subject!");
+                isGood = false;
+            }
+            user = databaseHandler.getUserByGoogleToken(googleToken);
+        } else {
+            user = databaseHandler.getUserByGoogleToken(localUser.getGoogleToken());
+            isGood = user != null;
+        }
         if (isGood) {
             // Now user is OK, now we need to find it in DB or create new
-            user = databaseHandler.getUserByGoogleToken(googleToken);
             if (user == null) {
                 // Create new one!
-                User localUser = gson.fromJson(data.getAsJsonObject(LOCAL_USER), User.class);
                 user = new User(
                         Math.abs(random.nextLong()), googleToken,
                         localUser.getNickNameStr(), localUser.getNickNameId(),
                         localUser.getColorCross(), localUser.getColorZero(),
                         null);
-                databaseHandler.addUser(user);
+            } else {
+                // Upgrade old one
+                user.setCrossColor(localUser.getColorCross());
+                user.setZeroColor(localUser.getColorZero());
+                user.setNickNameStr(localUser.getNickNameStr());
             }
+            databaseHandler.addUser(user);
             databaseHandler.addDeviceToken(user.getId(), deviceToken);
         }
 
-        JsonObject answer = new JsonObject();
-        answer.addProperty(RESULT, isGood ? RESULT_SUCCESS : RESULT_FAILURE);
-        if (isGood) {
-            answer.add(USER, gson.toJsonTree(user));
+        if (isNotRefreshment) {
+            JsonObject answer = new JsonObject();
+            answer.addProperty(RESULT, isGood ? RESULT_SUCCESS : RESULT_FAILURE);
+            if (isGood) {
+                answer.add(USER, gson.toJsonTree(user));
+            }
+            gcmHandler.sendDownstreamMessage(gcmHandler.createJsonMessage(
+                    deviceToken,
+                    gcmHandler.nextMessageId(),
+                    ACTION_LOGIN_COMPLETE,
+                    answer,
+                    null,
+                    null,
+                    false,
+                    "high"
+            ));
         }
-        gcmHandler.sendDownstreamMessage(gcmHandler.createJsonMessage(
-                deviceToken,
-                gcmHandler.nextMessageId(),
-                ACTION_LOGIN_COMPLETE,
-                answer,
-                null,
-                null,
-                false,
-                "high"
-        ));
         return null;
     }
 
