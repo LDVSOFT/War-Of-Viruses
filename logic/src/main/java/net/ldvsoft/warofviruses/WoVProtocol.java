@@ -1,5 +1,8 @@
 package net.ldvsoft.warofviruses;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +19,6 @@ public class WoVProtocol {
 
     public static final String PING_ID = "id";
     public static final String ACTION_TURN = "turn";
-    public static final String EVENT = "event";
 
     public static final String GAME_LOADED = "gameLoaded";
     public static final String TURN_ARRAY = "turnArray";
@@ -28,15 +30,25 @@ public class WoVProtocol {
     public static final String ACTION_USER_READY = "userReady";
     public static final String ACTION_UPDATE_LOCAL_GAME = "updateLocalGame";
 
-    public static ArrayList<GameEvent> getEventsFromIntArray(int[] turnArray) {
-        ArrayList<GameEvent> events = new ArrayList<>();
+    public static final String ACTION_LOGIN = "login";
+    public static final String ACTION_LOGOUT = "logout";
+    public static final String GOOGLE_TOKEN = "googleToken";
+    public static final String LOCAL_USER = "localUser";
+
+    public static final String ACTION_LOGIN_COMPLETE = "loginComplete";
+    public static final String USER = "user";
+
+    private static final Gson gson = new Gson();
+    public static List<GameEvent> eventsFromJson(JsonObject jsonData) {
+        int[] turnArray = gson.fromJson(jsonData.get(WoVProtocol.TURN_ARRAY), int[].class);
+        List<GameEvent> events = new ArrayList<>();
         for (int i = 0; i < turnArray.length; i += 3) {
             events.add(GameEvent.deserialize(turnArray[i], turnArray[i + 1], turnArray[i + 2], i));
         }
         return events;
     }
 
-    public static int[] getIntsFromEventArray(List<GameEvent> events) {
+    public static JsonObject eventsToJson(List<GameEvent> events) {
         int[] result = new int[events.size() * 3];
         for (int i = 0; i < events.size(); i++) {
             GameEvent event = events.get(i);
@@ -45,6 +57,8 @@ public class WoVProtocol {
             result[3 * i + 2] = event.getTurnY();
         }
 
-        return result;
+        JsonObject data = new JsonObject();
+        data.add(WoVProtocol.TURN_ARRAY, gson.toJsonTree(result));
+        return data;
     }
 }

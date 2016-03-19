@@ -31,7 +31,7 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
 
     private static final String CREATE_TURN_TABLE = "CREATE TABLE " + TURN_TABLE + "(" + GAME_ID + " INTEGER UNSIGNED NOT NULL, " +
             TURN_NUMBER + " INT UNSIGNED NOT NULL, " + TURN_TYPE + " INT NOT NULL, " + TURN_X + " INT NULL, " + TURN_Y + " INT NULL, " +
-            "PRIMARY KEY(" + GAME_ID + ", " + TURN_NUMBER + "), FOREIGN KEY (" + GAME_ID + ") REFERENCES " + GAME_ID + "(" + ID + ")" +
+            "PRIMARY KEY(" + GAME_ID + ", " + TURN_NUMBER + "), FOREIGN KEY (" + GAME_ID + ") REFERENCES " + GAME_TABLE + "(" + ID + ")" +
             "ON DELETE CASCADE ON UPDATE CASCADE);";
 
     private static final String CREATE_USER_TABLE = "CREATE TABLE " + USER_TABLE + "(" + ID + " INTEGER, " + GOOGLE_TOKEN +
@@ -39,8 +39,10 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
             " INT UNSIGNED NOT NULL, " + COLOR_CROSS + " INT UNSIGNED NOT NULL, " + COLOR_ZERO + " INT UNSIGNED NOT NULL, " +
             INVITATION_TARGET + " INTEGER NULL, PRIMARY KEY (" + ID + "), FOREIGN KEY (" + INVITATION_TARGET + ") REFERENCES " +
             USER_TABLE + " (" + ID + ") ON DELETE CASCADE ON UPDATE CASCADE);";
+
     private static DBOpenHelper instance;
     private Context context;
+
     private static final String DROP_GAME_TABLE = "DROP TABLE IF EXISTS " + GAME_TABLE + ";";
     private static final String DROP_TURN_TABLE = "DROP TABLE IF EXISTS " + TURN_TABLE + ";";
     private static final String DROP_USER_TABLE = "DROP TABLE IF EXISTS " + USER_TABLE + ";";
@@ -246,5 +248,11 @@ public class DBOpenHelper extends SQLiteOpenHelper implements DBProvider {
         userCursor.close();
 
         return user;
+    }
+
+    public void deleteGameById(long gameID) {
+        Object[] params = new Object[]{gameID};
+        getWritableDatabase().execSQL(DELETE_GAME_TURNS_BY_ID, params);
+        getWritableDatabase().execSQL(DELETE_GAME_BY_ID, params);
     }
 }

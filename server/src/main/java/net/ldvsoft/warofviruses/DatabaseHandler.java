@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,8 +20,10 @@ public class DatabaseHandler implements DBProvider {
     protected WarOfVirusesServer server;
 
     private final static String DEVICE_USER = "user";
-    private final static String GET_USER_BY_TOKEN = "SELECT * FROM " + USER_TABLE + "u INNER JOIN " + DEVICE_TABLE +
-            "d ON d." + DEVICE_USER + " = u." + ID + " WHERE " + GOOGLE_TOKEN + " = ?;";
+    private final static String GET_USER_BY_DEVICE_TOKEN = "SELECT * FROM " + USER_TABLE + " u INNER JOIN " + DEVICE_TABLE +
+            " d ON d." + DEVICE_USER + " = u." + ID + " WHERE d." + TOKEN + " = ?;";
+    private final static String GET_USER_BY_GOOGLE_TOKEN = "SELECT * FROM " + USER_TABLE + " WHERE "
+            + GOOGLE_TOKEN + " = ?;";
 
     private Logger logger = Logger.getLogger(DatabaseHandler.class.getName());
 
@@ -140,7 +143,14 @@ public class DatabaseHandler implements DBProvider {
     public void addUser(User user) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement addUserStatement = connection.prepareStatement(ADD_USER);
-            addUserStatement.executeQuery();
+            addUserStatement.setLong(1, user.getId());
+            addUserStatement.setString(2, user.getGoogleToken());
+            addUserStatement.setString(3, user.getNickNameStr());
+            addUserStatement.setInt(4, user.getNickNameId());
+            addUserStatement.setInt(5, user.getColorCross());
+            addUserStatement.setInt(6, user.getColorZero());
+            addUserStatement.setNull(7, Types.INTEGER);
+            addUserStatement.execute();
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Cannot find user", e);
         }
@@ -170,10 +180,10 @@ public class DatabaseHandler implements DBProvider {
         }
     }
 
-    public User getUserByToken(String token) {
+    private User getUserWithQuarry(String quarry, String param) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement getUserStatement = connection.prepareStatement(GET_USER_BY_TOKEN);
-            getUserStatement.setString(1, token);
+            PreparedStatement getUserStatement = connection.prepareStatement(quarry);
+            getUserStatement.setString(1, param);
             ResultSet users = getUserStatement.executeQuery();
             if (!users.first())
                 return null;
@@ -181,15 +191,71 @@ public class DatabaseHandler implements DBProvider {
             return new User(
                     users.getLong(1),
                     users.getString(2),
-                    users.getString(4),
+                    users.getString(3),
+                    users.getInt(4),
                     users.getInt(5),
                     users.getInt(6),
-                    users.getInt(7),
                     null /*FIXME Load separetly*/
             );
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Cannot find user", e);
             return null;
+        }
+    }
+
+    public User getUserByDeviceToken(String token) {
+        return getUserWithQuarry(GET_USER_BY_DEVICE_TOKEN, token);
+    }
+
+    public User getUserByGoogleToken(String token) {
+        return getUserWithQuarry(GET_USER_BY_GOOGLE_TOKEN, token);
+    }
+
+    public List<String> getDeviceTokens(long userId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement getUserStatement = connection.prepareStatement(
+                    "SELECT token FROM Device WHERE user = ?"
+            );
+            getUserStatement.setLong(1, userId);
+            ResultSet users = getUserStatement.executeQuery();
+            if (!users.first())
+                return new ArrayList<>();
+
+            ArrayList<String> res = new ArrayList<>();
+            while (!users.isAfterLast()) {
+                res.add(users.getString(1));
+                users.next();
+            }
+            return res;
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot find user", e);
+            return null;
+        }
+    }
+
+    public void addDeviceToken(long userId, String deviceToken) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement addTokenStatement = connection.prepareStatement(ADD_DEVICE_TOKEN);
+            addTokenStatement.setString(1, deviceToken);
+            addTokenStatement.setLong(2, userId);
+
+            addTokenStatement.execute();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot add token:", e);
+        }
+    }
+
+
+    public void deleteDeviceToken(String deviceToken) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement deleteTokenStatement = connection.prepareStatement(
+                    "DELETE FROM " + DEVICE_TABLE + " WHERE " + TOKEN + " = ?;"
+            );
+            deleteTokenStatement.setString(1, deviceToken);
+
+            deleteTokenStatement.execute();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Cannot add token:", e);
         }
     }
 }

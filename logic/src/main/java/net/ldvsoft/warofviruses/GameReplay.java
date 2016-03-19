@@ -13,20 +13,22 @@ import static java.lang.Math.min;
 public class GameReplay {
     ArrayList<GameLogic> gameStates;
     private int currentEventNumber;
+    private Player crossPlayer;
+    private Player zeroPlayer;
 
     /**
      * Constructor for gameReplay
      * @param gameEventHistory history of events from GameLogic class that should be reproduced
      */
-    GameReplay(List<GameEvent> gameEventHistory) {
+    GameReplay(List<GameEvent> gameEventHistory, Player crossPlayer, Player zeroPlayer) {
         GameLogic gameLogic = new GameLogic();
-        gameLogic.newGame();
-
+        this.crossPlayer = crossPlayer;
+        this.zeroPlayer = zeroPlayer;
         gameStates = new ArrayList<>();
         gameStates.add(new GameLogic(gameLogic));
         for (GameEvent event : gameEventHistory) {
-            event.applyEvent(gameLogic);
-            gameStates.add(new GameLogic(gameLogic));
+            gameLogic = event.applyEvent(gameLogic);
+            gameStates.add(gameLogic);
         }
         currentEventNumber = 0;
     }
@@ -74,5 +76,13 @@ public class GameReplay {
      */
     public GameLogic getGameLogic() {
         return new GameLogic(gameStates.get(currentEventNumber));
+    }
+
+    public Player getCrossPlayer() {
+        return crossPlayer;
+    }
+
+    public Player getZeroPlayer() {
+        return zeroPlayer;
     }
 }
